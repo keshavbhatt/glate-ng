@@ -62,6 +62,39 @@ void Share::setTranslation(const QString &translation, const QString &uuid, cons
 
 Share::~Share() { delete ui; }
 
+// ── Licence helpers ───────────────────────────────────────────────────────────
+
+void Share::setHasPaidAccess(bool hasPaidAccess)
+{
+    m_hasPaidAccess = hasPaidAccess;
+}
+
+bool Share::checkPaidAccess(const QString &featureName)
+{
+    if (m_hasPaidAccess)
+        return true;
+
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(QStringLiteral("Pro Feature"));
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setText(
+        QStringLiteral("<b>%1</b> is a Pro feature.").arg(featureName));
+    msgBox.setInformativeText(
+        QStringLiteral("Upgrade to a Pro licence to unlock this feature "
+                       "and support continued development of Glate."));
+
+    QPushButton *upgradeBtn =
+        msgBox.addButton(QStringLiteral("View Plans"), QMessageBox::AcceptRole);
+    msgBox.addButton(QStringLiteral("Not Now"), QMessageBox::RejectRole);
+    msgBox.setDefaultButton(upgradeBtn);
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == upgradeBtn)
+        emit upgradeRequested();
+
+    return false;
+}
+
 
 QString Share::getFileNameFromString(const QString &string) {
   QString filename;
@@ -118,6 +151,9 @@ void Share::on_email_clicked() {
 }
 
 void Share::on_pastebin_clicked() {
+  if (!checkPaidAccess(QStringLiteral("Paste Link (share via paste.rs)")))
+    return;
+
   const QString text = ui->translation->toPlainText();
   if (text.trimmed().isEmpty()) {
     showStatus("<span style='color:red'>Share: </span>No text to share.");
@@ -211,6 +247,8 @@ void Share::showStatus(const QString &message) {
 }
 
 void Share::on_download_clicked() {
+  if (!checkPaidAccess(QStringLiteral("Export as Audio")))
+    return;
 
   // create a dir with uuid to track process,
   // start donwload manager with tasks,

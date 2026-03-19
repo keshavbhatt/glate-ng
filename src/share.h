@@ -23,6 +23,14 @@ public:
 public slots:
   void setTranslation(const QString &translation, const QString &uuid,
                       const QString &langCode = QString());
+
+  /// Called by MainWindow whenever the licence status changes.
+  void setHasPaidAccess(bool hasPaidAccess);
+
+signals:
+  /// Emitted when the user clicks "View Plans" inside a Pro-feature prompt.
+  void upgradeRequested();
+
 private slots:
   void on_text_clicked();
   void on_email_clicked();
@@ -36,6 +44,11 @@ private slots:
   void concat(const QStringList &audioFiles);
 
 private:
+  /// Shows a polite upgrade prompt for @p featureName.
+  /// Returns true if the user has paid access (feature may proceed).
+  /// Returns false and, optionally, emits upgradeRequested() if they do not.
+  bool checkPaidAccess(const QString &featureName);
+
   Ui::Share *ui;
   QSettings settings;
   QProcess *ffmpeg = nullptr;
@@ -44,6 +57,7 @@ private:
   QString translationUUID;
   QString translationLangCode;
   QStringList m_downloadedAudioFiles;
+  bool m_hasPaidAccess = false;
 };
 
 #endif // SHARE_H

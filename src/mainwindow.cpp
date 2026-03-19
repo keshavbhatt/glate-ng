@@ -229,9 +229,11 @@ MainWindow::MainWindow(QWidget *parent)
   // init share
   m_share = new Share(this);
   m_share->setWindowTitle(QApplication::applicationName() +
-                          " | Share translation");
+                          QStringLiteral(" | Share translation"));
   m_share->setWindowFlag(Qt::Dialog);
   m_share->setWindowModality(Qt::NonModal);
+  connect(m_share, &Share::upgradeRequested,
+          this,    &MainWindow::on_account_clicked);
 
   m_lineByLine = new LineByLine(this, m_clipboard);
   m_lineByLine->setWindowTitle(QApplication::applicationName() +
@@ -996,6 +998,10 @@ void MainWindow::onLicenseStatusUpdated(
     const AccountLicenseManager::LicenseStatus &status)
 {
     m_hasPremiumAccess = status.hasPaidAccess;
+
+    // Forward the paid-access flag to every gated feature.
+    m_share->setHasPaidAccess(status.hasPaidAccess);
+
     qDebug().noquote()
         << "[Glate licence]"
         << (status.active           ? "Pro"
