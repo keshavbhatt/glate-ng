@@ -24,6 +24,33 @@ AccountDialog::AccountDialog(QWidget *parent)
     connect(ui->purchaseBtn, &QPushButton::clicked, this, &AccountDialog::onPurchaseClicked);
     connect(ui->portalBtn,   &QPushButton::clicked, this, &AccountDialog::onPortalClicked);
     connect(ui->closeBtn,    &QPushButton::clicked, this, &QDialog::close);
+
+#ifdef QT_DEBUG
+    // Style the debug frame so it stands out visually.
+    ui->debugFrame->setStyleSheet(
+        QStringLiteral("QFrame#debugFrame { border: 1px dashed #888; border-radius: 4px; }"));
+
+    connect(ui->debugApplyBtn, &QPushButton::clicked, this, [this]() {
+        if (!m_accountManager)
+            return;
+        using S = AccountLicenseManager::DebugLicenseState;
+        static const S kStates[] = {
+            S::None,
+            S::Pro,
+            S::EvaluationActive,
+            S::EvaluationExpired,
+            S::NetworkError,
+        };
+        const int idx = ui->debugStateCombo->currentIndex();
+        const S state = (idx >= 0 && idx < 5) ? kStates[idx] : S::None;
+        m_accountManager->setDebugLicenseState(state);
+        // force = true so the scheduler is bypassed and the simulated status
+        // fires immediately through the full signal chain.
+        m_accountManager->checkPurchase(m_accountManager->serial(), /*force=*/true);
+    });
+#else
+    ui->debugFrame->hide();
+#endif
 }
 
 AccountDialog::~AccountDialog()

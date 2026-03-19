@@ -88,6 +88,17 @@ void AccountLicenseManager::ensureSerial()
 
 void AccountLicenseManager::checkPurchase(const QString &serial, bool force)
 {
+#ifdef QT_DEBUG
+    if (m_debugLicenseState != DebugLicenseState::None) {
+        const LicenseStatus s = buildDebugStatus(m_debugLicenseState);
+        m_hasPremiumAccess    = s.hasPaidAccess;
+        m_evaluationActive    = s.evaluationActive;
+        emit licenseStatusUpdated(s);
+        emit licenseCheckInProgressChanged(false);
+        return;
+    }
+#endif
+
     const QString accountId = serial.trimmed();
     if (accountId.isEmpty()) {
         LicenseStatus status;
@@ -477,4 +488,65 @@ QString AccountLicenseManager::loadSerialFromFile() const
 {
     return al_generateId(length);
 }
+
+// ── Debug simulation (QT_DEBUG only) ─────────────────────────────────────────
+#ifdef QT_DEBUG
+
+void AccountLicenseManager::setDebugLicenseState(DebugLicenseState state)
+{
+    m_debugLicenseState = state;
+}
+
+AccountLicenseManager::DebugLicenseState
+AccountLicenseManager::debugLicenseState() const
+{
+    return m_debugLicenseState;
+}
+
+/*static*/ AccountLicenseManager::LicenseStatus
+AccountLicenseManager::buildDebugStatus(DebugLicenseState state)
+{
+    LicenseStatus s;
+    const qint64 now = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
+
+    switch (state) {
+    case DebugLicenseState::Pro:
+        s.active             = true;
+        s.hasPaidAccess      = true;
+        s.licenseType        = QStringLiteral("pro");
+        s.message            = QStringLiteral("[DEBUG] Pro licence active");
+        s.expiryDate         = QStringLiteral("2027-01-01");
+        s.hasExpiryDate      = true;
+        s.expiryTimestamp    = now + 365LL * 24LL * 3600LL;
+        s.hasExpiryTimestamp = true;
+        s.daysRemaining      = 365;
+        s.hasDaysRemaining   = true;
+        break;
+
+    case DebugLicenseState::EvaluationActive:
+        s.evaluationActive        = true;
+        s.hasPaidAccess           = true;
+        s.licenseType             = QStringLiteral("evaluation");
+        s.message                 = QStringLiteral("[DEBUG] Evaluation active");
+        s.evaluationEndTimestamp  = now + 7LL * 24LL * 3600LL;
+        s.evaluationDaysRemaining = 7;
+        break;
+
+    case DebugLicenseState::EvaluationExpired:
+        // all fields default to false/0 → Free tier
+        s.message = QStringLiteral("[DEBUG] Evaluation expired — Free tier");
+        break;
+
+    case DebugLicenseState::NetworkError:
+        s.fromNetworkError = true;
+        s.message          = QStringLiteral("[DEBUG] Simulated network error");
+        break;
+
+    default:
+        break;
+    }
+    return s;
+}
+
+#endif // QT_DEBUG
 

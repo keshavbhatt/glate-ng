@@ -118,6 +118,37 @@ private:
     bool                  m_hasPremiumAccess = false;
     bool                  m_evaluationActive = false;
     QNetworkAccessManager m_nam;
+
+#ifdef QT_DEBUG
+// ── Debug simulation (debug builds only) ─────────────────────────────────────
+public:
+    /**
+     * @brief Simulated licence states available in debug builds.
+     *
+     * Set via setDebugLicenseState() before calling checkPurchase() to have
+     * the manager emit a crafted LicenseStatus immediately without any
+     * network call or settings read.  The full signal chain
+     * (AccountDialog, MainWindow, Share gating) is exercised just as in
+     * production.
+     *
+     * Set to DebugLicenseState::None (the default) to restore normal behaviour.
+     */
+    enum class DebugLicenseState {
+        None,              ///< Real licence check (default)
+        Pro,               ///< Active Pro licence, 365 days remaining
+        EvaluationActive,  ///< Evaluation period, 7 days remaining
+        EvaluationExpired, ///< Evaluation ended — Free tier
+        NetworkError,      ///< Simulated network error (cached state)
+    };
+    Q_ENUM(DebugLicenseState)
+
+    void             setDebugLicenseState(DebugLicenseState state);
+    DebugLicenseState debugLicenseState() const;
+
+private:
+    static LicenseStatus buildDebugStatus(DebugLicenseState state);
+    DebugLicenseState m_debugLicenseState = DebugLicenseState::None;
+#endif
     QString               m_serial;
     int                   m_pendingChecks    = 0;
 };

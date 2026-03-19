@@ -312,6 +312,82 @@
     </widget>
    </item>
 
+   <!-- ── Debug simulation panel (hidden in Release by accountdialog.cpp) ── -->
+   <item>
+    <widget class="QFrame" name="debugFrame">
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Plain</enum>
+     </property>
+     <layout class="QVBoxLayout" name="debugLayout">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>8</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="debugTitleLabel">
+        <property name="text">
+         <string>🛠 Debug: Simulate licence state</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="debugControlRow">
+        <item>
+         <widget class="QComboBox" name="debugStateCombo">
+          <item>
+           <property name="text">
+            <string>None — real check</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Pro (365 days remaining)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Evaluation active (7 days)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Evaluation expired — Free tier</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Network error (cached state)</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="debugApplyBtn">
+          <property name="text">
+           <string>Apply</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
    <!-- ── Bottom row: close ──────────────────────────────────────────── -->
    <item>
     <layout class="QHBoxLayout" name="bottomRow">
