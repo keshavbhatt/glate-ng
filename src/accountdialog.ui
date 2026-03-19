@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AccountDialog</class>
+ <widget class="QDialog" name="AccountDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>540</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>480</width>
+    <height>360</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Account</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing">
+    <number>12</number>
+   </property>
+   <property name="leftMargin">
+    <number>18</number>
+   </property>
+   <property name="topMargin">
+    <number>18</number>
+   </property>
+   <property name="rightMargin">
+    <number>18</number>
+   </property>
+   <property name="bottomMargin">
+    <number>14</number>
+   </property>
+
+   <!-- ── Account info frame ─────────────────────────────────────────── -->
+   <item>
+    <widget class="QFrame" name="infoFrame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="infoLayout">
+      <property name="spacing">
+       <number>8</number>
+      </property>
+      <property name="leftMargin">
+       <number>14</number>
+      </property>
+      <property name="topMargin">
+       <number>14</number>
+      </property>
+      <property name="rightMargin">
+       <number>14</number>
+      </property>
+      <property name="bottomMargin">
+       <number>14</number>
+      </property>
+
+      <item>
+       <widget class="QLabel" name="planSummaryLabel">
+        <property name="text">
+         <string>Plan status: Evaluation active</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+
+      <item>
+       <layout class="QHBoxLayout" name="idRow">
+        <item>
+         <widget class="QLabel" name="labelId">
+          <property name="text">
+           <string>Account Id :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="accId">
+          <property name="text">
+           <string>—</string>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::TextInteractionFlag::TextSelectableByMouse</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="copyAccId">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Copy Account ID</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="icons.qrc">
+            <normaloff>:/icons/file-copy-line.png</normaloff>:/icons/file-copy-line.png</iconset>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="idSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size><width>0</width><height>0</height></size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+
+      <item>
+       <layout class="QHBoxLayout" name="typeRow">
+        <item>
+         <widget class="QLabel" name="labelType">
+          <property name="text">
+           <string>Plan :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="accType">
+          <property name="text">
+           <string>Evaluation</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="typeSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size><width>0</width><height>0</height></size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+
+      <item>
+       <layout class="QHBoxLayout" name="evaluationRow">
+        <item>
+         <widget class="QLabel" name="labelEvaluationRemaining">
+          <property name="text">
+           <string>Evaluation remaining :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="evaluationRemainingLabel">
+          <property name="text">
+           <string>--</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="evalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size><width>0</width><height>0</height></size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+
+      <item>
+       <widget class="QFrame" name="divider">
+        <property name="frameShape">
+         <enum>QFrame::Shape::HLine</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Sunken</enum>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Status: single-line, no expanding -->
+      <item>
+       <widget class="QLabel" name="accountStatusLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Status: waiting for account check...</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Hint: word-wrapped, needs MinimumExpanding so it gets full height -->
+      <item>
+       <widget class="QLabel" name="accountHintLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Upgrade to Pro for access to all premium features and priority support.</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+
+     </layout>
+    </widget>
+   </item>
+
+   <!-- ── Action buttons (outside the frame for breathing room) ─────── -->
+   <item>
+    <layout class="QHBoxLayout" name="actionRow">
+     <property name="spacing">
+      <number>8</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="restoreBtn">
+       <property name="text">
+        <string>Refresh Status</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/refresh-line.png</normaloff>:/icons/refresh-line.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="purchaseBtn">
+       <property name="text">
+        <string>Purchase Pro Licence</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/star-line.png</normaloff>:/icons/star-line.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="portalBtn">
+       <property name="toolTip">
+        <string>Open the online portal to manage your account and license</string>
+       </property>
+       <property name="text">
+        <string>Self Service Portal</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/links-line.png</normaloff>:/icons/links-line.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- ── Portal info text ───────────────────────────────────────────── -->
+   <item>
+    <widget class="QLabel" name="portalInfoLabel">
+     <property name="text">
+      <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;To &lt;b&gt;migrate your license&lt;/b&gt; or &lt;b&gt;manage your account&lt;/b&gt;, use the &lt;b&gt;Self Service Portal&lt;/b&gt; button above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+
+   <!-- ── Bottom row: close ──────────────────────────────────────────── -->
+   <item>
+    <layout class="QHBoxLayout" name="bottomRow">
+     <item>
+      <spacer name="bottomSpacer">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size><width>0</width><height>0</height></size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeBtn">
+       <property name="text">
+        <string>Close</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/close-fill.png</normaloff>:/icons/close-fill.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>
+

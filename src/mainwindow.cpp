@@ -5,6 +5,8 @@
 #include <QShortcut>
 #include <QUrlQuery>
 
+#include "GlateLicenseConfig.h"
+#include "accountdialog.h"
 #include "ui_mainwindow.h"
 #include "utils.h"
 
@@ -258,6 +260,22 @@ MainWindow::MainWindow(QWidget *parent)
     on_help_clicked();
     m_settings.setValue("firstRun", false);
   }
+
+  // ── Account & licence ──────────────────────────────────────────────────────
+  m_licenseManager = new AccountLicenseManager(glateAccountLicenseConfig(), this);
+  connect(m_licenseManager, &AccountLicenseManager::licenseStatusUpdated,
+          this, &MainWindow::onLicenseStatusUpdated);
+
+  // Account dialog — created once, shown on demand via the toolbar button
+  m_accountDialog = new AccountDialog(this);
+  m_accountDialog->setWindowFlag(Qt::Dialog);
+  m_accountDialog->setWindowModality(Qt::NonModal);
+  m_accountDialog->setAccountManager(m_licenseManager);
+
+  // Restore / generate the serial and kick off a background licence check.
+  m_licenseManager->ensureSerial();
+  m_accountDialog->setSerial(m_licenseManager->serial());
+  m_licenseManager->checkPurchase(m_licenseManager->serial());
 }
 
 // TODO skip duplicate history item by checking translationId
@@ -947,7 +965,7 @@ void MainWindow::on_help_clicked() {
   if (m_slider == nullptr) {
     m_slider = new Slider(this);
     m_slider->setWindowTitle(QApplication::applicationName() +
-                             " | Introduction");
+                             "  Introduction");
     m_slider->setWindowFlag(Qt::Dialog);
     m_slider->setWindowModality(Qt::ApplicationModal);
     m_slider->setMinimumSize(680, 420);
@@ -957,3 +975,33 @@ void MainWindow::on_help_clicked() {
     m_slider->start();
   }
 }
+
+// ── Account / licence ─────────────────────────────────────────────────────────
+
+void MainWindow::on_account_clicked()
+{
+    if (m_accountDialog->isVisible()) {
+        m_accountDialog->raise();
+        m_accountDialog->activateWindow();
+        return;
+    }
+    QScreen *pScreen = QGuiApplication::screenAt(
+        mapToGlobal(QPoint(width() / 2, 0)));
+    QRect available = pScreen->availableGeometry();
+    m_accountDialog->move(available.center() - m_accountDialog->rect().center());
+    m_accountDialog->showNormal();
+}
+
+void MainWindow::onLicenseStatusUpdated(
+    const AccountLicenseManager::LicenseStatus &status)
+{
+    m_hasPremiumAccess = status.hasPaidAccess;
+    qDebug().noquote()
+        << "[Glate licence]"
+        << (status.active           ? "Pro"
+            : status.evaluationActive ? "Evaluation"
+                                      : "Free")
+        << "|" << status.message;
+}
+
+

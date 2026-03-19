@@ -33,6 +33,9 @@ if(WIN32)
 endif()
 
 qt_add_executable(glate
+    accountdialog.cpp
+    accountdialog.h
+    accountdialog.ui
     controlbutton.cpp
     controlbutton.h
     elidedlabel.cpp
@@ -62,6 +65,7 @@ qt_add_executable(glate
     utils.h
     waitingspinnerwidget.cpp
     waitingspinnerwidget.h
+    GlateLicenseConfig.h
     ${QHOTKEY_SOURCES}
     ${PLATFORM_SOURCES}
     error.ui
@@ -87,6 +91,9 @@ endif()
 target_include_directories(glate PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/QHotkey
+    # AccountAndLicense module headers (account_license PUBLIC already exposes this,
+    # but list explicitly for IDE tooling)
+    ${CMAKE_SOURCE_DIR}/modules/AccountAndLicense
 )
 
 target_compile_definitions(glate PRIVATE
@@ -95,6 +102,7 @@ target_compile_definitions(glate PRIVATE
 )
 
 target_link_libraries(glate PRIVATE
+    account_license
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets

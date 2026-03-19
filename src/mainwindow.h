@@ -20,6 +20,8 @@
 #include "ttsdownloader.h"
 #include "ui_textoptionform.h"
 #include "waitingspinnerwidget.h"
+#include "AccountLicenseManager.h"
+#include "accountdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -54,6 +56,10 @@ private slots:
   void on_history_clicked();
   void on_lineByline_clicked();
   void on_help_clicked();
+  void on_account_clicked();
+
+  // Account / licence
+  void onLicenseStatusUpdated(const AccountLicenseManager::LicenseStatus &status);
 
   void readLangCode();
   void resizeFix();
@@ -114,6 +120,11 @@ private:
   QStringList m_ttsLocalFiles;
   int m_ttsCurrentIndex = -1;
   bool m_ttsSessionActive = false;
+
+  // Account / licence
+  AccountLicenseManager *m_licenseManager  = nullptr;
+  AccountDialog         *m_accountDialog   = nullptr;
+  bool                   m_hasPremiumAccess = false;
 };
 
 #endif // MAINWINDOW_H
