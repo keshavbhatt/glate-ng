@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QTimer>
 #include "AccountLicenseManager.h"
 
 namespace Ui { class AccountDialog; }
@@ -18,6 +19,10 @@ public:
     void setSerial(const QString &serial) const;
     void setAccountType(bool isPro) const;
     void setCheckingState(bool checking) const;
+
+    /// Flash the Purchase button with a red border for ~10 seconds to draw
+    /// the user's attention after arriving from the "View Plans" prompt.
+    void highlightPurchaseButton();
 
 public slots:
     void onLicenseStatusUpdated(const AccountLicenseManager::LicenseStatus &status);
@@ -40,10 +45,14 @@ private:
     void onPortalClicked() const;
 
     Ui::AccountDialog       *ui;
-    AccountLicenseManager   *m_accountManager        = nullptr;
-    bool                     m_isPaidPlan             = false;
-    bool                     m_canUpgradePaidPlan     = false;
-    bool                     m_isEvaluationActive     = false;
+    AccountLicenseManager   *m_accountManager         = nullptr;
+    bool                     m_isPaidPlan              = false;
+    bool                     m_canUpgradePaidPlan      = false;
+    bool                     m_isEvaluationActive      = false;
     int                      m_evaluationDaysRemaining = -1;
+
+    // Purchase-button flash state
+    QTimer *m_flashTimer = nullptr;
+    int     m_flashCount  = 0;
 };
 

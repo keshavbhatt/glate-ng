@@ -232,8 +232,10 @@ MainWindow::MainWindow(QWidget *parent)
                           QStringLiteral(" | Share translation"));
   m_share->setWindowFlag(Qt::Dialog);
   m_share->setWindowModality(Qt::NonModal);
-  connect(m_share, &Share::upgradeRequested,
-          this,    &MainWindow::on_account_clicked);
+  connect(m_share, &Share::upgradeRequested, this, [this]() {
+      on_account_clicked();
+      m_accountDialog->highlightPurchaseButton();
+  });
 
   m_lineByLine = new LineByLine(this, m_clipboard);
   m_lineByLine->setWindowTitle(QApplication::applicationName() +

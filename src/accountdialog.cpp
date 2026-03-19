@@ -157,6 +157,52 @@ void AccountDialog::onLicenseCheckProgressChanged(bool inProgress) const
     setCheckingState(inProgress);
 }
 
+void AccountDialog::highlightPurchaseButton()
+{
+    // Cancel any in-progress flash before starting a new one.
+    if (m_flashTimer) {
+        m_flashTimer->stop();
+        m_flashTimer->deleteLater();
+        m_flashTimer = nullptr;
+    }
+    ui->purchaseBtn->setStyleSheet(QString());
+
+    // Only flash when the button is actually actionable.
+    if (!ui->purchaseBtn->isEnabled())
+        return;
+
+    static constexpr int kIntervalMs  = 400; // ms per half-cycle
+    static constexpr int kTotalCycles = 25;  // 25 × 400 ms = 10 s
+
+    const QString kOnStyle  = QStringLiteral(
+        "QPushButton {"
+        "  border: 2px solid #e05050;"
+        "  border-radius: 4px;"
+        "  color: #e05050;"
+        "}");
+
+    m_flashCount = 0;
+    m_flashTimer = new QTimer(this);
+    m_flashTimer->setInterval(kIntervalMs);
+
+    connect(m_flashTimer, &QTimer::timeout, this, [this, kOnStyle]() {
+        // odd count → off, even → on
+        ui->purchaseBtn->setStyleSheet(
+            (m_flashCount % 2 == 0) ? kOnStyle : QString());
+
+        if (++m_flashCount >= kTotalCycles * 2) {
+            m_flashTimer->stop();
+            m_flashTimer->deleteLater();
+            m_flashTimer = nullptr;
+            ui->purchaseBtn->setStyleSheet(QString());
+        }
+    });
+
+    // Start with the button lit so the flash is immediately visible.
+    ui->purchaseBtn->setStyleSheet(kOnStyle);
+    m_flashTimer->start();
+}
+
 // ── Private helpers ───────────────────────────────────────────────────────────
 
 void AccountDialog::refreshPurchaseButtonState() const
@@ -221,6 +267,15 @@ void AccountDialog::onRefreshClicked() const
 void AccountDialog::onPurchaseClicked() const
 {
     if (!m_accountManager) return;
+
+    // Stop the attention flash — the user has seen it.
+    if (m_flashTimer) {
+        m_flashTimer->stop();
+        m_flashTimer->deleteLater();
+        // m_flashTimer is mutable-style; cast away const for the cleanup.
+        const_cast<AccountDialog *>(this)->m_flashTimer = nullptr;
+        ui->purchaseBtn->setStyleSheet(QString());
+    }
 
     if (m_isPaidPlan && m_canUpgradePaidPlan) {
         const int answer = QMessageBox::question(
