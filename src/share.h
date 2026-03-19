@@ -7,7 +7,7 @@
 #include <QNetworkAccessManager>
 #include <QProcess>
 #include <QSettings>
-#include <QWidget>
+#include <QPushButton>
 
 namespace Ui {
 class Share;

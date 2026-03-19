@@ -83,7 +83,7 @@ bool Share::checkPaidAccess(const QString &featureName)
         QStringLiteral("Upgrade to a Pro licence to unlock this feature "
                        "and support continued development of Glate."));
 
-    QPushButton *upgradeBtn =
+    auto upgradeBtn =
         msgBox.addButton(QStringLiteral("View Plans"), QMessageBox::AcceptRole);
     msgBox.addButton(QStringLiteral("Not Now"), QMessageBox::RejectRole);
     msgBox.setDefaultButton(upgradeBtn);
