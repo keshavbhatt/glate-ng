@@ -389,5 +389,6 @@ void AccountDialog::closeEvent(QCloseEvent *event) {
 
 void AccountDialog::on_planCompareButton_clicked() {
   PlansComparisionDialog dialog(this);
+  dialog.adjustSize();
   dialog.exec();
 }

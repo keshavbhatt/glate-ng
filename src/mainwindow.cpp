@@ -215,6 +215,11 @@ MainWindow::MainWindow(QWidget *parent)
 
   resetPlayIcons();
 
+  // Disable TTS buttons initially — re-enabled by on_src*_textChanged
+  // as soon as the user types or text is loaded.
+  ui->play1->setEnabled(!ui->src1->toPlainText().isEmpty());
+  ui->play2->setEnabled(!ui->src2->toPlainText().isEmpty());
+
   // load src1
   ui->counter->setText("5000/5000");
   const int minWid =
