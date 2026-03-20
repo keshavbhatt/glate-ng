@@ -24,6 +24,9 @@ public slots:
   void setTranslation(const QString &translation, const QString &uuid,
                       const QString &langCode = QString());
 
+protected:
+  void closeEvent(QCloseEvent *event) override;
+
 private slots:
   void on_text_clicked();
   void on_email_clicked();

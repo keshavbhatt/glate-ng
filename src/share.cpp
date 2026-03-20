@@ -14,6 +14,9 @@ Share::Share(QWidget *parent) : QWidget(parent), ui(new Ui::Share) {
   ui->setupUi(this);
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
 
+  if (settings.contains(QStringLiteral("shareDialogGeometry")))
+    restoreGeometry(settings.value(QStringLiteral("shareDialogGeometry")).toByteArray());
+
   // Route all link clicks in the status browser through QDesktopServices
   // so "Open file" and "Show in folder" file:// links actually work.
   connect(ui->status, &QTextBrowser::anchorClicked,
@@ -71,6 +74,12 @@ void Share::setTranslation(const QString &translation, const QString &uuid, cons
 }
 
 Share::~Share() { delete ui; }
+
+void Share::closeEvent(QCloseEvent *event)
+{
+  settings.setValue(QStringLiteral("shareDialogGeometry"), saveGeometry());
+  QWidget::closeEvent(event);
+}
 
 QString Share::getFileNameFromString(const QString &string) {
   QString filename;

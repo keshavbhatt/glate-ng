@@ -92,6 +92,12 @@
      </property>
      <item>
       <widget class="QToolButton" name="email">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="toolTip">
         <string>Open your mail client with the translation pre-filled</string>
        </property>
@@ -119,7 +125,7 @@
      <item>
       <widget class="QToolButton" name="pastebin">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -166,6 +172,12 @@
      </item>
      <item>
       <widget class="QToolButton" name="download">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="toolTip">
         <string>Synthesise the translation with TTS and export to an MP3 file</string>
        </property>
@@ -192,6 +204,12 @@
      </item>
      <item>
       <widget class="QToolButton" name="text">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="toolTip">
         <string>Save the translation as a plain-text file</string>
        </property>
