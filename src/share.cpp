@@ -144,12 +144,13 @@ void Share::on_pastebin_clicked() {
   ui->pastebin->setDisabled(true);
   showStatus("<span style='color:green'>Share: </span>Uploading paste please wait...");
 
-  QNetworkRequest request(QUrl("https://paste.rs/"));
+  QNetworkRequest request(QUrl("https://paste.rs"));
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                        QNetworkRequest::NoLessSafeRedirectPolicy);
+  // Keep the request minimal (curl-compatible) and explicitly UTF-8.
   request.setHeader(QNetworkRequest::ContentTypeHeader,
-                    "text/plain");
-  request.setRawHeader("User-Agent", "glate/1.0");
+                    QStringLiteral("text/plain; charset=utf-8"));
+  request.setRawHeader("Accept", "text/plain");
   request.setTransferTimeout(15000);
 
   QByteArray payload = text.toUtf8();
