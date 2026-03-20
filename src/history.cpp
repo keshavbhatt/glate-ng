@@ -1,6 +1,7 @@
 #include "history.h"
 #include "ui_history.h"
 #include "utils.h"
+#include "elidedlabel.h"
 
 #include <QDir>
 #include <QFile>
@@ -305,10 +306,10 @@ void History::addRecordItem(const HistoryRecord &record) {
   fromCaption->setFont(captionFont);
   toCaption->setFont(captionFont);
 
-  auto *fromText = new QLabel(elideText(record.src1, 240), card);
-  auto *toText = new QLabel(elideText(record.src2, 240), card);
-  fromText->setWordWrap(true);
-  toText->setWordWrap(true);
+  auto *fromText = new ElidedLabel(record.src1, Qt::ElideRight, card);
+  auto *toText   = new ElidedLabel(record.src2, Qt::ElideRight, card);
+  fromText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+  toText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
   textColumn->addWidget(fromCaption, 0, 0);
   textColumn->addWidget(toCaption, 0, 1);
@@ -351,7 +352,8 @@ void History::addRecordItem(const HistoryRecord &record) {
   auto *item = new QListWidgetItem();
   item->setData(Qt::UserRole, record.id);
   ui->historyList->addItem(item);
-  item->setSizeHint(card->sizeHint());
+  // Fixed height: prevents items growing with long text now that labels elide.
+  item->setSizeHint(QSize(ui->historyList->viewport()->width(), 110));
   ui->historyList->setItemWidget(item, card);
 }
 
