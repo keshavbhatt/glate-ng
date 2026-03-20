@@ -32,9 +32,9 @@ signals:
   void setTranslationId(QString transId);
 public slots:
   void loadHistory();
-  void save(QStringList meta, QString translationId);
-  void insertItem(QStringList meta, bool fromHistory, QString translationId);
-  void loadHistoryItem(QString itemPath);
+  void save(const QStringList &meta, const QString &translationId);
+  void insertItem(const QStringList &meta, bool fromHistory, const QString &translationId);
+  void loadHistoryItem(const QString &itemPath);
 
 private slots:
   void on_clearall_clicked();
@@ -43,8 +43,8 @@ private slots:
   void onItemDoubleClicked(QListWidgetItem *item);
   void onDeleteSelected();
   void onLoadSelected();
-  static QJsonDocument loadJson(QString fileName);
-  static void saveJson(QJsonDocument document, QString fileName);
+  static QJsonDocument loadJson(const QString &fileName);
+  static void saveJson(const QJsonDocument &document, const QString &fileName);
 
 private:
   void refreshList();

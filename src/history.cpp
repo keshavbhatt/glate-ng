@@ -68,8 +68,8 @@ void History::on_clearall_clicked() {
   }
 }
 
-void History::insertItem(QStringList meta, bool fromHistory,
-                         QString translationId) {
+void History::insertItem(const QStringList &meta, bool fromHistory,
+                         const QString &translationId) {
   if (meta.count() < 5 || translationId.isEmpty()) {
     return;
   }
@@ -89,7 +89,7 @@ void History::insertItem(QStringList meta, bool fromHistory,
   }
 }
 
-void History::loadHistoryItem(QString itemPath) {
+void History::loadHistoryItem(const QString &itemPath) {
   QFile file(itemPath);
   if (file.exists()) {
     QJsonDocument doc = loadJson(itemPath);
@@ -103,7 +103,7 @@ void History::loadHistoryItem(QString itemPath) {
   }
 }
 
-void History::save(QStringList meta, QString translationId) {
+void History::save(const QStringList &meta, const QString &translationId) {
   if (meta.count() >= 5) {
     QString from, to, src1, src2, date;
     from = meta.at(0);
@@ -126,7 +126,7 @@ void History::save(QStringList meta, QString translationId) {
   }
 }
 
-QJsonDocument History::loadJson(QString fileName) {
+QJsonDocument History::loadJson(const QString &fileName) {
   QFile jsonFile(fileName);
   if (!jsonFile.open(QIODevice::ReadOnly)) {
     return QJsonDocument();
@@ -143,7 +143,7 @@ QJsonDocument History::loadJson(QString fileName) {
   return document;
 }
 
-void History::saveJson(QJsonDocument document, QString fileName) {
+void History::saveJson(const QJsonDocument &document, const QString &fileName) {
   QFile jsonFile(fileName);
   if (!jsonFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
     return;
@@ -261,6 +261,10 @@ void History::addRecordItem(const HistoryRecord &record) {
   auto *card = new QFrame();
   card->setObjectName("historyCard");
   card->setFrameShape(QFrame::NoFrame);
+  // Transparent background so the QListWidget selection highlight shows through
+  card->setStyleSheet(
+      "QFrame#historyCard { background: transparent; border: none; }"
+      "QFrame#historyCard QLabel { background: transparent; border: none; }");
 
   auto *root = new QVBoxLayout(card);
   root->setContentsMargins(10, 8, 10, 8);
@@ -302,8 +306,6 @@ void History::addRecordItem(const HistoryRecord &record) {
   auto *toText = new QLabel(elideText(record.src2, 240), card);
   fromText->setWordWrap(true);
   toText->setWordWrap(true);
-  fromText->setTextInteractionFlags(Qt::TextSelectableByMouse);
-  toText->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
   textColumn->addWidget(fromCaption, 0, 0);
   textColumn->addWidget(toCaption, 0, 1);
@@ -345,7 +347,6 @@ void History::addRecordItem(const HistoryRecord &record) {
 
   auto *item = new QListWidgetItem();
   item->setData(Qt::UserRole, record.id);
-  item->setFlags(item->flags() & ~Qt::ItemIsSelectable);
   ui->historyList->addItem(item);
   item->setSizeHint(card->sizeHint());
   ui->historyList->setItemWidget(item, card);
