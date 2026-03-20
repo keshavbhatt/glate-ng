@@ -174,11 +174,11 @@ void AccountDialog::highlightPurchaseButton()
         return;
 
     static constexpr int kIntervalMs  = 400; // ms per half-cycle
-    static constexpr int kTotalCycles = 25;  // 25 × 400 ms = 10 s
+    static constexpr int kTotalCycles = 5;  // 5 × 400 ms = 2 s
 
     const QString kOnStyle  = QStringLiteral(
         "QPushButton {"
-        "  border: 2px solid #e05050;"
+        "  border: 1px solid #e05050;"
         "  border-radius: 4px;"
         "  color: #e05050;"
         "}");
