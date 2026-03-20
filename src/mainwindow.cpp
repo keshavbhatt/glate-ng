@@ -118,8 +118,9 @@ MainWindow::MainWindow(QWidget *parent)
     } else {
       const QScreen *pScreen = QGuiApplication::screenAt(
           this->mapToGlobal(QPoint(this->width() / 2, 0)));
-      const QRect availableScreenSize = pScreen->availableGeometry();
-      this->move(availableScreenSize.center() - this->rect().center());
+      if (pScreen) {
+        this->move(pScreen->availableGeometry().center() - this->rect().center());
+      }
     }
   }
 
@@ -977,12 +978,6 @@ void MainWindow::on_share_clicked() {
 
 void MainWindow::on_settings_clicked() const {
   if (m_settingsWidget->isVisible() == false) {
-    m_settingsWidget->adjustSize();
-    const QScreen *pScreen = QGuiApplication::screenAt(
-        this->mapToGlobal(QPoint(m_settingsWidget->width() / 2, 0)));
-    const QRect availableScreenSize = pScreen->availableGeometry();
-    m_settingsWidget->move(availableScreenSize.center() -
-                           m_settingsWidget->rect().center());
     m_settingsWidget->showNormal();
   }
 }
@@ -990,11 +985,6 @@ void MainWindow::on_settings_clicked() const {
 void MainWindow::on_history_clicked() const {
   if (m_historyWidget->isVisible() == false) {
     m_historyWidget->loadHistory();
-    const QScreen *pScreen = QGuiApplication::screenAt(
-        this->mapToGlobal(QPoint(m_historyWidget->width() / 2, 0)));
-    const QRect availableScreenSize = pScreen->availableGeometry();
-    m_historyWidget->move(availableScreenSize.center() -
-                          m_historyWidget->rect().center());
     m_historyWidget->showNormal();
   }
 }
@@ -1027,11 +1017,6 @@ void MainWindow::on_lineByline_clicked() {
                               getLangName(getTransLang()), m_translationId);
       }
     }
-    const QScreen *pScreen = QGuiApplication::screenAt(
-        this->mapToGlobal(QPoint(m_lineByLine->width() / 2, 0)));
-    const QRect availableScreenSize = pScreen->availableGeometry();
-    m_lineByLine->move(availableScreenSize.center() -
-                       m_lineByLine->rect().center());
     m_lineByLine->showNormal();
   }
 }
