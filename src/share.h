@@ -33,6 +33,7 @@ private slots:
 
   static QString getFileNameFromString(const QString &string);
   void showStatus(const QString &message);
+  void showStatusWithFile(const QString &message, const QString &filePath);
   bool saveFile(const QString &filename);
   void concat(const QStringList &audioFiles);
 
@@ -45,6 +46,7 @@ private:
   QString translationUUID;
   QString translationLangCode;
   QStringList m_downloadedAudioFiles;
+  QString m_lastExportedFilePath; ///< Set after a successful save; used for "Open file" links.
 };
 
 #endif // SHARE_H

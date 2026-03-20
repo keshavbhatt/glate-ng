@@ -13,6 +13,13 @@
 Share::Share(QWidget *parent) : QWidget(parent), ui(new Ui::Share) {
   ui->setupUi(this);
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
+
+  // Route all link clicks in the status browser through QDesktopServices
+  // so "Open file" and "Show in folder" file:// links actually work.
+  connect(ui->status, &QTextBrowser::anchorClicked,
+          this, [](const QUrl &url) {
+              QDesktopServices::openUrl(url);
+          });
   ffmpeg = new QProcess(this);
   m_networkManager = new QNetworkAccessManager(this);
   m_ttsDownloader = new TtsDownloader(this);
@@ -95,7 +102,9 @@ void Share::on_text_clicked() {
     out << translation;
     settings.setValue("sharePath", QFileInfo(file).path());
     file.close();
-    showStatus("<span style='color:green'>Share: </span>file saved successfully.");
+    showStatusWithFile(
+        QStringLiteral("<span style='color:green'>Share: </span>File saved."),
+        QFileInfo(fileName).absoluteFilePath());
   } else {
     showStatus("<span style='color:red'>Share: </span>file save operation cancelled.");
   }
@@ -209,6 +218,22 @@ void Share::showStatus(const QString &message) {
   ui->status->show();
 }
 
+/// Shows @p message in the status bar and appends "Open file | Show in folder"
+/// links for @p filePath.
+void Share::showStatusWithFile(const QString &message, const QString &filePath)
+{
+  const QUrl fileUrl   = QUrl::fromLocalFile(filePath);
+  const QUrl folderUrl = QUrl::fromLocalFile(
+      QFileInfo(filePath).dir().absolutePath());
+
+  const QString links =
+      QStringLiteral(" &nbsp;<a href='%1'>Open file</a>"
+                     " &nbsp;·&nbsp; <a href='%2'>Show in folder</a>")
+          .arg(fileUrl.toString(), folderUrl.toString());
+
+  showStatus(message + links);
+}
+
 void Share::on_download_clicked() {
   if (!LicenseService::instance()->checkAccess(
           QStringLiteral("Export as Audio")))
@@ -239,7 +264,6 @@ void Share::on_download_clicked() {
 }
 
 void Share::concat(const QStringList &audioFiles) {
-  // get path
   QString translation = ui->translation->toPlainText();
   QString path =
       settings
@@ -251,49 +275,44 @@ void Share::concat(const QStringList &audioFiles) {
       path + QDir::separator() + getFileNameFromString(translation) + ".mp3",
       tr("Audio Files (*.mp3)"));
   if (!fileName.isEmpty()) {
+    m_lastExportedFilePath = QFileInfo(fileName).absoluteFilePath();
 
     QStringList args;
     QString complex;
-    args << "-v"
-         << "quiet"
-         << "-stats";
+    args << "-v" << "quiet" << "-stats";
     for (int i = 0; i < audioFiles.count(); i++) {
       args << "-i" << audioFiles.at(i);
       complex += "[" + QString::number(i) + ":0]";
     }
-    complex +=
-        "concat=n=" + QString::number(audioFiles.count()) + ":v=0:a=1[out]";
-    args << "-filter_complex" << complex << "-map"
-         << "[out]" << fileName << "-y";
-    // ffmpeg -v quiet -stats inputs -filter_complex
-    // '[0:0][1:0]concat=n=2:v=0:a=1[out]' -map '[out]' /tmp/output.mp3
+    complex += "concat=n=" + QString::number(audioFiles.count()) + ":v=0:a=1[out]";
+    args << "-filter_complex" << complex << "-map" << "[out]" << fileName << "-y";
     ffmpeg->start("ffmpeg", args);
 
     ui->download->setEnabled(!ffmpeg->waitForStarted());
-    // save last used location
-    showStatus("<span style='color:green'>Share: </span>concating parts...");
+    showStatus("<span style='color:green'>Share: </span>Merging audio parts...");
     settings.setValue("sharePathAudio", QFileInfo(fileName).path());
   } else {
-    showStatus(
-        "<span style='color:red'>Share: </span>file save operation cancelled.");
+    m_lastExportedFilePath.clear();
+    showStatus("<span style='color:red'>Share: </span>file save operation cancelled.");
     ui->download->setEnabled(true);
   }
 }
 
 void Share::ffmpeg_finished(int k) {
   if (k == 0) {
-    const QString output = QString::fromUtf8(ffmpeg->readAll()).trimmed();
-    const QString message = output.isEmpty()
-                                ? "<span style='color:green'>Share: </span>Export finished."
-                                : "<span style='color:green'>Share: </span>Export finished.<br>" +
-                                      output.toHtmlEscaped();
-    showStatus(message);
+    if (!m_lastExportedFilePath.isEmpty()) {
+      showStatusWithFile(
+          QStringLiteral("<span style='color:green'>Share: </span>Export finished."),
+          m_lastExportedFilePath);
+    } else {
+      showStatus(QStringLiteral("<span style='color:green'>Share: </span>Export finished."));
+    }
   } else {
     const QString err =
         QString::fromUtf8(ffmpeg->readAllStandardError()).trimmed();
     showStatus(err.isEmpty()
-                   ? "<span style='color:red'>Share: </span>Export failed."
-                   : "<span style='color:red'>Share: </span>" +
+                   ? QStringLiteral("<span style='color:red'>Share: </span>Export failed.")
+                   : QStringLiteral("<span style='color:red'>Share: </span>") +
                          err.toHtmlEscaped());
   }
   ui->download->setDisabled(false);
