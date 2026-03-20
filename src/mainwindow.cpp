@@ -266,11 +266,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
   }
 
-  if (m_settings.value("firstRun").isValid() == false) {
-    on_help_clicked();
-    m_settings.setValue("firstRun", false);
-  }
-
   // ── Account & licence ──────────────────────────────────────────────────────
   m_licenseManager = new AccountLicenseManager(glateAccountLicenseConfig(), this);
   connect(m_licenseManager, &AccountLicenseManager::licenseStatusUpdated,
@@ -286,6 +281,13 @@ MainWindow::MainWindow(QWidget *parent)
   m_licenseManager->ensureSerial();
   m_accountDialog->setSerial(m_licenseManager->serial());
   m_licenseManager->checkPurchase(m_licenseManager->serial());
+
+  if (m_settings.value("firstRun").isValid() == false) {
+    QTimer::singleShot(3000, this, [this]() {
+      on_help_clicked();
+    });
+    m_settings.setValue("firstRun", false);
+  }
 }
 
 // TODO skip duplicate history item by checking translationId
@@ -1063,7 +1065,6 @@ void MainWindow::on_help_clicked() {
     m_slider->setWindowTitle(QApplication::applicationName() +
                              "  Introduction");
     m_slider->setWindowFlag(Qt::Dialog);
-    m_slider->setWindowModality(Qt::ApplicationModal);
     m_slider->setMinimumSize(680, 420);
   }
   if (m_slider->isVisible() == false) {
@@ -1080,10 +1081,6 @@ void MainWindow::on_account_clicked() const {
         m_accountDialog->activateWindow();
         return;
     }
-    const QScreen *pScreen = QGuiApplication::screenAt(
-        mapToGlobal(QPoint(width() / 2, 0)));
-    const QRect available = pScreen->availableGeometry();
-    m_accountDialog->move(available.center() - m_accountDialog->rect().center());
     m_accountDialog->showNormal();
 }
 

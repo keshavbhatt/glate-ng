@@ -1,14 +1,24 @@
 #ifndef HISTORY_H
 #define HISTORY_H
 
-#include "ui_history_item.h"
 #include <QJsonDocument>
-#include <QJsonObject>
+#include <QDateTime>
+#include <QListWidgetItem>
 #include <QWidget>
 
 namespace Ui {
 class History;
 }
+
+struct HistoryRecord {
+  QString id;
+  QString from;
+  QString to;
+  QString src1;
+  QString src2;
+  QString date;
+  QDateTime modifiedAt;
+};
 
 class History : public QWidget {
   Q_OBJECT
@@ -28,12 +38,24 @@ public slots:
 
 private slots:
   void on_clearall_clicked();
+  void onSearchChanged(const QString &text);
+  void onSortChanged(int index);
+  void onItemDoubleClicked(QListWidgetItem *item);
+  void onDeleteSelected();
+  void onLoadSelected();
   static QJsonDocument loadJson(QString fileName);
   static void saveJson(QJsonDocument document, QString fileName);
 
 private:
+  void refreshList();
+  void addRecordItem(const HistoryRecord &record);
+  bool matchesSearch(const HistoryRecord &record) const;
+  void updateUiState();
+  static QString elideText(const QString &text, int maxChars);
+
   Ui::History *ui;
-  Ui::history_item history_item_ui;
+  QList<HistoryRecord> m_records;
+  QString m_searchText;
 };
 
 #endif // HISTORY_H

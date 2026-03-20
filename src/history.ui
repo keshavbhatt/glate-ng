@@ -6,42 +6,67 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
-    <height>363</height>
+    <width>760</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>History</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>8</number>
+   </property>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <property name="topMargin">
-      <number>0</number>
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>16</pointsize>
+       <bold>true</bold>
+      </font>
      </property>
+     <property name="text">
+      <string>Translation History</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_2">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <italic>true</italic>
+      </font>
+     </property>
+     <property name="text">
+      <string>Recent translations are saved automatically. Use search to quickly find and reload old results.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="filtersLayout">
      <item>
-      <widget class="QLabel" name="label">
-       <property name="font">
-        <font>
-         <pointsize>16</pointsize>
-        </font>
+      <widget class="QLineEdit" name="searchEdit">
+       <property name="placeholderText">
+        <string>Search language, source text, or translated text...</string>
        </property>
-       <property name="text">
-        <string>Translation history:</string>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <italic>true</italic>
-        </font>
-       </property>
-       <property name="text">
-        <string>History holds your 20 recent translations</string>
-       </property>
+      <widget class="QComboBox" name="sortBox">
+       <item>
+        <property name="text">
+         <string>Newest first</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Oldest first</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
@@ -49,31 +74,41 @@
    <item>
     <widget class="QListWidget" name="historyList">
      <property name="alternatingRowColors">
-      <bool>true</bool>
+      <bool>false</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
      </property>
      <property name="verticalScrollMode">
       <enum>QAbstractItemView::ScrollPerPixel</enum>
      </property>
-     <property name="horizontalScrollMode">
-      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     <property name="spacing">
+      <number>8</number>
      </property>
-     <property name="movement">
-      <enum>QListView::Free</enum>
+     <property name="uniformItemSizes">
+      <bool>false</bool>
      </property>
-     <property name="selectionRectVisible">
-      <bool>true</bool>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="emptyLabel">
+     <property name="text">
+      <string>No history items match your search.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="visible">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="topMargin">
-      <number>0</number>
-     </property>
      <item>
       <widget class="QPushButton" name="clearall">
        <property name="text">
-        <string>Clear All</string>
+        <string>Clear all history</string>
        </property>
        <property name="icon">
         <iconset resource="icons.qrc">
@@ -86,6 +121,19 @@
         </size>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
