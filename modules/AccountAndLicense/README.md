@@ -102,8 +102,6 @@ These match the hard-coded strings that were in `AppSettings.cpp` and
 | `checkoutUrlTemplate`      | optional                        | `%1` → accountId                         |
 | `selfServicePortalUrl`     | optional                        |                                          |
 | `upgradeDialogUrlTemplate` | optional                        | `%1` → appName, `%2` → accountId         |
-| `freeDownloadCap`          | `20`                            | Policy: free tier cap                    |
-| `evaluationDailyDownloadCap` | `8`                           | Policy: eval daily cap                   |
 | `evaluationDurationSecs`   | 14 days                         |                                          |
 | `weeklyCheckSecs`          | 7 days                          |                                          |
 | `lifetimeRecheckSecs`      | 90 days                         |                                          |

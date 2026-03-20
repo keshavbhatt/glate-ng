@@ -70,8 +70,6 @@ struct AccountLicenseConfig
     QString upgradeDialogUrlTemplate;
 
     // ── License policy ────────────────────────────────────────────────────────
-    int    freeDownloadCap            = 20;
-    int    evaluationDailyDownloadCap = 8;
     qint64 evaluationDurationSecs     = 14LL * 24LL * 60LL * 60LL;
     qint64 weeklyCheckSecs            =  7LL * 24LL * 60LL * 60LL;
     qint64 lifetimeRecheckSecs        = 90LL * 24LL * 60LL * 60LL;

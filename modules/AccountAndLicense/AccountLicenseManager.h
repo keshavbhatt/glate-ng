@@ -81,8 +81,6 @@ public:
     QString upgradeDialogUrl()     const;
 
     // ── Policy accessors ──────────────────────────────────────────────────────
-    int freeDownloadCap()            const;
-    int evaluationDailyDownloadCap() const;
 
     const AccountLicenseConfig &config() const;
 

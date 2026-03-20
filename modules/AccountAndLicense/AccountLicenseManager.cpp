@@ -162,15 +162,6 @@ QString AccountLicenseManager::upgradeDialogUrl() const
 
 // ── Policy accessors ──────────────────────────────────────────────────────────
 
-int AccountLicenseManager::freeDownloadCap() const
-{
-    return m_config.freeDownloadCap;
-}
-
-int AccountLicenseManager::evaluationDailyDownloadCap() const
-{
-    return m_config.evaluationDailyDownloadCap;
-}
 
 const AccountLicenseConfig &AccountLicenseManager::config() const
 {
