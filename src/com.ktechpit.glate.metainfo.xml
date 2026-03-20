@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>com.ktechpit.glate</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>MIT</project_license>
+  <project_license>LicenseRef-proprietary</project_license>
   <name>Glate</name>
   <summary>Translate text and generate speech audio on Linux desktop</summary>
 
@@ -23,7 +23,11 @@
   </description>
 
   <launchable type="desktop-id">com.ktechpit.glate.desktop</launchable>
-  <icon type="stock">com.ktechpit.glate</icon>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#E02070</color>
+    <color type="primary" scheme_preference="dark">#C01060</color>
+  </branding>
 
   <screenshots>
     <screenshot type="default">
@@ -40,9 +44,12 @@
     </screenshot>
   </screenshots>
 
-  <url type="homepage">https://github.com/keshavbhatt/glate</url>
-  <url type="bugtracker">https://github.com/keshavbhatt/glate/issues</url>
-  <url type="vcs-browser">https://github.com/keshavbhatt/glate</url>
+  <icon type="stock">com.ktechpit.glate</icon>
+
+  <url type="homepage">https://ktechpit.com/USS/public/product.php?slug=glate</url>
+  <url type="bugtracker">https://github.com/keshavbhatt/glate-packaging/issues</url>
+  <url type="vcs-browser">https://github.com/keshavbhatt/glate-packaging</url>
+  <url type="donation">https://www.paypal.me/keshavnrj/9</url>
 
   <provides>
     <binary>glate</binary>
