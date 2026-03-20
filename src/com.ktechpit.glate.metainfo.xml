@@ -11,36 +11,38 @@
   </developer>
 
   <description>
-    <p>Glate is a desktop translator with built-in text to speech for fast daily translation workflows.</p>
-    <p>It supports language-to-language translation, per-line translation, speech playback, and exporting translated text or speech output.</p>
+    <p>Glate is a fast desktop translator with built-in text-to-speech for everyday translation workflows.</p>
+    <p>It supports translation across 100+ languages, per-line translation view, voice playback, history tracking, and sharing translated text or speech output.</p>
     <ul>
-      <li>Translate between 100+ languages</li>
-      <li>Line-by-line translation view for long content</li>
-      <li>Built-in text to speech playback and MP3 export</li>
-      <li>History tracking and quick copy/share actions</li>
-      <li>Dark and light themes</li>
+      <li>Translate between 100+ languages instantly</li>
+      <li>Line-by-line translation view for structured content</li>
+      <li>Text-to-speech playback with voice and gender options</li>
+      <li>Export speech output as MP3 audio</li>
+      <li>Translation history with search and quick copy</li>
+      <li>Share translations via public paste link</li>
+      <li>Dark and light themes with automatic system detection</li>
     </ul>
   </description>
 
   <launchable type="desktop-id">com.ktechpit.glate.desktop</launchable>
 
   <branding>
-    <color type="primary" scheme_preference="light">#E02070</color>
-    <color type="primary" scheme_preference="dark">#C01060</color>
+    <color type="primary" scheme_preference="light">#3A7CC4</color>
+    <color type="primary" scheme_preference="dark">#5197EF</color>
   </branding>
 
   <screenshots>
     <screenshot type="default">
       <caption>Main translation view with dark theme</caption>
-      <image>https://raw.githubusercontent.com/keshavbhatt/glate/master/screenshots/1.jpg</image>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-packaging/master/screenshots/1.jpg</image>
     </screenshot>
     <screenshot>
       <caption>Settings and language options</caption>
-      <image>https://raw.githubusercontent.com/keshavbhatt/glate/master/screenshots/2.jpg</image>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-packaging/master/screenshots/2.jpg</image>
     </screenshot>
     <screenshot>
       <caption>Share dialog and export options</caption>
-      <image>https://raw.githubusercontent.com/keshavbhatt/glate/master/screenshots/3.jpg</image>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-packaging/master/screenshots/3.jpg</image>
     </screenshot>
   </screenshots>
 
@@ -70,14 +72,19 @@
   </keywords>
 
   <releases>
-    <release version="4.0" date="2026-03-18">
+    <release version="4.0" date="2026-03-21">
       <description>
-        <p>Packaging and release modernization update.</p>
+        <p>Major update with reworked UX, improved sharing, and single-instance enforcement.</p>
         <ul>
-          <li>Aligned desktop metadata with reverse-DNS app id for stores.</li>
-          <li>Updated Snap packaging to core24 with CMake-based builds.</li>
-          <li>Added Flatpak manifest and CI release artifacts.</li>
-          <li>Improved selection theming contrast and paste sharing behavior.</li>
+          <li>Single-instance enforcement: raising the existing window when app is launched again</li>
+          <li>History window overhauled: item selection, theming, and layout improvements</li>
+          <li>TTS buttons now disabled when source text is empty</li>
+          <li>Paste sharing now correctly handles UTF-8 text including CJK and Devanagari scripts</li>
+          <li>Plan comparison dialog shows Free, Evaluation, and Pro feature differences</li>
+          <li>Dark and light theme contrast improvements across dialogs</li>
+          <li>Snap packaging updated to core24 with CMake-based builds</li>
+          <li>Added Flatpak manifest and CI release artifacts</li>
+          <li>Aligned desktop metadata with reverse-DNS app ID for stores</li>
         </ul>
       </description>
     </release>
