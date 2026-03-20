@@ -1,6 +1,11 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QGuiApplication>
+#include <QLocalServer>
+#include <QLocalSocket>
+
+// Unique name for the local socket used as a single-instance lock.
+static constexpr auto kInstanceKey = "com.ktechpit.glate.SingleInstance";
 
 int main(int argc, char *argv[]) {
   // Qt6 on Linux routes qDebug/qWarning to journald when the process is not
@@ -15,7 +20,40 @@ int main(int argc, char *argv[]) {
   QApplication::setApplicationName("Glate");
   QApplication::setOrganizationName("org.keshavnrj.ubuntu");
   QApplication::setApplicationVersion("4.0");
+
+  // ── Single-instance guard ─────────────────────────────────────────────────
+  // Try to contact an already-running instance first.
+  {
+    QLocalSocket probe;
+    probe.connectToServer(kInstanceKey);
+    if (probe.waitForConnected(500)) {
+      // Another instance is running — ask it to raise itself and exit.
+      probe.write("raise");
+      probe.flush();
+      probe.waitForBytesWritten(500);
+      return 0;
+    }
+  }
+
+  // No existing instance: claim the server name (remove any stale socket file
+  // left over from a previous crash) and start listening.
+  QLocalServer::removeServer(kInstanceKey);
+  QLocalServer instanceServer;
+  instanceServer.listen(kInstanceKey);
+  // ─────────────────────────────────────────────────────────────────────────
+
   MainWindow w;
+
+  // When a second instance connects, bring this window to the front.
+  QObject::connect(&instanceServer, &QLocalServer::newConnection, &w,
+                   [&instanceServer, &w]() {
+    if (QLocalSocket *conn = instanceServer.nextPendingConnection()) {
+      conn->deleteLater();
+    }
+    w.showNormal();
+    w.raise();
+    w.activateWindow();
+  });
 
   w.show();
 
