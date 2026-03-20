@@ -57,7 +57,7 @@ public:
      */
     bool checkTtsAccess();
 
-    static constexpr int kFreeTierDailyTtsLimit = 10;
+    static constexpr int kFreeTierDailyTtsLimit = 6;
 
     /// Called by MainWindow whenever AccountLicenseManager reports a new status.
     void setHasPaidAccess(bool hasPaidAccess);
