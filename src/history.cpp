@@ -11,6 +11,9 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QShortcut>
+#include <QSettings>
+#include <QCloseEvent>
+#include <QShowEvent>
 
 #include <algorithm>
 
@@ -390,3 +393,19 @@ QString History::elideText(const QString &text, int maxChars) {
   }
   return cleaned.left(maxChars - 3) + "...";
 }
+
+void History::closeEvent(QCloseEvent *event) {
+  QSettings settings;
+  settings.setValue("history/geometry", saveGeometry());
+  QWidget::closeEvent(event);
+}
+
+void History::showEvent(QShowEvent *event) {
+  QWidget::showEvent(event);
+  QSettings settings;
+  const QByteArray geom = settings.value("history/geometry").toByteArray();
+  if (!geom.isEmpty()) {
+    restoreGeometry(geom);
+  }
+}
+

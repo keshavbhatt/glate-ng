@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QDateTime>
 #include <QListWidgetItem>
+#include <QSettings>
 #include <QWidget>
 
 namespace Ui {
@@ -52,6 +53,10 @@ private:
   bool matchesSearch(const HistoryRecord &record) const;
   void updateUiState();
   static QString elideText(const QString &text, int maxChars);
+
+protected:
+  void closeEvent(QCloseEvent *event) override;
+  void showEvent(QShowEvent *event) override;
 
   Ui::History *ui;
   QList<HistoryRecord> m_records;
