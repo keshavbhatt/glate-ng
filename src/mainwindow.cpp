@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 
 #include <QFile>
-#include <QNetworkRequest>
 #include <QShortcut>
 #include <QUrlQuery>
 
