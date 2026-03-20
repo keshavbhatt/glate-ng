@@ -2,7 +2,8 @@
 
 #include <QObject>
 #include <QString>
-#include "AccountLicenseManager.h"
+
+class AccountLicenseManager;
 
 /**
  * @brief Application-wide Pro-feature license gate.

@@ -1,4 +1,5 @@
 #include "licenseservice.h"
+#include "AccountLicenseManager.h"
 
 #include <QApplication>
 #include <QDate>
