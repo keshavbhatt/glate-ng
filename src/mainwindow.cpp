@@ -7,6 +7,7 @@
 
 #include "GlateLicenseConfig.h"
 #include "accountdialog.h"
+#include "licenseservice.h"
 #include "ui_mainwindow.h"
 #include "utils.h"
 
@@ -232,10 +233,14 @@ MainWindow::MainWindow(QWidget *parent)
                           QStringLiteral(" | Share translation"));
   m_share->setWindowFlag(Qt::Dialog);
   m_share->setWindowModality(Qt::NonModal);
-  connect(m_share, &Share::upgradeRequested, this, [this]() {
-      on_account_clicked();
-      m_accountDialog->highlightPurchaseButton();
-  });
+
+  // LicenseService is the single point that any class calls for Pro gating.
+  // MainWindow connects its upgradeRequested() to the Account dialog here.
+  connect(LicenseService::instance(), &LicenseService::upgradeRequested,
+          this, [this]() {
+              on_account_clicked();
+              m_accountDialog->highlightPurchaseButton();
+          });
 
   m_lineByLine = new LineByLine(this, m_clipboard);
   m_lineByLine->setWindowTitle(QApplication::applicationName() +
@@ -1000,8 +1005,8 @@ void MainWindow::onLicenseStatusUpdated(
 {
     m_hasPremiumAccess = status.hasPaidAccess;
 
-    // Forward the paid-access flag to every gated feature.
-    m_share->setHasPaidAccess(status.hasPaidAccess);
+    // Keep the centralized gate in sync — all Pro-gated features read from here.
+    LicenseService::instance()->setHasPaidAccess(status.hasPaidAccess);
 
     qDebug().noquote()
         << "[Glate licence]"

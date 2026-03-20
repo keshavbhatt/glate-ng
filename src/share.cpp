@@ -1,6 +1,7 @@
 #include "share.h"
 #include "ui_share.h"
 
+#include "licenseservice.h"
 #include "utils.h"
 
 #include <QFileDialog>
@@ -64,40 +65,6 @@ void Share::setTranslation(const QString &translation, const QString &uuid, cons
 
 Share::~Share() { delete ui; }
 
-// ── Licence helpers ───────────────────────────────────────────────────────────
-
-void Share::setHasPaidAccess(bool hasPaidAccess)
-{
-    m_hasPaidAccess = hasPaidAccess;
-}
-
-bool Share::checkPaidAccess(const QString &featureName)
-{
-    if (m_hasPaidAccess)
-        return true;
-
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle(QStringLiteral("Pro Feature"));
-    msgBox.setIcon(QMessageBox::Information);
-    msgBox.setText(
-        QStringLiteral("<b>%1</b> is a Pro feature.").arg(featureName));
-    msgBox.setInformativeText(
-        QStringLiteral("Upgrade to a Pro licence to unlock this feature "
-                       "and support continued development of Glate."));
-
-    auto upgradeBtn =
-        msgBox.addButton(QStringLiteral("View Plans"), QMessageBox::AcceptRole);
-    msgBox.addButton(QStringLiteral("Not Now"), QMessageBox::RejectRole);
-    msgBox.setDefaultButton(upgradeBtn);
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == upgradeBtn)
-        emit upgradeRequested();
-
-    return false;
-}
-
-
 QString Share::getFileNameFromString(const QString &string) {
   QString filename;
   if (string.trimmed().length() > 10) {
@@ -105,7 +72,6 @@ QString Share::getFileNameFromString(const QString &string) {
   } else {
     filename = utils::generateRandomId(10);
   }
-
   return filename.remove("/").remove(".");
 }
 
@@ -122,23 +88,16 @@ void Share::on_text_clicked() {
   if (!fileName.isEmpty()) {
     QFile file(QFileInfo(fileName).absoluteFilePath());
     if (!file.open(QIODevice::WriteOnly)) {
-      showStatus(
-          "<span style='color:red'>Share: </span>error failed to save file.");
-      return; // aborted
+      showStatus("<span style='color:red'>Share: </span>error failed to save file.");
+      return;
     }
-    // save data
-    QString text = translation;
     QTextStream out(&file);
-    out << text;
-    // save last used location
+    out << translation;
     settings.setValue("sharePath", QFileInfo(file).path());
     file.close();
-    // inform user
-    showStatus(
-        "<span style='color:green'>Share: </span>file saved successfully.");
+    showStatus("<span style='color:green'>Share: </span>file saved successfully.");
   } else {
-    showStatus(
-        "<span style='color:red'>Share: </span>file save operation cancelled.");
+    showStatus("<span style='color:red'>Share: </span>file save operation cancelled.");
   }
 }
 
@@ -147,13 +106,15 @@ void Share::on_email_clicked() {
   bool opened = QDesktopServices::openUrl(
       QUrl("mailto:?body=" + ui->translation->toPlainText()));
   if (!opened) {
-    showStatus("<span style='color:red'>Share: </span>unable to open a mail "
-               "client...");
+    showStatus("<span style='color:red'>Share: </span>unable to open a mail client...");
   }
 }
 
+// ── Licence-gated handlers ────────────────────────────────────────────────────
+
 void Share::on_pastebin_clicked() {
-  if (!checkPaidAccess(QStringLiteral("Paste Link (share via paste.rs)")))
+  if (!LicenseService::instance()->checkAccess(
+          QStringLiteral("Paste Link (share via paste.rs)")))
     return;
 
   const QString text = ui->translation->toPlainText();
@@ -249,7 +210,8 @@ void Share::showStatus(const QString &message) {
 }
 
 void Share::on_download_clicked() {
-  if (!checkPaidAccess(QStringLiteral("Export as Audio")))
+  if (!LicenseService::instance()->checkAccess(
+          QStringLiteral("Export as Audio")))
     return;
 
   // create a dir with uuid to track process,

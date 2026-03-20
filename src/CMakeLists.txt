@@ -38,6 +38,8 @@ qt_add_executable(glate
     accountdialog.ui
     controlbutton.cpp
     controlbutton.h
+    licenseservice.cpp
+    licenseservice.h
     elidedlabel.cpp
     elidedlabel.h
     error.cpp
