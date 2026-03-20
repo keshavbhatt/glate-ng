@@ -528,7 +528,10 @@ AccountLicenseManager::buildDebugStatus(DebugLicenseState state)
         break;
 
     case DebugLicenseState::EvaluationExpired:
-        // all fields default to false/0 → Free tier
+        // evaluationEndTimestamp must be > 0 so callers can distinguish
+        // "expired" from "never started" (evaluationEndTimestamp == 0).
+        // Use a timestamp 15 days in the past (one day past the default trial).
+        s.evaluationEndTimestamp = now - 15LL * 24LL * 3600LL;
         s.message = QStringLiteral("[DEBUG] Evaluation expired — Free tier");
         break;
 
