@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
     probe.connectToServer(kInstanceKey);
     if (probe.waitForConnected(500)) {
       // Another instance is running — ask it to raise itself and exit.
+      qInfo() << "Another instance is already running; asking it to raise itself.";
       probe.write("raise");
       probe.flush();
       probe.waitForBytesWritten(500);
