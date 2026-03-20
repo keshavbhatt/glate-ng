@@ -48,9 +48,13 @@ public:
     /// Called by MainWindow whenever AccountLicenseManager reports a new status.
     void setHasPaidAccess(bool hasPaidAccess);
     void setEvaluationState(EvaluationState state);
+    /// Set from the AccountLicenseConfig so the upgrade dialog can quote
+    /// the actual trial length instead of a hardcoded number.
+    void setEvaluationDurationDays(int days);
 
     bool hasPaidAccess() const;
     EvaluationState evaluationState() const;
+    int evaluationDurationDays() const;
 
 signals:
     /// Emitted when the user clicks "View Plans" inside the upgrade prompt.
@@ -60,6 +64,7 @@ private:
     explicit LicenseService(QObject *parent = nullptr);
     static LicenseService *s_instance;
 
-    bool            m_hasPaidAccess    = false;
-    EvaluationState m_evaluationState  = EvaluationState::Unknown;
+    bool            m_hasPaidAccess       = false;
+    EvaluationState m_evaluationState     = EvaluationState::Unknown;
+    int             m_evaluationDurationDays = 14;
 };

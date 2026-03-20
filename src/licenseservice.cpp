@@ -28,6 +28,14 @@ bool LicenseService::hasPaidAccess() const       { return m_hasPaidAccess; }
 LicenseService::EvaluationState
 LicenseService::evaluationState() const          { return m_evaluationState; }
 
+void LicenseService::setEvaluationDurationDays(int days)
+{
+    if (days > 0)
+        m_evaluationDurationDays = days;
+}
+
+int LicenseService::evaluationDurationDays() const { return m_evaluationDurationDays; }
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 bool LicenseService::checkAccess(const QString &featureName)
@@ -36,6 +44,7 @@ bool LicenseService::checkAccess(const QString &featureName)
         return true;
 
     const bool evalExpired = (m_evaluationState == EvaluationState::Expired);
+    const QString daysStr  = QString::number(m_evaluationDurationDays);
 
     // ── Compose context-aware copy ────────────────────────────────────────────
 
@@ -50,7 +59,8 @@ bool LicenseService::checkAccess(const QString &featureName)
     const QString body = evalExpired
         ? QStringLiteral(
             "<p>You enjoyed full access to <b>%1</b> and all other Pro features "
-            "during your Evaluation period.&nbsp; Unlock them permanently with a Pro licence.</p>"
+            "during your <b>%2&#8209;day</b> evaluation period.&nbsp; "
+            "Unlock them permanently with a Pro licence.</p>"
             "<p style='margin-top:8px;'><b>Glate Pro includes:</b></p>"
             "<p style='margin:0; line-height:1.7;'>"
             "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
@@ -61,10 +71,10 @@ bool LicenseService::checkAccess(const QString &featureName)
             "<p style='margin-top:10px; color:gray; font-size:8pt;'>"
             "One-time purchase &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; Lifetime updates"
             "</p>")
-          .arg(featureName)
+          .arg(featureName, daysStr)
         : QStringLiteral(
             "<p><b>%1</b> is part of the <b>Glate Pro</b> plan.</p>"
-            "<p>Start a <b>14&#8209;day free trial</b> to explore every Pro feature, "
+            "<p>Start a <b>%2&#8209;day free trial</b> to explore every Pro feature, "
             "or upgrade directly to keep access forever.</p>"
             "<p style='margin-top:8px;'><b>What you get with Pro:</b></p>"
             "<p style='margin:0; line-height:1.7;'>"
@@ -76,7 +86,7 @@ bool LicenseService::checkAccess(const QString &featureName)
             "<p style='margin-top:10px; color:gray; font-size:8pt;'>"
             "One-time purchase &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; Lifetime updates"
             "</p>")
-          .arg(featureName);
+          .arg(featureName, daysStr);
 
     // CTA label
     const QString ctaLabel = evalExpired

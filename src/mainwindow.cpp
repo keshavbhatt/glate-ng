@@ -1104,6 +1104,7 @@ void MainWindow::onLicenseStatusUpdated(
               ? ES::Expired
               : ES::Unknown;
     LicenseService::instance()->setEvaluationState(evalState);
+    LicenseService::instance()->setEvaluationDurationDays(m_licenseManager->config().evaluationDurationSecs / 86400);
 
     qDebug().noquote()
         << "[Glate licence]"
