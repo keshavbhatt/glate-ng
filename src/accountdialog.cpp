@@ -94,7 +94,7 @@ void AccountDialog::setCheckingState(bool checking) const
 {
     if (checking) {
         ui->accountStatusLabel->setText(QStringLiteral("Status: Checking account status..."));
-        ui->planSummaryLabel->setText(QStringLiteral("⟳  Verifying licence…"));
+        ui->planSummaryLabel->setText(QStringLiteral("◌  Verifying licence…"));
 
         const bool dark = QApplication::palette().window().color().lightness() < 128;
         const QString checkingColor = dark
@@ -316,7 +316,7 @@ void AccountDialog::refreshPlanVisuals(bool paidPlan, bool evaluation) const
     }
 
     if (evaluation) {
-        ui->planSummaryLabel->setText(QStringLiteral("⏳  Plan status: Evaluation active"));
+        ui->planSummaryLabel->setText(QStringLiteral("Plan status: Evaluation active"));
         applyBadge(evalColors);
         ui->evaluationRemainingLabel->setText(
             m_evaluationDaysRemaining >= 0
@@ -327,7 +327,7 @@ void AccountDialog::refreshPlanVisuals(bool paidPlan, bool evaluation) const
     }
 
     // Free / expired
-    ui->planSummaryLabel->setText(QStringLiteral("✖  Plan status: Free tier"));
+    ui->planSummaryLabel->setText(QStringLiteral("Plan status: Free tier"));
     applyBadge(freeColors);
     ui->evaluationRemainingLabel->setText(QStringLiteral("Ended"));
 }
