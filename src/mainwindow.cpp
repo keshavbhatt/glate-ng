@@ -1009,6 +1009,16 @@ void MainWindow::onLicenseStatusUpdated(
     // Keep the centralized gate in sync — all Pro-gated features read from here.
     LicenseService::instance()->setHasPaidAccess(status.hasPaidAccess);
 
+    // Let the upgrade dialog know whether the user has had a trial so it can
+    // show contextually appropriate copy ("eval ended" vs "try for free").
+    using ES = LicenseService::EvaluationState;
+    const ES evalState = status.evaluationActive
+        ? ES::Active
+        : (!status.active && status.evaluationEndTimestamp > 0)
+              ? ES::Expired
+              : ES::Unknown;
+    LicenseService::instance()->setEvaluationState(evalState);
+
     qDebug().noquote()
         << "[Glate licence]"
         << (status.active           ? "Pro"

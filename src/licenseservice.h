@@ -23,6 +23,14 @@ class LicenseService : public QObject
 {
     Q_OBJECT
 public:
+    /// Describes where the user stands relative to the evaluation period.
+    enum class EvaluationState {
+        Unknown,  ///< No evaluation data yet (first launch)
+        Active,   ///< Trial is currently running
+        Expired,  ///< Trial ran and has since ended
+    };
+    Q_ENUM(EvaluationState)
+
     /// Returns the application-wide singleton, creating it on first call.
     /// The instance is parented to qApp and lives for the process lifetime.
     static LicenseService *instance();
@@ -39,8 +47,10 @@ public:
 
     /// Called by MainWindow whenever AccountLicenseManager reports a new status.
     void setHasPaidAccess(bool hasPaidAccess);
+    void setEvaluationState(EvaluationState state);
 
     bool hasPaidAccess() const;
+    EvaluationState evaluationState() const;
 
 signals:
     /// Emitted when the user clicks "View Plans" inside the upgrade prompt.
@@ -50,6 +60,6 @@ private:
     explicit LicenseService(QObject *parent = nullptr);
     static LicenseService *s_instance;
 
-    bool m_hasPaidAccess = false;
+    bool            m_hasPaidAccess    = false;
+    EvaluationState m_evaluationState  = EvaluationState::Unknown;
 };
-
