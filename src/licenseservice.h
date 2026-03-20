@@ -83,7 +83,7 @@ private:
 
     // TTS daily-counter helpers
     int  ttsPlaysToday() const;
-    void incrementTtsPlays();
+    void incrementTtsPlays() const;
 
     bool            m_hasPaidAccess       = false;
     EvaluationState m_evaluationState     = EvaluationState::Unknown;

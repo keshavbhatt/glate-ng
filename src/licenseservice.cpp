@@ -9,6 +9,60 @@
 
 LicenseService *LicenseService::s_instance = nullptr;
 
+namespace {
+
+static constexpr char kUpgradeButtonStyle[] =
+    "QPushButton {"
+    "  background-color: #3daee9;"
+    "  color: #ffffff;"
+    "  border: none;"
+    "  border-radius: 4px;"
+    "  padding: 6px 16px;"
+    "  font-weight: 600;"
+    "}"
+    "QPushButton:hover  { background-color: #4db8f0; }"
+    "QPushButton:pressed{ background-color: #2d9ed8; }";
+
+QString proBenefitsHtml(const QString &title)
+{
+    return QStringLiteral(
+        "<p style='margin-top:8px;'><b>%1</b></p>"
+        "<p style='margin:0; line-height:1.7;'>"
+        "&nbsp;🔊&nbsp; Unlimited TTS playback<br>"
+        "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
+        "&nbsp;🔗&nbsp; Create public share links<br>"
+        "&nbsp;⭐&nbsp; All future premium features<br>"
+        "&nbsp;❤️&nbsp; Support independent development"
+        "</p>"
+        "<p style='margin-top:10px; color:gray; font-size:8pt;'>"
+        "One-time purchase &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; Lifetime updates"
+        "</p>")
+        .arg(title);
+}
+
+bool showUpgradePrompt(const QString &windowTitleSuffix,
+                       const QString &headline,
+                       const QString &body,
+                       const QString &ctaLabel)
+{
+    QMessageBox msgBox(QApplication::activeWindow());
+    msgBox.setWindowTitle(QApplication::applicationName() + windowTitleSuffix);
+    msgBox.setIcon(QMessageBox::NoIcon);
+    msgBox.setText(headline);
+    msgBox.setInformativeText(body);
+    msgBox.setTextFormat(Qt::RichText);
+
+    QPushButton *upgradeBtn = msgBox.addButton(ctaLabel, QMessageBox::AcceptRole);
+    msgBox.addButton(QStringLiteral("Maybe Later"), QMessageBox::RejectRole);
+
+    upgradeBtn->setStyleSheet(QString::fromLatin1(kUpgradeButtonStyle));
+    msgBox.setDefaultButton(upgradeBtn);
+    msgBox.exec();
+    return msgBox.clickedButton() == upgradeBtn;
+}
+
+} // namespace
+
 LicenseService::LicenseService(QObject *parent)
     : QObject(parent) {}
 
@@ -62,83 +116,32 @@ bool LicenseService::checkAccess(const QString &featureName)
                          "Pro feature</span>");
 
     // Feature callout + value proposition
-    const QString body = evalExpired
+    const QString intro = evalExpired
         ? QStringLiteral(
             "<p>You enjoyed full access to <b>%1</b> and all other Pro features "
             "during your <b>%2&#8209;day</b> evaluation period.&nbsp; "
-            "Unlock them permanently with a Pro licence.</p>"
-            "<p style='margin-top:8px;'><b>Glate Pro includes:</b></p>"
-            "<p style='margin:0; line-height:1.7;'>"
-            "&nbsp;🔊&nbsp; Unlimited TTS playback<br>"
-            "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
-            "&nbsp;🔗&nbsp; Create public share links<br>"
-            "&nbsp;⭐&nbsp; All future premium features<br>"
-            "&nbsp;❤️&nbsp; Support independent development"
-            "</p>"
-            "<p style='margin-top:10px; color:gray; font-size:8pt;'>"
-            "One-time purchase &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; Lifetime updates"
-            "</p>")
+            "Unlock them permanently with a Pro licence.</p>")
           .arg(featureName, daysStr)
         : QStringLiteral(
             "<p><b>%1</b> is part of the <b>Glate Pro</b> plan.</p>"
             "<p>Upgrade to Pro to unlock this and every other premium feature "
-            "permanently.</p>"
-            "<p style='margin-top:8px;'><b>What you get with Pro:</b></p>"
-            "<p style='margin:0; line-height:1.7;'>"
-            "&nbsp;🔊&nbsp; Unlimited TTS playback<br>"
-            "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
-            "&nbsp;🔗&nbsp; Create public share links<br>"
-            "&nbsp;⭐&nbsp; All future premium features<br>"
-            "&nbsp;❤️&nbsp; Support independent development"
-            "</p>"
-            "<p style='margin-top:10px; color:gray; font-size:8pt;'>"
-            "One-time purchase &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; Lifetime updates"
-            "</p>")
+            "permanently.</p>")
           .arg(featureName);
+
+    const QString body = intro
+        + proBenefitsHtml(evalExpired
+            ? QStringLiteral("Glate Pro includes:")
+            : QStringLiteral("What you get with Pro:"));
 
     // CTA label
     const QString ctaLabel = evalExpired
         ? QStringLiteral("  Unlock Pro Now  ")
         : QStringLiteral("  See Plans & Pricing  ");
 
-    // ── Build and show the dialog ─────────────────────────────────────────────
-
-    QWidget *parent = QApplication::activeWindow();
-
-    QMessageBox msgBox(parent);
-    msgBox.setWindowTitle(QApplication::applicationName()
-                          + QStringLiteral(" | Upgrade to Pro"));
-
-    // Use NoIcon — the emoji headline and rich text carry all the visual weight.
-    msgBox.setIcon(QMessageBox::NoIcon);
-    msgBox.setText(headline);
-    msgBox.setInformativeText(body);
-    msgBox.setTextFormat(Qt::RichText);
-
-    QPushButton *upgradeBtn =
-        msgBox.addButton(ctaLabel, QMessageBox::AcceptRole);
-    QPushButton *laterBtn =
-        msgBox.addButton(QStringLiteral("Maybe Later"), QMessageBox::RejectRole);
-
-    // Style the CTA button to stand out.
-    upgradeBtn->setStyleSheet(
-        QStringLiteral("QPushButton {"
-                       "  background-color: #3daee9;"
-                       "  color: #ffffff;"
-                       "  border: none;"
-                       "  border-radius: 4px;"
-                       "  padding: 6px 16px;"
-                       "  font-weight: 600;"
-                       "}"
-                       "QPushButton:hover  { background-color: #4db8f0; }"
-                       "QPushButton:pressed{ background-color: #2d9ed8; }"));
-    Q_UNUSED(laterBtn)
-
-    msgBox.setDefaultButton(upgradeBtn);
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == upgradeBtn)
+    if (showUpgradePrompt(QStringLiteral(" | Upgrade to Pro"),
+                          headline, body, ctaLabel)) {
         emit upgradeRequested();
+    }
 
     return false;
 }
@@ -167,8 +170,7 @@ int LicenseService::ttsPlaysToday() const
     return s.value(kTtsPlaysKey, 0).toInt();
 }
 
-void LicenseService::incrementTtsPlays()
-{
+void LicenseService::incrementTtsPlays() const {
     const QString today = QDate::currentDate().toString(Qt::ISODate);
 
     if (m_accountManager) {
@@ -211,54 +213,23 @@ bool LicenseService::checkTtsAccess()
         QStringLiteral("<span style='font-size:11pt; font-weight:600;'>"
                        "Daily TTS limit reached</span>");
 
-    const QString body =
+    const QString intro =
         QStringLiteral(
             "<p>Free tier allows <b>%1 TTS plays per day</b>. "
             "You have used all %1 today.</p>"
             "<p>Upgrade to <b>Glate Pro</b> for unlimited text-to-speech "
-            "and all other premium features.</p>"
-            "<p style='margin:0; line-height:1.7;'>"
-            "&nbsp;🔊&nbsp; Unlimited TTS playback<br>"
-            "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
-            "&nbsp;🔗&nbsp; Create public share links<br>"
-            "&nbsp;❤️&nbsp; Support independent development"
-            "</p>"
-            "<p style='margin-top:10px; color:gray; font-size:8pt;'>"
-            "One-time purchase &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; Lifetime updates"
-            "</p>")
+            "and all other premium features.</p>")
         .arg(kFreeTierDailyTtsLimit);
 
-    QWidget *parent = QApplication::activeWindow();
-    QMessageBox msgBox(parent);
-    msgBox.setWindowTitle(QApplication::applicationName()
-                          + QStringLiteral(" | Daily TTS Limit Reached"));
-    msgBox.setIcon(QMessageBox::NoIcon);
-    msgBox.setText(headline);
-    msgBox.setInformativeText(body);
-    msgBox.setTextFormat(Qt::RichText);
+    const QString body = intro
+        + proBenefitsHtml(QStringLiteral("What you get with Pro:"));
 
-    QPushButton *upgradeBtn =
-        msgBox.addButton(QStringLiteral("  Upgrade to Pro  "),
-                         QMessageBox::AcceptRole);
-    msgBox.addButton(QStringLiteral("Maybe Later"), QMessageBox::RejectRole);
-
-    upgradeBtn->setStyleSheet(
-        QStringLiteral("QPushButton {"
-                       "  background-color: #3daee9;"
-                       "  color: #ffffff;"
-                       "  border: none;"
-                       "  border-radius: 4px;"
-                       "  padding: 6px 16px;"
-                       "  font-weight: 600;"
-                       "}"
-                       "QPushButton:hover  { background-color: #4db8f0; }"
-                       "QPushButton:pressed{ background-color: #2d9ed8; }"));
-
-    msgBox.setDefaultButton(upgradeBtn);
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == upgradeBtn)
+    if (showUpgradePrompt(QStringLiteral(" | Daily TTS Limit Reached"),
+                          headline,
+                          body,
+                          QStringLiteral("  Upgrade to Pro  "))) {
         emit upgradeRequested();
+    }
 
     return false;
 }
