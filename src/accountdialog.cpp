@@ -94,6 +94,16 @@ void AccountDialog::setCheckingState(bool checking) const
 {
     if (checking) {
         ui->accountStatusLabel->setText(QStringLiteral("Status: Checking account status..."));
+        ui->planSummaryLabel->setText(QStringLiteral("⟳  Verifying licence…"));
+        ui->planSummaryLabel->setStyleSheet(
+            QStringLiteral("QLabel {"
+                           "  border-radius: 4px;"
+                           "  padding: 4px 10px;"
+                           "  font-weight: 600;"
+                           "  border: 1px solid #76797c;"
+                           "  color: #9aa2ab;"
+                           "  background: rgba(118,121,124,0.10);"
+                           "}"));
         ui->restoreBtn->setEnabled(false);
         ui->purchaseBtn->setEnabled(false);
         ui->portalBtn->setEnabled(false);
@@ -236,15 +246,34 @@ void AccountDialog::refreshPlanVisuals(bool paidPlan, bool evaluation) const
     ui->labelEvaluationRemaining->setVisible(!paidPlan);
     ui->evaluationRemainingLabel->setVisible(!paidPlan);
 
+    // Shared badge geometry — only the colour tokens differ per state.
+    static const char kBadgeBase[] =
+        "QLabel {"
+        "  border-radius: 4px;"
+        "  padding: 4px 10px;"
+        "  font-weight: 600;"
+        "  border: 1px solid %1;"
+        "  color: %1;"
+        "  background: %2;"
+        "}";
+
     if (paidPlan) {
-        ui->planSummaryLabel->setText(QStringLiteral("Plan status: Pro license active"));
+        ui->planSummaryLabel->setText(QStringLiteral("✔  Plan status: Pro license active"));
+        ui->planSummaryLabel->setStyleSheet(
+            QString::fromLatin1(kBadgeBase)
+                .arg(QStringLiteral("#4fc37a"),
+                     QStringLiteral("rgba(79,195,122,0.12)")));
         ui->accType->setStyleSheet(QStringLiteral("color: #4fc37a; font-weight: 600;"));
         ui->evaluationRemainingLabel->setText(QStringLiteral("Not applicable"));
         return;
     }
 
     if (evaluation) {
-        ui->planSummaryLabel->setText(QStringLiteral("Plan status: Evaluation active"));
+        ui->planSummaryLabel->setText(QStringLiteral("⏳  Plan status: Evaluation active"));
+        ui->planSummaryLabel->setStyleSheet(
+            QString::fromLatin1(kBadgeBase)
+                .arg(QStringLiteral("#ffcc66"),
+                     QStringLiteral("rgba(255,204,102,0.10)")));
         ui->accType->setStyleSheet(QStringLiteral("color: #ffcc66; font-weight: 600;"));
         ui->evaluationRemainingLabel->setText(
             m_evaluationDaysRemaining >= 0
@@ -254,7 +283,12 @@ void AccountDialog::refreshPlanVisuals(bool paidPlan, bool evaluation) const
         return;
     }
 
-    ui->planSummaryLabel->setText(QStringLiteral("Plan status: Free tier"));
+    // Free / expired
+    ui->planSummaryLabel->setText(QStringLiteral("✖  Plan status: Free tier"));
+    ui->planSummaryLabel->setStyleSheet(
+        QString::fromLatin1(kBadgeBase)
+            .arg(QStringLiteral("#e05050"),
+                 QStringLiteral("rgba(224,80,80,0.10)")));
     ui->accType->setStyleSheet(QStringLiteral("color: #d4d4d4; font-weight: 600;"));
     ui->evaluationRemainingLabel->setText(QStringLiteral("Ended"));
 }
