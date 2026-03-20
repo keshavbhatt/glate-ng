@@ -95,15 +95,23 @@ void AccountDialog::setCheckingState(bool checking) const
     if (checking) {
         ui->accountStatusLabel->setText(QStringLiteral("Status: Checking account status..."));
         ui->planSummaryLabel->setText(QStringLiteral("⟳  Verifying licence…"));
+
+        const bool dark = QApplication::palette().window().color().lightness() < 128;
+        const QString checkingColor = dark
+            ? QStringLiteral("#9aa2ab")
+            : QStringLiteral("#555e6a");
+        const QString checkingBg = dark
+            ? QStringLiteral("rgba(118,121,124,0.10)")
+            : QStringLiteral("rgba(85,94,106,0.10)");
         ui->planSummaryLabel->setStyleSheet(
             QStringLiteral("QLabel {"
                            "  border-radius: 4px;"
                            "  padding: 4px 10px;"
                            "  font-weight: 600;"
-                           "  border: 1px solid #76797c;"
-                           "  color: #9aa2ab;"
-                           "  background: rgba(118,121,124,0.10);"
-                           "}"));
+                           "  border: 1px solid %1;"
+                           "  color: %1;"
+                           "  background: %2;"
+                           "}").arg(checkingColor, checkingBg));
         ui->restoreBtn->setEnabled(false);
         ui->purchaseBtn->setEnabled(false);
         ui->portalBtn->setEnabled(false);
@@ -114,7 +122,7 @@ void AccountDialog::setCheckingState(bool checking) const
     refreshPurchaseButtonState();
 }
 
-// ── Slots ─────────────────────────────────────────────────────────────────────
+// ── Slots ────────────────────────────────────────l─────────────────────────────
 
 void AccountDialog::onLicenseStatusUpdated(
     const AccountLicenseManager::LicenseStatus &status)
@@ -246,7 +254,43 @@ void AccountDialog::refreshPlanVisuals(bool paidPlan, bool evaluation) const
     ui->labelEvaluationRemaining->setVisible(!paidPlan);
     ui->evaluationRemainingLabel->setVisible(!paidPlan);
 
-    // Shared badge geometry — only the colour tokens differ per state.
+    // Detect active theme via the app-level palette — this is always current
+    // even during the initial synchronous status update in the constructor,
+    // before the per-widget PaletteChange event has been dispatched.
+    const bool dark = QApplication::palette().window().color().lightness() < 128;
+
+    // Colour tokens — each tuple: { borderAndText, background, accTypeText }
+    struct BadgeColors {
+        QString borderText;
+        QString background;
+        QString accType;
+    };
+
+    const BadgeColors proColors = dark
+        ? BadgeColors{ QStringLiteral("#4fc37a"),
+                       QStringLiteral("rgba(79,195,122,0.12)"),
+                       QStringLiteral("#4fc37a") }
+        : BadgeColors{ QStringLiteral("#1a7a40"),
+                       QStringLiteral("rgba(26,122,64,0.12)"),
+                       QStringLiteral("#1a7a40") };
+
+    const BadgeColors evalColors = dark
+        ? BadgeColors{ QStringLiteral("#ffcc66"),
+                       QStringLiteral("rgba(255,204,102,0.10)"),
+                       QStringLiteral("#ffcc66") }
+        : BadgeColors{ QStringLiteral("#8a6000"),
+                       QStringLiteral("rgba(138,96,0,0.12)"),
+                       QStringLiteral("#8a6000") };
+
+    const BadgeColors freeColors = dark
+        ? BadgeColors{ QStringLiteral("#e05050"),
+                       QStringLiteral("rgba(224,80,80,0.10)"),
+                       QStringLiteral("#c0c0c0") }
+        : BadgeColors{ QStringLiteral("#b52a2a"),
+                       QStringLiteral("rgba(181,42,42,0.10)"),
+                       QStringLiteral("#666666") };
+
+    // Shared badge geometry template.
     static const char kBadgeBase[] =
         "QLabel {"
         "  border-radius: 4px;"
@@ -257,24 +301,23 @@ void AccountDialog::refreshPlanVisuals(bool paidPlan, bool evaluation) const
         "  background: %2;"
         "}";
 
+    auto applyBadge = [&](const BadgeColors &c) {
+        ui->planSummaryLabel->setStyleSheet(
+            QString::fromLatin1(kBadgeBase).arg(c.borderText, c.background));
+        ui->accType->setStyleSheet(
+            QStringLiteral("color: %1; font-weight: 600;").arg(c.accType));
+    };
+
     if (paidPlan) {
         ui->planSummaryLabel->setText(QStringLiteral("✔  Plan status: Pro license active"));
-        ui->planSummaryLabel->setStyleSheet(
-            QString::fromLatin1(kBadgeBase)
-                .arg(QStringLiteral("#4fc37a"),
-                     QStringLiteral("rgba(79,195,122,0.12)")));
-        ui->accType->setStyleSheet(QStringLiteral("color: #4fc37a; font-weight: 600;"));
+        applyBadge(proColors);
         ui->evaluationRemainingLabel->setText(QStringLiteral("Not applicable"));
         return;
     }
 
     if (evaluation) {
         ui->planSummaryLabel->setText(QStringLiteral("⏳  Plan status: Evaluation active"));
-        ui->planSummaryLabel->setStyleSheet(
-            QString::fromLatin1(kBadgeBase)
-                .arg(QStringLiteral("#ffcc66"),
-                     QStringLiteral("rgba(255,204,102,0.10)")));
-        ui->accType->setStyleSheet(QStringLiteral("color: #ffcc66; font-weight: 600;"));
+        applyBadge(evalColors);
         ui->evaluationRemainingLabel->setText(
             m_evaluationDaysRemaining >= 0
                 ? QString::number(m_evaluationDaysRemaining) + QStringLiteral(" day") +
@@ -285,11 +328,7 @@ void AccountDialog::refreshPlanVisuals(bool paidPlan, bool evaluation) const
 
     // Free / expired
     ui->planSummaryLabel->setText(QStringLiteral("✖  Plan status: Free tier"));
-    ui->planSummaryLabel->setStyleSheet(
-        QString::fromLatin1(kBadgeBase)
-            .arg(QStringLiteral("#e05050"),
-                 QStringLiteral("rgba(224,80,80,0.10)")));
-    ui->accType->setStyleSheet(QStringLiteral("color: #d4d4d4; font-weight: 600;"));
+    applyBadge(freeColors);
     ui->evaluationRemainingLabel->setText(QStringLiteral("Ended"));
 }
 
@@ -336,6 +375,16 @@ void AccountDialog::onPortalClicked() const
     if (!m_accountManager) return;
     QDesktopServices::openUrl(
         QUrl(m_accountManager->config().selfServicePortalUrl));
+}
+
+void AccountDialog::showEvent(QShowEvent *event)
+{
+    QDialog::showEvent(event);
+    // Re-apply badge colours on every open — the palette is guaranteed to be
+    // fully resolved by the time showEvent fires, even on first open.
+    const bool paidPlan  = m_isPaidPlan;
+    const bool evaluation = m_isEvaluationActive;
+    refreshPlanVisuals(paidPlan, evaluation);
 }
 
 void AccountDialog::closeEvent(QCloseEvent *event)

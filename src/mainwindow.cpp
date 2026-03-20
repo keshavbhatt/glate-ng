@@ -502,6 +502,92 @@ void MainWindow::setStyle(const QString &fname) {
   }
   qApp->setStyleSheet(styleSheet.readAll());
   styleSheet.close();
+
+  // ── Apply a matching QPalette ─────────────────────────────────────────────
+  // Palette colours are taken directly from the same tokens used in the QSS
+  // files so that palette()-based theme detection (e.g. in AccountDialog) is
+  // always consistent with what the user actually sees.
+  const bool dark = fname.contains(QStringLiteral("dark"));
+
+  QPalette pal;
+
+  if (dark) {
+    // ── Dark palette (dark.qss) ───────────────────────────────────────────
+    const QColor window      ("#31363b");
+    const QColor windowText  ("#eff0f1");
+    const QColor base        ("#232629");  // QLineEdit / QTextEdit background
+    const QColor altBase     ("#2a2929");  // alternate row colour
+    const QColor highlight   ("#2b8fbe");  // selection-background-color
+    const QColor highlightTx ("#0f1419");  // selection-color
+    const QColor tooltipBase ("#1f252b");
+    const QColor tooltipText ("#f5f7fa");
+    const QColor disabled    ("#9aa2ab");
+    const QColor link        ("#3daee9");
+    const QColor mid         ("#232629");
+    const QColor shadow      ("#1a1d20");
+
+    pal.setColor(QPalette::Window,          window);
+    pal.setColor(QPalette::WindowText,      windowText);
+    pal.setColor(QPalette::Base,            base);
+    pal.setColor(QPalette::AlternateBase,   altBase);
+    pal.setColor(QPalette::Text,            windowText);
+    pal.setColor(QPalette::BrightText,      windowText);
+    pal.setColor(QPalette::Button,          window);
+    pal.setColor(QPalette::ButtonText,      windowText);
+    pal.setColor(QPalette::Highlight,       highlight);
+    pal.setColor(QPalette::HighlightedText, highlightTx);
+    pal.setColor(QPalette::ToolTipBase,     tooltipBase);
+    pal.setColor(QPalette::ToolTipText,     tooltipText);
+    pal.setColor(QPalette::Link,            link);
+    pal.setColor(QPalette::LinkVisited,     link.darker(120));
+    pal.setColor(QPalette::Mid,             mid);
+    pal.setColor(QPalette::Shadow,          shadow);
+    // Disabled group
+    pal.setColor(QPalette::Disabled, QPalette::WindowText,  disabled);
+    pal.setColor(QPalette::Disabled, QPalette::Text,        disabled);
+    pal.setColor(QPalette::Disabled, QPalette::ButtonText,  disabled);
+    pal.setColor(QPalette::Disabled, QPalette::Highlight,   mid);
+    pal.setColor(QPalette::Disabled, QPalette::HighlightedText, disabled);
+  } else {
+    // ── Light palette (light.qss) ─────────────────────────────────────────
+    const QColor window      ("#eff0f1");
+    const QColor windowText  ("#232627");
+    const QColor base        ("#fcfcfc");  // QLineEdit / QTextEdit background
+    const QColor altBase     ("#eff0f1");
+    const QColor highlight   ("#2f9dd6");  // selection-background-color
+    const QColor highlightTx ("#0f1419");
+    const QColor tooltipBase ("#1f252b");
+    const QColor tooltipText ("#f5f7fa");
+    const QColor disabled    ("#7c8289");
+    const QColor link        ("#3daee9");
+    const QColor mid         ("#e5e7eb");
+    const QColor shadow      ("#b8bec4");
+
+    pal.setColor(QPalette::Window,          window);
+    pal.setColor(QPalette::WindowText,      windowText);
+    pal.setColor(QPalette::Base,            base);
+    pal.setColor(QPalette::AlternateBase,   altBase);
+    pal.setColor(QPalette::Text,            windowText);
+    pal.setColor(QPalette::BrightText,      windowText);
+    pal.setColor(QPalette::Button,          window);
+    pal.setColor(QPalette::ButtonText,      windowText);
+    pal.setColor(QPalette::Highlight,       highlight);
+    pal.setColor(QPalette::HighlightedText, highlightTx);
+    pal.setColor(QPalette::ToolTipBase,     tooltipBase);
+    pal.setColor(QPalette::ToolTipText,     tooltipText);
+    pal.setColor(QPalette::Link,            link);
+    pal.setColor(QPalette::LinkVisited,     link.darker(120));
+    pal.setColor(QPalette::Mid,             mid);
+    pal.setColor(QPalette::Shadow,          shadow);
+    // Disabled group
+    pal.setColor(QPalette::Disabled, QPalette::WindowText,  disabled);
+    pal.setColor(QPalette::Disabled, QPalette::Text,        disabled);
+    pal.setColor(QPalette::Disabled, QPalette::ButtonText,  disabled);
+    pal.setColor(QPalette::Disabled, QPalette::Highlight,   QColor("#c0c4c8"));
+    pal.setColor(QPalette::Disabled, QPalette::HighlightedText, disabled);
+  }
+
+  qApp->setPalette(pal);
 }
 
 MainWindow::~MainWindow() {
