@@ -82,8 +82,6 @@ struct AccountLicenseConfig
     /// Checkout URL template; %1 is replaced with the accountId.
     QString checkoutUrlTemplate;
     QString selfServicePortalUrl;
-    /// Upgrade-dialog URL template; %1 = appName, %2 = accountId.
-    QString upgradeDialogUrlTemplate;
 
     // ── License policy ────────────────────────────────────────────────────────
     qint64 evaluationDurationSecs     = 14LL * 24LL * 60LL * 60LL;

@@ -30,9 +30,6 @@ inline AccountLicenseConfig glateAccountLicenseConfig()
         QStringLiteral("https://ktechpit.com/USS/public/checkout.php?slug=glate&accountId=%1");
     cfg.selfServicePortalUrl =
         QStringLiteral("https://ktechpit.com/USS/public/user/");
-    // %1 = appName, %2 = accountId
-    cfg.upgradeDialogUrlTemplate =
-        QStringLiteral("https://ktechpit.com/USS/WW/accounts/html/index.php?itemName=%1&accountId=%2");
 
     // ── Policy ────────────────────────────────────────────────────────────────
     cfg.evaluationDurationSecs = 30 * 24 * 3600; // 30 days

@@ -78,7 +78,6 @@ public:
     // ── Config-driven URL builders ────────────────────────────────────────────
     QString checkoutUrl()          const;
     QString selfServicePortalUrl() const;
-    QString upgradeDialogUrl()     const;
 
     // ── Policy accessors ──────────────────────────────────────────────────────
 

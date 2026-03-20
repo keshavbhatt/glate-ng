@@ -158,11 +158,6 @@ QString AccountLicenseManager::selfServicePortalUrl() const
     return m_config.selfServicePortalUrl;
 }
 
-QString AccountLicenseManager::upgradeDialogUrl() const
-{
-    return m_config.upgradeDialogUrlTemplate
-        .arg(m_config.appName, m_serial);
-}
 
 // ── Policy accessors ──────────────────────────────────────────────────────────
 
