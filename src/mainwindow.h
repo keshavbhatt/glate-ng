@@ -42,21 +42,21 @@ protected slots:
 private slots:
 
   void on_clear_clicked();
-  void on_paste_clicked();
-  void on_switch_lang_clicked();
+  void on_paste_clicked() const;
+  void on_switch_lang_clicked() const;
   void on_lang1_currentIndexChanged(int index);
   void on_lang2_currentIndexChanged(int index);
   void on_play2_clicked();
   void on_play1_clicked();
-  void on_src1_textChanged();
-  void on_copy_clicked();
-  void on_src2_textChanged();
+  void on_src1_textChanged() const;
+  void on_copy_clicked() const;
+  void on_src2_textChanged() const;
   void on_share_clicked();
-  void on_settings_clicked();
-  void on_history_clicked();
+  void on_settings_clicked() const;
+  void on_history_clicked() const;
   void on_lineByline_clicked();
   void on_help_clicked();
-  void on_account_clicked();
+  void on_account_clicked() const;
 
   // Account / licence
   void onLicenseStatusUpdated(const AccountLicenseManager::LicenseStatus &status);
@@ -65,14 +65,14 @@ private slots:
   void resizeFix();
   void translate_clicked();
   void init_history();
-  QString getTransLang();
-  QString getSourceLang();
+  QString getTransLang() const;
+  QString getSourceLang() const;
   void init_settings();
   static void setStyle(const QString &fname);
   void showError(const QString &message);
   void textSelectionChanged(QTextEdit *editor);
-  QString getLangName(const QString &langCode);
-  QString getLangCode(const QString &langName);
+  QString getLangName(const QString &langCode) const;
+  QString getLangCode(const QString &langName) const;
   static void saveByTransId(const QString &translationId, const QString &reply);
   void processTranslation(const QString &reply);
   void startTtsSession(const QString &playerName, const QString &text,
@@ -81,7 +81,7 @@ private slots:
   void stopTtsSession(bool stopPlayer);
   void resetPlayIcons();
   void setPlayButtonState(const QString &buttonName, const QIcon &icon,
-                          const QString &toolTip);
+                          const QString &toolTip) const;
   QString activePlayButtonName() const;
   bool resolveTtsVoiceConfig(const QString &baseLang, QString &ttsLang,
                              QString &ttsCheckLang,

@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
   m_translate->setToolTip("Translate (Shift + Enter)");
   m_translate->setStyleSheet("border:none;border-radius:18px;");
   m_translate->setIconSize(QSize(28, 28));
-  auto shortcut =
+  const auto shortcut =
       new QShortcut(QKeySequence(tr("Shift+Return", "Translate")), m_translate,
                     SLOT(click()));
   shortcut->setContext(Qt::ApplicationShortcut);
@@ -115,9 +115,9 @@ MainWindow::MainWindow(QWidget *parent)
     if (m_settings.value("windowState").isValid()) {
       restoreState(m_settings.value("windowState").toByteArray());
     } else {
-      QScreen *pScreen = QGuiApplication::screenAt(
+      const QScreen *pScreen = QGuiApplication::screenAt(
           this->mapToGlobal(QPoint(this->width() / 2, 0)));
-      QRect availableScreenSize = pScreen->availableGeometry();
+      const QRect availableScreenSize = pScreen->availableGeometry();
       this->move(availableScreenSize.center() - this->rect().center());
     }
   }
@@ -125,7 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
   // init media player
   m_player = new QMediaPlayer(this);
   m_ttsDownloader = new TtsDownloader(this);
-  auto audioOutput = new QAudioOutput(this);
+  const auto audioOutput = new QAudioOutput(this);
   audioOutput->setVolume(1.0);
   m_player->setAudioOutput(audioOutput);
 
@@ -216,7 +216,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   // load src1
   ui->counter->setText("5000/5000");
-  int minWid =
+  const int minWid =
       ui->counter->fontMetrics().boundingRect(ui->counter->text()).width();
   ui->counter->setText(QString::number(ui->src1->toPlainText().length()) +
                        "/5000");
@@ -250,7 +250,7 @@ MainWindow::MainWindow(QWidget *parent)
   init_history();
 
   if (m_settings.value("lastTranslation").isValid()) {
-    QFileInfo check(QFile(utils::returnPath("history") + "/" +
+    const QFileInfo check(QFile(utils::returnPath("history") + "/" +
                           m_settings.value("lastTranslation").toString() +
                           ".json"));
     if (check.exists()) {
@@ -352,7 +352,7 @@ void MainWindow::init_settings() {
 }
 
 void MainWindow::textSelectionChanged(QTextEdit *editor) {
-  QString selection = editor->textCursor().selectedText().trimmed();
+  const QString selection = editor->textCursor().selectedText().trimmed();
   if (!selection.isEmpty()) {
     m_textOptionWidget->setObjectName("selection_" + editor->objectName());
     m_textOptionWidget->move(QCursor::pos().x(), QCursor::pos().y() + 10);
@@ -398,7 +398,7 @@ bool MainWindow::eventFilter(QObject *o, QEvent *e) {
   if (e->type() == QEvent::KeyRelease || e->type() == QEvent::KeyPress ||
       e->type() == QEvent::ShortcutOverride) {
     if (o == ui->src1 || o == ui->src2) {
-      auto keyEvent = static_cast<QKeyEvent *>(e);
+      const auto keyEvent = static_cast<QKeyEvent *>(e);
       if ((keyEvent->key() == Qt::Key_Return) &&
           keyEvent->modifiers() & (Qt::ShiftModifier)) {
         m_translate->click();
@@ -450,9 +450,9 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
-  int x =
+  const int x =
       ui->translationWidget->geometry().center().x() - m_translate->width() / 2;
-  int y = ui->translationWidget->geometry().center().y() -
+  const int y = ui->translationWidget->geometry().center().y() -
           (m_translate->height() + m_translate->height() / 2);
   m_translate->move(x, y);
   ui->switch_lang->move(x, ui->switch_lang->y());
@@ -533,7 +533,7 @@ void MainWindow::translate_clicked() {
       showError(errorString);
     });
 
-    QString src1 = ui->src1->toPlainText();
+    const QString src1 = ui->src1->toPlainText();
 
     QUrl url("https://translate.googleapis.com/translate_a/single");
     QUrlQuery urlQuery;
@@ -548,7 +548,7 @@ void MainWindow::translate_clicked() {
 
     url.setQuery(urlQuery);
 
-    QString urlStr = url.toString(QUrl::FullyEncoded);
+    const QString urlStr = url.toString(QUrl::FullyEncoded);
     qDebug() << urlStr;
 
     if (urlStr.isEmpty()) {
@@ -580,7 +580,7 @@ void MainWindow::saveByTransId(const QString &translationId,
 
 void MainWindow::processTranslation(const QString &reply) {
   m_currentTranslationData.clear();
-  QJsonDocument jsonResponse = QJsonDocument::fromJson(reply.toUtf8());
+  const QJsonDocument jsonResponse = QJsonDocument::fromJson(reply.toUtf8());
   if (jsonResponse.isEmpty()) {
     showError(
         "Empty response returned.\n Please report to keshavnrj@gmail.com");
@@ -614,8 +614,8 @@ void MainWindow::processTranslation(const QString &reply) {
       false, m_translationId);
 }
 
-QString MainWindow::getSourceLang() {
-  int indexLang1 = ui->lang1->currentIndex();
+QString MainWindow::getSourceLang() const {
+  const int indexLang1 = ui->lang1->currentIndex();
   if (indexLang1 == 0) {
     return "auto";
   } else {
@@ -623,8 +623,8 @@ QString MainWindow::getSourceLang() {
   }
 }
 
-QString MainWindow::getTransLang() {
-  int indexLang2 = ui->lang2->currentIndex();
+QString MainWindow::getTransLang() const {
+  const int indexLang2 = ui->lang2->currentIndex();
   return m_langCode.at(indexLang2).trimmed();
 }
 
@@ -662,23 +662,23 @@ void MainWindow::on_clear_clicked() {
   m_lineByLine->clearData();
 }
 
-void MainWindow::on_paste_clicked() {
+void MainWindow::on_paste_clicked() const {
   const QMimeData *mimeData = m_clipboard->mimeData();
   if (mimeData->hasText()) {
     ui->src1->setPlainText(mimeData->text());
   }
 }
 
-void MainWindow::on_switch_lang_clicked() {
-  int index1 = ui->lang1->currentIndex();
-  int index2 = ui->lang2->currentIndex();
+void MainWindow::on_switch_lang_clicked() const {
+  const int index1 = ui->lang1->currentIndex();
+  const int index2 = ui->lang2->currentIndex();
 
   ui->lang1->setCurrentIndex(index2 + 1);
   ui->lang2->setCurrentIndex(index1 - 1);
 
   if (ui->src2->toPlainText().trimmed().isEmpty() == false) {
-    QString src1 = ui->src1->toPlainText();
-    QString src2 = ui->src2->toPlainText();
+    const QString src1 = ui->src1->toPlainText();
+    const QString src2 = ui->src2->toPlainText();
 
     ui->src2->setText(src1);
     ui->src1->setText(src2);
@@ -706,7 +706,7 @@ QString MainWindow::activePlayButtonName() const {
 }
 
 void MainWindow::setPlayButtonState(const QString &buttonName, const QIcon &icon,
-                                    const QString &toolTip) {
+                                    const QString &toolTip) const {
   if (buttonName == "play1") {
     ui->play1->setIcon(icon);
     ui->play1->setToolTip(toolTip);
@@ -846,11 +846,11 @@ void MainWindow::on_play1_clicked() {
   toggleOrStartTts("play1", getSourceLang(), getSourceLang(), text);
 }
 
-void MainWindow::on_src1_textChanged() {
+void MainWindow::on_src1_textChanged() const {
   ui->counter->setText(QString::number(ui->src1->toPlainText().length()) +
                        "/5000");
   if (ui->src1->toPlainText().length() > 5000) {
-    int diff = ui->src1->toPlainText().length() - 5000;
+    const int diff = ui->src1->toPlainText().length() - 5000;
     QString newStr = ui->src1->toPlainText();
     newStr.chop(diff);
     ui->src1->setText(newStr);
@@ -861,12 +861,12 @@ void MainWindow::on_src1_textChanged() {
   ui->play1->setEnabled(!ui->src1->toPlainText().isEmpty());
 }
 
-void MainWindow::on_src2_textChanged() {
+void MainWindow::on_src2_textChanged() const {
   // enable disable play button if text is not empty
   ui->play2->setEnabled(!ui->src2->toPlainText().isEmpty());
 }
 
-void MainWindow::on_copy_clicked() {
+void MainWindow::on_copy_clicked() const {
   const QString text = ui->src2->toPlainText();
   if (!text.isEmpty()) {
     m_clipboard->setText(text);
@@ -881,24 +881,24 @@ void MainWindow::on_share_clicked() {
   }
 }
 
-void MainWindow::on_settings_clicked() {
+void MainWindow::on_settings_clicked() const {
   if (m_settingsWidget->isVisible() == false) {
     m_settingsWidget->adjustSize();
-    QScreen *pScreen = QGuiApplication::screenAt(
+    const QScreen *pScreen = QGuiApplication::screenAt(
         this->mapToGlobal(QPoint(m_settingsWidget->width() / 2, 0)));
-    QRect availableScreenSize = pScreen->availableGeometry();
+    const QRect availableScreenSize = pScreen->availableGeometry();
     m_settingsWidget->move(availableScreenSize.center() -
                            m_settingsWidget->rect().center());
     m_settingsWidget->showNormal();
   }
 }
 
-void MainWindow::on_history_clicked() {
+void MainWindow::on_history_clicked() const {
   if (m_historyWidget->isVisible() == false) {
     m_historyWidget->loadHistory();
-    QScreen *pScreen = QGuiApplication::screenAt(
+    const QScreen *pScreen = QGuiApplication::screenAt(
         this->mapToGlobal(QPoint(m_historyWidget->width() / 2, 0)));
-    QRect availableScreenSize = pScreen->availableGeometry();
+    const QRect availableScreenSize = pScreen->availableGeometry();
     m_historyWidget->move(availableScreenSize.center() -
                           m_historyWidget->rect().center());
     m_historyWidget->showNormal();
@@ -933,9 +933,9 @@ void MainWindow::on_lineByline_clicked() {
                               getLangName(getTransLang()), m_translationId);
       }
     }
-    QScreen *pScreen = QGuiApplication::screenAt(
+    const QScreen *pScreen = QGuiApplication::screenAt(
         this->mapToGlobal(QPoint(m_lineByLine->width() / 2, 0)));
-    QRect availableScreenSize = pScreen->availableGeometry();
+    const QRect availableScreenSize = pScreen->availableGeometry();
     m_lineByLine->move(availableScreenSize.center() -
                        m_lineByLine->rect().center());
     m_lineByLine->showNormal();
@@ -943,7 +943,7 @@ void MainWindow::on_lineByline_clicked() {
 }
 
 // convert lang code to lang name.
-QString MainWindow::getLangName(const QString &langCode) {
+QString MainWindow::getLangName(const QString &langCode) const {
   if (langCode == "auto") {
     return "Auto Detected";
   } else {
@@ -955,11 +955,11 @@ QString MainWindow::getLangName(const QString &langCode) {
 }
 
 // not tested not being used yet
-QString MainWindow::getLangCode(const QString &langName) {
+QString MainWindow::getLangCode(const QString &langName) const {
   if (langName.contains("auto", Qt::CaseInsensitive)) {
     return "auto";
   } else {
-    QStringList langCodeList = m_langCode;
+    const QStringList langCodeList = m_langCode;
     QString langCode = langCodeList.at(m_langName.lastIndexOf(langName) - 1);
     return langCode;
   }
@@ -982,16 +982,15 @@ void MainWindow::on_help_clicked() {
 
 // ── Account / licence ─────────────────────────────────────────────────────────
 
-void MainWindow::on_account_clicked()
-{
+void MainWindow::on_account_clicked() const {
     if (m_accountDialog->isVisible()) {
         m_accountDialog->raise();
         m_accountDialog->activateWindow();
         return;
     }
-    QScreen *pScreen = QGuiApplication::screenAt(
+    const QScreen *pScreen = QGuiApplication::screenAt(
         mapToGlobal(QPoint(width() / 2, 0)));
-    QRect available = pScreen->availableGeometry();
+    const QRect available = pScreen->availableGeometry();
     m_accountDialog->move(available.center() - m_accountDialog->rect().center());
     m_accountDialog->showNormal();
 }
