@@ -74,8 +74,8 @@ bool LicenseService::checkAccess(const QString &featureName)
           .arg(featureName, daysStr)
         : QStringLiteral(
             "<p><b>%1</b> is part of the <b>Glate Pro</b> plan.</p>"
-            "<p>Start a <b>%2&#8209;day free trial</b> to explore every Pro feature, "
-            "or upgrade directly to keep access forever.</p>"
+            "<p>Upgrade to Pro to unlock this and every other premium feature "
+            "permanently.</p>"
             "<p style='margin-top:8px;'><b>What you get with Pro:</b></p>"
             "<p style='margin:0; line-height:1.7;'>"
             "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
@@ -86,7 +86,7 @@ bool LicenseService::checkAccess(const QString &featureName)
             "<p style='margin-top:10px; color:gray; font-size:8pt;'>"
             "One-time purchase &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; Lifetime updates"
             "</p>")
-          .arg(featureName, daysStr);
+          .arg(featureName);
 
     // CTA label
     const QString ctaLabel = evalExpired
