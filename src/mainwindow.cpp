@@ -273,6 +273,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   // ── Account & licence ──────────────────────────────────────────────────────
   m_licenseManager = new AccountLicenseManager(glateAccountLicenseConfig(), this);
+  LicenseService::instance()->setAccountManager(m_licenseManager);
   connect(m_licenseManager, &AccountLicenseManager::licenseStatusUpdated,
           this, &MainWindow::onLicenseStatusUpdated);
 
@@ -905,6 +906,7 @@ void MainWindow::toggleOrStartTts(const QString &buttonName,
   const bool isPlaying =
       m_player->playbackState() == QMediaPlayer::PlayingState;
 
+  // Toggle off — never consumes a play credit.
   if (isPlaying && activeButton == buttonName) {
     stopTtsSession(true);
     return;
@@ -913,6 +915,10 @@ void MainWindow::toggleOrStartTts(const QString &buttonName,
   if (isPlaying && activeButton != buttonName) {
     stopTtsSession(true);
   }
+
+  // Check free-tier daily TTS limit before doing any work.
+  if (!LicenseService::instance()->checkTtsAccess())
+    return;
 
   QString ttsLang;
   QString ttsCheckLang;

@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QString>
+#include "AccountLicenseManager.h"
 
 /**
  * @brief Application-wide Pro-feature license gate.
@@ -45,9 +46,25 @@ public:
      */
     bool checkAccess(const QString &featureName);
 
+    /**
+     * @brief Gate one TTS playback request in the free tier.
+     *
+     * Free users may play TTS up to kFreeTierDailyTtsLimit times per day.
+     * On the first call that exceeds the limit, an upgrade prompt is shown.
+     *
+     * @return true  — play is allowed (paid access, or within daily quota).
+     * @return false — limit reached; caller should abort playback.
+     */
+    bool checkTtsAccess();
+
+    static constexpr int kFreeTierDailyTtsLimit = 10;
+
     /// Called by MainWindow whenever AccountLicenseManager reports a new status.
     void setHasPaidAccess(bool hasPaidAccess);
     void setEvaluationState(EvaluationState state);
+    /// Provide the license manager so TTS counters are stored in the
+    /// encrypted store rather than plain QSettings.
+    void setAccountManager(AccountLicenseManager *mgr);
     /// Set from the AccountLicenseConfig so the upgrade dialog can quote
     /// the actual trial length instead of a hardcoded number.
     void setEvaluationDurationDays(int days);
@@ -64,7 +81,12 @@ private:
     explicit LicenseService(QObject *parent = nullptr);
     static LicenseService *s_instance;
 
+    // TTS daily-counter helpers
+    int  ttsPlaysToday() const;
+    void incrementTtsPlays();
+
     bool            m_hasPaidAccess       = false;
     EvaluationState m_evaluationState     = EvaluationState::Unknown;
     int             m_evaluationDurationDays = 14;
+    AccountLicenseManager *m_accountManager = nullptr;
 };

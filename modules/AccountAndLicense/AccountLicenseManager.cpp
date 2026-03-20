@@ -167,6 +167,18 @@ const AccountLicenseConfig &AccountLicenseManager::config() const
     return m_config;
 }
 
+QVariant AccountLicenseManager::storeValue(const QString &key,
+                                            const QVariant &defaultValue) const
+{
+    return m_store->value(key, defaultValue);
+}
+
+void AccountLicenseManager::setStoreValue(const QString &key,
+                                           const QVariant &value)
+{
+    m_store->setValue(key, value);
+}
+
 // ── Network reply slot ────────────────────────────────────────────────────────
 
 void AccountLicenseManager::onCheckRequestFinished()

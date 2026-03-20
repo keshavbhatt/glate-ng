@@ -52,7 +52,7 @@ PlansComparisionDialog::PlansComparisionDialog(QWidget *parent)
   static const FeatureRow kRows[] = {
       {"Translate text", true, true, true},
       {"Translation History", true, true, true},
-      {"TTS voice output", false, true, true},
+      {"Unlimited TTS voice output", false, true, true},
       {"Export/share advanced options", false, true, true},
       {"Priority support", false, false, true},
   };

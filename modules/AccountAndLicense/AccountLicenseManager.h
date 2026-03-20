@@ -83,6 +83,14 @@ public:
 
     const AccountLicenseConfig &config() const;
 
+    // ── Encrypted app-level key/value storage ─────────────────────────────────
+    /// Read a value from the encrypted store.
+    /// Keys prefixed with "license/" are stored obfuscated and XOR-encrypted.
+    QVariant storeValue(const QString &key,
+                        const QVariant &defaultValue = {}) const;
+    /// Write a value to the encrypted store.
+    void setStoreValue(const QString &key, const QVariant &value);
+
 signals:
     void serialReady(const QString &serial);
     void licenseCheckInProgressChanged(bool inProgress);

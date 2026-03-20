@@ -1,8 +1,10 @@
 #include "licenseservice.h"
 
 #include <QApplication>
+#include <QDate>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSettings>
 #include <QStyle>
 
 LicenseService *LicenseService::s_instance = nullptr;
@@ -22,6 +24,10 @@ void LicenseService::setHasPaidAccess(bool hasPaidAccess) {
 
 void LicenseService::setEvaluationState(EvaluationState state) {
     m_evaluationState = state;
+}
+
+void LicenseService::setAccountManager(AccountLicenseManager *mgr) {
+    m_accountManager = mgr;
 }
 
 bool LicenseService::hasPaidAccess() const       { return m_hasPaidAccess; }
@@ -63,6 +69,7 @@ bool LicenseService::checkAccess(const QString &featureName)
             "Unlock them permanently with a Pro licence.</p>"
             "<p style='margin-top:8px;'><b>Glate Pro includes:</b></p>"
             "<p style='margin:0; line-height:1.7;'>"
+            "&nbsp;🔊&nbsp; Unlimited TTS playback<br>"
             "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
             "&nbsp;🔗&nbsp; Create public share links<br>"
             "&nbsp;⭐&nbsp; All future premium features<br>"
@@ -78,6 +85,7 @@ bool LicenseService::checkAccess(const QString &featureName)
             "permanently.</p>"
             "<p style='margin-top:8px;'><b>What you get with Pro:</b></p>"
             "<p style='margin:0; line-height:1.7;'>"
+            "&nbsp;🔊&nbsp; Unlimited TTS playback<br>"
             "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
             "&nbsp;🔗&nbsp; Create public share links<br>"
             "&nbsp;⭐&nbsp; All future premium features<br>"
@@ -134,3 +142,124 @@ bool LicenseService::checkAccess(const QString &featureName)
 
     return false;
 }
+
+// ── TTS daily-limit gate ──────────────────────────────────────────────────────
+
+// Keys are prefixed with "license/" so AccountLicenseStore treats them as
+// sensitive and stores them XOR-encrypted with obfuscated key names.
+static const QString kTtsDateKey  = QStringLiteral("license/tts_free/date");
+static const QString kTtsPlaysKey = QStringLiteral("license/tts_free/plays");
+
+int LicenseService::ttsPlaysToday() const
+{
+    const QString today = QDate::currentDate().toString(Qt::ISODate);
+
+    if (m_accountManager) {
+        if (m_accountManager->storeValue(kTtsDateKey).toString() != today)
+            return 0;
+        return m_accountManager->storeValue(kTtsPlaysKey, 0).toInt();
+    }
+
+    // Fallback (should not happen in normal operation)
+    QSettings s;
+    if (s.value(kTtsDateKey).toString() != today)
+        return 0;
+    return s.value(kTtsPlaysKey, 0).toInt();
+}
+
+void LicenseService::incrementTtsPlays()
+{
+    const QString today = QDate::currentDate().toString(Qt::ISODate);
+
+    if (m_accountManager) {
+        if (m_accountManager->storeValue(kTtsDateKey).toString() != today) {
+            m_accountManager->setStoreValue(kTtsDateKey,  today);
+            m_accountManager->setStoreValue(kTtsPlaysKey, 1);
+        } else {
+            m_accountManager->setStoreValue(
+                kTtsPlaysKey,
+                m_accountManager->storeValue(kTtsPlaysKey, 0).toInt() + 1);
+        }
+        return;
+    }
+
+    // Fallback
+    QSettings s;
+    if (s.value(kTtsDateKey).toString() != today) {
+        s.setValue(kTtsDateKey,  today);
+        s.setValue(kTtsPlaysKey, 1);
+    } else {
+        s.setValue(kTtsPlaysKey, s.value(kTtsPlaysKey, 0).toInt() + 1);
+    }
+}
+
+bool LicenseService::checkTtsAccess()
+{
+    // Paid users (Pro / active Evaluation) have unlimited TTS.
+    if (m_hasPaidAccess)
+        return true;
+
+    const int playsToday = ttsPlaysToday();
+
+    if (playsToday < kFreeTierDailyTtsLimit) {
+        incrementTtsPlays();
+        return true;
+    }
+
+    // Limit reached — show upgrade prompt.
+    const QString headline =
+        QStringLiteral("<span style='font-size:11pt; font-weight:600;'>"
+                       "Daily TTS limit reached</span>");
+
+    const QString body =
+        QStringLiteral(
+            "<p>Free tier allows <b>%1 TTS plays per day</b>. "
+            "You have used all %1 today.</p>"
+            "<p>Upgrade to <b>Glate Pro</b> for unlimited text-to-speech "
+            "and all other premium features.</p>"
+            "<p style='margin:0; line-height:1.7;'>"
+            "&nbsp;🔊&nbsp; Unlimited TTS playback<br>"
+            "&nbsp;🎵&nbsp; Export translations as audio (MP3)<br>"
+            "&nbsp;🔗&nbsp; Create public share links<br>"
+            "&nbsp;❤️&nbsp; Support independent development"
+            "</p>"
+            "<p style='margin-top:10px; color:gray; font-size:8pt;'>"
+            "One-time purchase &nbsp;·&nbsp; No subscription &nbsp;·&nbsp; Lifetime updates"
+            "</p>")
+        .arg(kFreeTierDailyTtsLimit);
+
+    QWidget *parent = QApplication::activeWindow();
+    QMessageBox msgBox(parent);
+    msgBox.setWindowTitle(QApplication::applicationName()
+                          + QStringLiteral(" | Daily TTS Limit Reached"));
+    msgBox.setIcon(QMessageBox::NoIcon);
+    msgBox.setText(headline);
+    msgBox.setInformativeText(body);
+    msgBox.setTextFormat(Qt::RichText);
+
+    QPushButton *upgradeBtn =
+        msgBox.addButton(QStringLiteral("  Upgrade to Pro  "),
+                         QMessageBox::AcceptRole);
+    msgBox.addButton(QStringLiteral("Maybe Later"), QMessageBox::RejectRole);
+
+    upgradeBtn->setStyleSheet(
+        QStringLiteral("QPushButton {"
+                       "  background-color: #3daee9;"
+                       "  color: #ffffff;"
+                       "  border: none;"
+                       "  border-radius: 4px;"
+                       "  padding: 6px 16px;"
+                       "  font-weight: 600;"
+                       "}"
+                       "QPushButton:hover  { background-color: #4db8f0; }"
+                       "QPushButton:pressed{ background-color: #2d9ed8; }"));
+
+    msgBox.setDefaultButton(upgradeBtn);
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == upgradeBtn)
+        emit upgradeRequested();
+
+    return false;
+}
+
