@@ -255,13 +255,14 @@ MainWindow::MainWindow(QWidget *parent)
   init_history();
 
   if (m_settings.value("lastTranslation").isValid()) {
-    const QFileInfo check(QFile(utils::returnPath("history") + "/" +
-                          m_settings.value("lastTranslation").toString() +
-                          ".json"));
+    const QFileInfo check(QDir(utils::returnPath("history"))
+                              .filePath(m_settings.value("lastTranslation").toString()
+                                        + ".json"));
     if (check.exists()) {
       m_translationId = m_settings.value("lastTranslation").toString();
-      m_historyWidget->loadHistoryItem(utils::returnPath("history") + "/" +
-                                       m_translationId + ".json");
+      m_historyWidget->loadHistoryItem(
+          QDir(utils::returnPath("history"))
+              .filePath(m_translationId + ".json"));
     }
   }
 
@@ -567,7 +568,7 @@ void MainWindow::translate_clicked() {
 
 void MainWindow::saveByTransId(const QString &translationId,
                                const QString &reply) {
-  QFile jsonFile(utils::returnPath("cache") + "/" + translationId + ".glate");
+  QFile jsonFile(QDir(utils::returnPath("cache")).filePath(translationId + ".glate"));
   if (!jsonFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
     qWarning() << "Unable to open cache file for writing:" << jsonFile.fileName()
                << jsonFile.errorString();
@@ -924,7 +925,7 @@ void MainWindow::on_lineByline_clicked() {
                               getLangName(getTransLang()), m_translationId);
       } else {
         // load translation from cache;
-        QFile jsonFile(utils::returnPath("cache") + "/" + m_translationId + ".glate");
+        QFile jsonFile(QDir(utils::returnPath("cache")).filePath(m_translationId + ".glate"));
         if (!jsonFile.open(QFile::ReadOnly)) {
           showError("Unable to open cached translation file.");
           return;

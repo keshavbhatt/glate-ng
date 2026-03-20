@@ -99,7 +99,7 @@ void Share::on_text_clicked() {
                      .toString();
   QString fileName = QFileDialog::getSaveFileName(
       this, tr("Save Text File"),
-      path + "/" + getFileNameFromString(translation) + ".txt",
+      QDir(path).filePath(getFileNameFromString(translation) + ".txt"),
       tr("Text Files (*.txt)"));
   if (!fileName.isEmpty()) {
     QFile file(QFileInfo(fileName).absoluteFilePath());
@@ -193,7 +193,7 @@ void Share::on_pastebin_clicked() {
 // not being used as we are not saving file now to share.
 bool Share::saveFile(const QString &filename) {
   QString path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-  QFile file(path + QDir::separator() + filename);
+  QFile file(QDir(path).filePath(filename));
   if (!file.open(QFile::WriteOnly | QFile::Text)) {
     QMessageBox::warning(this, tr("Application"),
                          tr("Cannot write file %1:\n%2.")
@@ -281,7 +281,7 @@ void Share::concat(const QStringList &audioFiles) {
           .toString();
   QString fileName = QFileDialog::getSaveFileName(
       this, tr("Save Audio File"),
-      path + QDir::separator() + getFileNameFromString(translation) + ".mp3",
+      QDir(path).filePath(getFileNameFromString(translation) + ".mp3"),
       tr("Audio Files (*.mp3)"));
   if (!fileName.isEmpty()) {
     m_lastExportedFilePath = QFileInfo(fileName).absoluteFilePath();

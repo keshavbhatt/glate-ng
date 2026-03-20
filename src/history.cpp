@@ -41,7 +41,7 @@ void History::insertItem(QStringList meta, bool fromHistory,
     history_item_ui.remove->setObjectName("remove_" + translationId);
     history_item_ui.load->setObjectName("load_" + translationId);
     connect(history_item_ui.remove, &QPushButton::clicked, [=]() {
-      QFile file(utils::returnPath("history") + "/" + translationId + ".json");
+      QFile file(QDir(utils::returnPath("history")).filePath(translationId + ".json"));
       if (file.remove()) {
         loadHistory();
       }
@@ -49,8 +49,7 @@ void History::insertItem(QStringList meta, bool fromHistory,
 
     connect(history_item_ui.load, &QPushButton::clicked, [=]() {
       emit setTranslationId(translationId);
-      loadHistoryItem(utils::returnPath("history") + "/" + translationId +
-                      ".json");
+      loadHistoryItem(QDir(utils::returnPath("history")).filePath(translationId + ".json"));
     });
     history_item_ui.time->setText(date);
     history_item_ui.from->setText(from);
@@ -96,7 +95,7 @@ void History::save(QStringList meta, QString translationId) {
     src2 = meta.at(3);
     date = meta.at(4);
     QString history_file_path =
-        utils::returnPath("history") + "/" + translationId + ".json";
+        QDir(utils::returnPath("history")).filePath(translationId + ".json");
     QVariantMap map;
     map.insert("date", date);
     map.insert("from", from);

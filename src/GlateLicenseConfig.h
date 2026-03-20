@@ -19,8 +19,8 @@ inline AccountLicenseConfig glateAccountLicenseConfig()
 
     // ── QSettings ─────────────────────────────────────────────────────────────
     // Must match QApplication::setOrganizationName / setApplicationName in main.cpp
-    cfg.settingsOrgName = QStringLiteral("org.keshavnrj.ubuntu");
-    cfg.settingsAppName = QStringLiteral("glate");
+    cfg.settingsOrgName = QApplication::organizationName();
+    cfg.settingsAppName = QApplication::applicationName();
 
     // ── API endpoints ─────────────────────────────────────────────────────────
     cfg.checkStatusEndpoint =

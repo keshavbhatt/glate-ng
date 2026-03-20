@@ -102,13 +102,12 @@ QString utils::convertSectoDay(qint64 secs) {
 
 // static on demand path maker
 QString utils::returnPath(QString pathname) {
-  QString _data_path =
+  const QString basePath =
       QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-  if (!QDir(_data_path + "/" + pathname).exists()) {
-    QDir d(_data_path + "/" + pathname);
-    d.mkpath(_data_path + "/" + pathname);
-  }
-  return _data_path + "/" + pathname + "/";
+  const QString fullPath = QDir(basePath).filePath(pathname);
+  if (!QDir(fullPath).exists())
+    QDir().mkpath(fullPath);
+  return fullPath;
 }
 
 QString utils::htmlToPlainText(QString str) {
