@@ -92,6 +92,7 @@ These match the hard-coded strings that were in `AppSettings.cpp` and
 |----------------------------|---------------------------------|------------------------------------------|
 | `appCode`                  | _required_                      | Short API code, e.g. `"WW_NG"`           |
 | `appName`                  | _required_                      | Human-readable, used in upgrade URLs     |
+| `serialPlatformPrefix`     | _(auto)_                        | Prepended to new serial IDs. Empty string = suppress. Null (default) = auto-insert `"win"` on Windows, nothing elsewhere |
 | `settingsOrgName`          | _required_                      | QSettings organisation name              |
 | `settingsAppName`          | _required_                      | QSettings application name               |
 | `encryptionKeySuffix`      | `"AL_LOCAL_LICENSE_KEY_v1"`     | Override for WW compat                   |

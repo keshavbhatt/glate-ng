@@ -62,10 +62,14 @@ void AccountLicenseManager::ensureSerial()
 
     // 3. Generate new
     if (m_serial.trimmed().isEmpty() || m_serial.length() < 8) {
-        QString prefix;
+        // Use the config-supplied prefix; fall back to platform auto-detection
+        // so the API can distinguish Windows installs without an extra field.
+        QString prefix = m_config.serialPlatformPrefix;
+        if (prefix.isNull()) {   // null = "not set" → auto-detect
 #ifdef Q_OS_WIN
-        prefix = QStringLiteral("win");
+            prefix = QStringLiteral("win");
 #endif
+        }
         m_serial = prefix + generateId(24);
     }
 

@@ -41,6 +41,22 @@ struct AccountLicenseConfig
     QString appCode;  ///< Short code sent to the API, e.g. "WW_NG"
     QString appName;  ///< Human-readable name, e.g. "WonderWall"
 
+    /**
+     * @brief Prefix prepended to every newly-generated serial ID.
+     *
+     * Used server-side to identify the originating platform without any
+     * extra API field.  When left empty (the default) the module inserts
+     * @c "win" automatically on Windows and nothing on other platforms.
+     * Set explicitly to override or suppress platform detection, e.g.:
+     * @code
+     * cfg.serialPlatformPrefix = QStringLiteral("win");  // force regardless of OS
+     * cfg.serialPlatformPrefix = QStringLiteral("");     // suppress on all platforms
+     * @endcode
+     * Only applied when a brand-new serial is generated; existing serials
+     * stored on disk are never modified.
+     */
+    QString serialPlatformPrefix;
+
     // ── QSettings parameters ──────────────────────────────────────────────────
     QString settingsOrgName;   ///< QSettings organisation, e.g. "ktechpit"
     QString settingsAppName;   ///< QSettings application,  e.g. "WonderWall"
