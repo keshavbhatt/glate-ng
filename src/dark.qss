@@ -486,6 +486,27 @@ QFrame[frameShape="0"] {
     border: 1px transparent #76797C;
 }
 
+/* ── Dividers ────────────────────────────────────────────────────────────── */
+/* HLine: a single 1 px horizontal rule, no box border                       */
+QFrame[frameShape="4"] {
+    border: none;
+    border-top: 1px solid #4a4f54;
+    background: transparent;
+    max-height: 1px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+/* VLine: a single 1 px vertical rule, no box border                         */
+QFrame[frameShape="5"] {
+    border: none;
+    border-left: 1px solid #4a4f54;
+    background: transparent;
+    max-width: 1px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
 QStackedWidget {
     border: 1px transparent black;
 }
