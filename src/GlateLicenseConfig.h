@@ -35,8 +35,7 @@ inline AccountLicenseConfig glateAccountLicenseConfig()
         QStringLiteral("https://ktechpit.com/USS/WW/accounts/html/index.php?itemName=%1&accountId=%2");
 
     // ── Policy ────────────────────────────────────────────────────────────────
-    // Defaults from AccountLicenseConfig are used (14-day eval, weekly check, etc.)
-
+    cfg.evaluationDurationSecs = 30 * 24 * 3600; // 30 days
     return cfg;
 }
 
