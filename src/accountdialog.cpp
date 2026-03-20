@@ -6,6 +6,7 @@
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QShortcut>
 #include <QTimer>
 #include <QUrl>
 
@@ -14,6 +15,7 @@ AccountDialog::AccountDialog(QWidget *parent)
     , ui(new Ui::AccountDialog)
 {
     ui->setupUi(this);
+    { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
     setWindowTitle(QApplication::applicationName() + QStringLiteral(" | Account"));
     setWindowModality(Qt::WindowModal);
 

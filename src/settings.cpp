@@ -6,11 +6,13 @@
 #include "utils.h"
 
 #include <QGuiApplication>
+#include <QShortcut>
 #include <QSystemTrayIcon>
 
 Settings::Settings(QWidget *parent, QHotkey *hotKey)
     : QWidget(parent), ui(new Ui::Settings) {
   ui->setupUi(this);
+  { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   this->nativeHotkey = hotKey;
 
   // Populate voice combo from central voice list

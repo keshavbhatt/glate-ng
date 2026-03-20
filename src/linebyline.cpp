@@ -1,10 +1,12 @@
 #include "linebyline.h"
 #include "ui_linebyline.h"
 #include <QScrollBar>
+#include <QShortcut>
 
 LineByLine::LineByLine(QWidget *parent, QClipboard *clipborad)
     : QWidget(parent), ui(new Ui::LineByLine) {
   ui->setupUi(this);
+  { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   this->clipborad = clipborad;
   connect(ui->src1->verticalScrollBar(), &QScrollBar::valueChanged,
           [=](int val) { ui->src2->verticalScrollBar()->setValue(val); });

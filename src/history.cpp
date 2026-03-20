@@ -2,9 +2,11 @@
 #include "ui_history.h"
 #include "utils.h"
 #include <QDir>
+#include <QShortcut>
 
 History::History(QWidget *parent) : QWidget(parent), ui(new Ui::History) {
   ui->setupUi(this);
+  { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   ui->historyList->setSelectionRectVisible(true);
   ui->historyList->setAlternatingRowColors(true);
   ui->historyList->setDragEnabled(false);

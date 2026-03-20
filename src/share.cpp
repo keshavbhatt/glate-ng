@@ -7,9 +7,11 @@
 #include <QGraphicsOpacityEffect>
 #include <QMessageBox>
 #include <QPropertyAnimation>
+#include <QShortcut>
 
 Share::Share(QWidget *parent) : QWidget(parent), ui(new Ui::Share) {
   ui->setupUi(this);
+  { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   ffmpeg = new QProcess(this);
   m_networkManager = new QNetworkAccessManager(this);
   m_ttsDownloader = new TtsDownloader(this);
