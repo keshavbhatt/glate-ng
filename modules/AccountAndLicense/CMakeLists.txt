@@ -29,3 +29,7 @@ target_compile_definitions(account_license PRIVATE
     $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:QT_NO_DEBUG_OUTPUT>
 )
 
+if(MSVC)
+    target_compile_options(account_license PRIVATE /utf-8)
+endif()
+

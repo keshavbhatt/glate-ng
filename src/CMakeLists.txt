@@ -104,6 +104,11 @@ target_compile_definitions(glate PRIVATE
     $<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG_OUTPUT>
 )
 
+if(MSVC)
+    # Keep source decoding consistent in CI (especially with UTF-8 literals).
+    target_compile_options(glate PRIVATE /utf-8)
+endif()
+
 target_link_libraries(glate PRIVATE
     account_license
     Qt6::Core
