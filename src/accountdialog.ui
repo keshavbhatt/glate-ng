@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
-    <height>400</height>
+    <width>666</width>
+    <height>461</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
@@ -38,12 +44,10 @@
    <property name="bottomMargin">
     <number>14</number>
    </property>
-
-   <!-- ── Account info frame ─────────────────────────────────────────── -->
    <item>
     <widget class="QFrame" name="infoFrame">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -70,7 +74,6 @@
       <property name="bottomMargin">
        <number>14</number>
       </property>
-
       <item>
        <widget class="QLabel" name="planSummaryLabel">
         <property name="text">
@@ -81,7 +84,6 @@
         </property>
        </widget>
       </item>
-
       <item>
        <layout class="QHBoxLayout" name="idRow">
         <item>
@@ -130,13 +132,15 @@
            <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
-           <size><width>0</width><height>0</height></size>
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
           </property>
          </spacer>
         </item>
        </layout>
       </item>
-
       <item>
        <layout class="QHBoxLayout" name="typeRow">
         <item>
@@ -159,13 +163,15 @@
            <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
-           <size><width>0</width><height>0</height></size>
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
           </property>
          </spacer>
         </item>
        </layout>
       </item>
-
       <item>
        <layout class="QHBoxLayout" name="evaluationRow">
         <item>
@@ -188,13 +194,15 @@
            <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
-           <size><width>0</width><height>0</height></size>
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
           </property>
          </spacer>
         </item>
        </layout>
       </item>
-
       <item>
        <widget class="QFrame" name="divider">
         <property name="frameShape">
@@ -205,29 +213,6 @@
         </property>
        </widget>
       </item>
-
-      <!-- Status: single-line, no expanding -->
-      <item>
-       <widget class="QLabel" name="accountStatusLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Status: waiting for account check...</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-
-      <!-- Hint: word-wrapped, needs MinimumExpanding so it gets full height -->
       <item>
        <widget class="QLabel" name="accountHintLabel">
         <property name="sizePolicy">
@@ -247,12 +232,9 @@
         </property>
        </widget>
       </item>
-
      </layout>
     </widget>
    </item>
-
-   <!-- ── Action buttons (outside the frame for breathing room) ─────── -->
    <item>
     <layout class="QHBoxLayout" name="actionRow">
      <property name="spacing">
@@ -296,8 +278,6 @@
      </item>
     </layout>
    </item>
-
-   <!-- ── Portal info text ───────────────────────────────────────────── -->
    <item>
     <widget class="QLabel" name="portalInfoLabel">
      <property name="text">
@@ -311,8 +291,6 @@
      </property>
     </widget>
    </item>
-
-   <!-- ── Debug simulation panel (hidden in Release by accountdialog.cpp) ── -->
    <item>
     <widget class="QFrame" name="debugFrame">
      <property name="frameShape">
@@ -387,17 +365,29 @@
      </layout>
     </widget>
    </item>
-
-   <!-- ── Bottom row: close ──────────────────────────────────────────── -->
    <item>
     <layout class="QHBoxLayout" name="bottomRow">
+     <item>
+      <widget class="QPushButton" name="planCompareButton">
+       <property name="text">
+        <string>Evaluation vs Pro vs Free</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/questionnaire-line.png</normaloff>:/icons/questionnaire-line.png</iconset>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer name="bottomSpacer">
        <property name="orientation">
         <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
-        <size><width>0</width><height>0</height></size>
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
        </property>
       </spacer>
      </item>
@@ -414,7 +404,6 @@
      </item>
     </layout>
    </item>
-
   </layout>
  </widget>
  <resources>
@@ -422,4 +411,3 @@
  </resources>
  <connections/>
 </ui>
-

@@ -28,6 +28,9 @@ public slots:
     void onLicenseStatusUpdated(const AccountLicenseManager::LicenseStatus &status);
     void onLicenseCheckProgressChanged(bool inProgress) const;
 
+private slots:
+    void on_planCompareButton_clicked();
+
 signals:
     /// Emitted when a valid Pro licence is confirmed.
     void licenseActivated(bool isPro);

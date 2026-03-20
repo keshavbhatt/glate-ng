@@ -83,6 +83,7 @@ qt_add_executable(glate
     qbreeze.qrc
     resources.qrc
     slides.qrc
+    planscomparisiondialog.h planscomparisiondialog.cpp planscomparisiondialog.ui
 )
 
 # On Windows: suppress the console window (GUI subsystem)
