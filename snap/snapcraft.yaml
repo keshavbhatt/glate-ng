@@ -1,9 +1,9 @@
 name: glate
 adopt-info: glate
-summary: Google translator for Linux desktop
+summary: Translate text and generate speech audio on Linux desktop
 description: |
-  Glate is a desktop translator with text-to-speech support, line-by-line
-  translation, and sharing/export tools.
+  Glate is a fast desktop translator with built-in text-to-speech for everyday translation workflows. 
+  It supports translation across 100+ languages, per-line translation view, voice playback, history tracking, and sharing translated text or speech output
 
 grade: stable
 confinement: strict
