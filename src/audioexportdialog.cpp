@@ -220,20 +220,42 @@ QStringList AudioExportDialog::buildFfmpegArgs(const QString &outputPath,
                                                int   bitrate) const
 {
     if (m_audioFiles.isEmpty()) return {};
+
     QStringList args;
     args << QStringLiteral("-y");
     for (const auto &f : m_audioFiles) args << QStringLiteral("-i") << f;
-    QString finalLabel;
-    const QString fc = buildFilterComplex(finalLabel);
-    args << QStringLiteral("-filter_complex") << fc
-         << QStringLiteral("-map") << QStringLiteral("[%1]").arg(finalLabel);
+
+    const bool advancedEnabled = ui->advancedGroup->isVisible();
+
+    if (advancedEnabled) {
+        // Full effect filter chain
+        QString finalLabel;
+        const QString fc = buildFilterComplex(finalLabel);
+        args << QStringLiteral("-filter_complex") << fc
+             << QStringLiteral("-map") << QStringLiteral("[%1]").arg(finalLabel);
+    } else if (m_audioFiles.count() > 1) {
+        // Multiple files: simple concat, no effects
+        QString inputs;
+        for (int i = 0; i < m_audioFiles.count(); ++i)
+            inputs += QStringLiteral("[%1:a]").arg(i);
+        const QString fc = inputs +
+            QStringLiteral("concat=n=%1:v=0:a=1[aout]").arg(m_audioFiles.count());
+        args << QStringLiteral("-filter_complex") << fc
+             << QStringLiteral("-map") << QStringLiteral("[aout]");
+    }
+    // Single file without advanced: no filter_complex needed, ffmpeg re-encodes directly
+
     args << QStringLiteral("-c:a") << codecName;
+
     const int sr = ui->sampleRateCombo->currentText().split(QStringLiteral(" ")).first().toInt();
     args << QStringLiteral("-ar") << QString::number(sr > 0 ? sr : 44100);
+
     const int ch = (ui->channelsCombo->currentText() == QStringLiteral("Mono")) ? 1 : 2;
     args << QStringLiteral("-ac") << QString::number(ch);
+
     if (applyBitrate && bitrate > 0)
         args << QStringLiteral("-b:a") << QString::number(bitrate) + QStringLiteral("k");
+
     args << outputPath;
     return args;
 }
@@ -269,10 +291,28 @@ void AudioExportDialog::onExportFinished(int exitCode, QProcess::ExitStatus stat
 {
     ui->exportBtn->setEnabled(true);
     ui->previewBtn->setEnabled(true);
+
     if (exitCode == 0 && status == QProcess::NormalExit) {
-        ui->statusLabel->setText(tr("Export complete: %1").arg(m_lastExportPath));
-        QMessageBox::information(this, tr("Export Complete"),
-            tr("Audio saved to:\n%1").arg(m_lastExportPath));
+        const QFileInfo fi(m_lastExportPath);
+        ui->statusLabel->setText(tr("Exported: %1").arg(fi.fileName()));
+
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(tr("Export Complete"));
+        msgBox.setIcon(QMessageBox::NoIcon);
+        msgBox.setText(QStringLiteral("<b>") + fi.fileName() + QStringLiteral("</b>"));
+        msgBox.setInformativeText(tr("Audio exported successfully.\n%1").arg(fi.absolutePath()));
+
+        QPushButton *openFileBtn   = msgBox.addButton(tr("Play File"),       QMessageBox::AcceptRole);
+        QPushButton *showFolderBtn = msgBox.addButton(tr("Show in Folder"),  QMessageBox::AcceptRole);
+        /*QPushButton *okBtn       =*/ msgBox.addButton(tr("Done"),          QMessageBox::RejectRole);
+
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == openFileBtn) {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(m_lastExportPath));
+        } else if (msgBox.clickedButton() == showFolderBtn) {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(fi.absolutePath()));
+        }
     } else {
         const QString err = QString::fromUtf8(m_exportProcess->readAllStandardError()).trimmed();
         ui->statusLabel->setText(tr("Export failed."));
