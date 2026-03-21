@@ -252,6 +252,16 @@ MainWindow::MainWindow(QWidget *parent)
                                " | LineByLine translation");
   m_lineByLine->setWindowFlag(Qt::Dialog);
   m_lineByLine->setWindowModality(Qt::NonModal);
+  connect(m_lineByLine, &LineByLine::readSourceRequested, this,
+          [this](const QString &text) {
+            toggleOrStartTts("line_read_src", getSourceLang(),
+                             getLangName(getSourceLang()), text);
+          });
+  connect(m_lineByLine, &LineByLine::readTranslationRequested, this,
+          [this](const QString &text) {
+            toggleOrStartTts("line_read_tr", getTransLang(),
+                             getLangName(getTransLang()), text);
+          });
 
   // init settings
   init_settings();
@@ -872,11 +882,13 @@ void MainWindow::startTtsSession(const QString &playerName, const QString &text,
                        kPreparingTooltip);
     setPlayButtonState("play2", QIcon(":/icons/volume-up-line.png"),
                        kPlay2IdleTooltip);
-  } else {
+  } else if (playerName == "play2") {
     setPlayButtonState("play2", QIcon(":/icons/loader-2-fill.png"),
                        kPreparingTooltip);
     setPlayButtonState("play1", QIcon(":/icons/volume-up-line.png"),
                        kPlay1IdleTooltip);
+  } else {
+    resetPlayIcons();
   }
 
   m_ttsDownloader->start(text, ttsLang, voiceGender);

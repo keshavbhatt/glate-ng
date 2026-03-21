@@ -21,6 +21,11 @@ public slots:
                QString tId);
   void clearData();
   QString getTId();
+
+signals:
+  void readSourceRequested(const QString &text);
+  void readTranslationRequested(const QString &text);
+
 private slots:
   void on_src1_currentRowChanged(int currentRow);
 
@@ -29,6 +34,10 @@ private slots:
   void on_copySrc2_clicked();
 
   void on_copySrc1_clicked();
+
+  void on_readSrc1_clicked();
+
+  void on_readSrc2_clicked();
 
 private:
   Ui::LineByLine *ui;

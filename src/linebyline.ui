@@ -84,15 +84,30 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="copySrc1">
-         <property name="text">
-          <string>Copy</string>
-         </property>
-         <property name="icon">
-          <iconset resource="icons.qrc">
-           <normaloff>:/icons/file-copy-line.png</normaloff>:/icons/file-copy-line.png</iconset>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="src1ActionsRow">
+         <item>
+          <widget class="QPushButton" name="copySrc1">
+           <property name="text">
+            <string>Copy</string>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/file-copy-line.png</normaloff>:/icons/file-copy-line.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="readSrc1">
+           <property name="text">
+            <string>Read</string>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/volume-up-line.png</normaloff>:/icons/volume-up-line.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
@@ -142,15 +157,30 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="copySrc2">
-         <property name="text">
-          <string>Copy</string>
-         </property>
-         <property name="icon">
-          <iconset resource="icons.qrc">
-           <normaloff>:/icons/file-copy-line.png</normaloff>:/icons/file-copy-line.png</iconset>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="src2ActionsRow">
+         <item>
+          <widget class="QPushButton" name="copySrc2">
+           <property name="text">
+            <string>Copy</string>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/file-copy-line.png</normaloff>:/icons/file-copy-line.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="readSrc2">
+           <property name="text">
+            <string>Read</string>
+           </property>
+           <property name="icon">
+            <iconset resource="icons.qrc">
+             <normaloff>:/icons/volume-up-line.png</normaloff>:/icons/volume-up-line.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
