@@ -1,63 +1,88 @@
+# Glate - Translator and Text-to-Speech for Desktop
 
-
-# Glate - Google Translator and Text To Speech Service on Linux Desktop
-Website for "The Glate App" - The Google translator and TTS app for Desktop Linux.
 <p align="center">
   <img width="200" height="200" src="https://github.com/keshavbhatt/glate/blob/master/icons/icon-256.png?raw=true">
 </p>
 
-Glate is a neat, simple yet feature rich, Google Translator and Text to speech synthesizer for Linux Desktop Platform.
+Glate is a fast desktop translator with built-in text-to-speech, history, and sharing tools.
 
-## Key Features of Glate :
+## Features
 
--   Set the preferred source and target language
--   Translate between over 104 languages
--   Line by Line translation
--   Download synthesized speech in mp3 format
--   Read Selected text wit Text to speech Engine
--   History of text translation for reference
--   Export translated History in text(.txt) format
--   Translation share option with inbuilt pastebin generator
--   HOTKEY to translate text from any website or other Application (X11/XWayland)
--   Listen to the pronunciation, Text to Speech
--   Dark and Light mode
--   Copy and paste the translated text
--   Glate will bring many more exciting features in near future, spread the name and the app with your friends, family and colleagues.
+- Translate between 100+ languages
+- Line-by-line translation view for structured text
+- Text-to-speech playback with voice and gender options
+- Export speech to audio formats with advanced controls
+- Translation history with search, quick copy, and text export
+- Share translations with built-in paste link support
+- Global quick-translate hotkey support on X11/XWayland
+- Dark and light themes
 
-## Screenshot :
-![Glate Main screen featuring dark theme](https://github.com/keshavbhatt/glate/blob/master/screenshots/1.jpg?raw=true)
+## Screenshots
 
-![Glate Setting dialog on right, featuring light theme ](https://github.com/keshavbhatt/glate/blob/master/screenshots/2.jpg?raw=true)
+![Glate main window with dark theme](https://github.com/keshavbhatt/glate/blob/master/screenshots/1.jpg?raw=true)
+![Glate settings window with light theme](https://github.com/keshavbhatt/glate/blob/master/screenshots/2.jpg?raw=true)
+![Glate share and export dialog](https://github.com/keshavbhatt/glate/blob/master/screenshots/3.jpg?raw=true)
 
+## Preview
 
-![Glate Share Dialog on right](https://github.com/keshavbhatt/glate/blob/master/screenshots/3.jpg?raw=true)
+[![Glate desktop preview](https://github.com/keshavbhatt/glate/blob/master/screenshots/preview.jpg?raw=true)](https://www.youtube.com/watch?v=FxTDqcIgk7g "Glate desktop preview")
 
-## Preview 
+## Install via Snap
 
-[![Glate - Google translator and text to speech Application for Linux Desktop](https://github.com/keshavbhatt/glate/blob/master/screenshots/preview.jpg?raw=true)](https://www.youtube.com/watch?v=FxTDqcIgk7g 
-"Glate - Google translator and text to speech Application for Linux Desktop")
+Install from Snap Store:
 
+```bash
+snap install glate
+```
 
-## Install on Linux via snap-store here :
-Glate can be installed on all Linux Desktop supporting snapd
-Via command line app can be simply installed with following command:
-
-    snap install glate
-### Snapstore Store link:
 [![glate](https://snapcraft.io/glate/trending.svg)](https://snapcraft.io/glate)
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/glate)
+
+## Build From Source
+
+### Linux desktop build (Qt + CMake)
+
+```bash
+cmake -S . -B cmake-build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build cmake-build-release -j
+```
+
+## Packaging Instructions
+
+### Flatpak
+
+```bash
+./build-flatpak.sh
+```
+
+This creates a versioned bundle like `glate-4.1.0.flatpak`.
+
+### Snap
+
+```bash
+snapcraft
+```
+
+Snap version is derived from the CMake project version during build.
+
+### Windows
+
+```bash
+cmake -S . -B cmake-build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build cmake-build-release -j
+cpack --config cmake-build-release/src/CPackConfig.cmake
+```
+
+Windows packaging output is generated through NSIS/ZIP via CPack.
 
 ## Global Hotkey Note (Wayland)
 
 Global hotkeys are not available on native Wayland sessions due to compositor security restrictions.
-If you need system-wide quick translate hotkeys, run Glate on an X11 session (or via XWayland where supported).
+If you need system-wide quick-translate hotkeys, run Glate on an X11 session (or via XWayland where supported).
 
-<hr>
- Version for Windows coming soon... Stay tuned for updates :)
-<hr>
+## Credits
 
-## Credits :
-[Alan Pope](https://github.com/popey) of [Canonical](https://github.com/canonical) helped me deciding the name for this Application.
+[Alan Pope](https://github.com/popey) of [Canonical](https://github.com/canonical) helped decide the app name.
 
 
 
