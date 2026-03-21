@@ -2,9 +2,7 @@
 #include "ui_audioexportdialog.h"
 #include <QApplication>
 #include <QAudioOutput>
-#include <QDateTime>
 #include <QDesktopServices>
-#include <QDir>
 #include <QFile>
 #include <QFileDialog>
 #include <QMediaPlayer>
@@ -51,6 +49,25 @@ AudioExportDialog::AudioExportDialog(QWidget *parent)
                           : QStringLiteral("Export with default settings"));
         QTimer::singleShot(0, this, [this] { adjustSize(); });
     });
+    // ── Echo sub-controls: hidden until checkbox is checked ──────────────────
+    ui->echoDelayLabel->setVisible(false);
+    ui->echoDelayWidget->setVisible(false);
+    ui->echoDecayLabel->setVisible(false);
+    ui->echoDecayWidget->setVisible(false);
+    connect(ui->echoCheckBox, &QCheckBox::toggled, this, [this](bool on) {
+        ui->echoDelayLabel->setVisible(on);
+        ui->echoDelayWidget->setVisible(on);
+        ui->echoDecayLabel->setVisible(on);
+        ui->echoDecayWidget->setVisible(on);
+        QTimer::singleShot(0, this, [this] { adjustSize(); });
+    });
+    // Connect echo sliders before loadSettings so labels sync on load
+    connect(ui->echoDelaySlider, &QSlider::valueChanged, this, [this](int v) {
+        ui->echoDelayValueLabel->setText(QString::number(v) + QStringLiteral(" ms"));
+    });
+    connect(ui->echoDecaySlider, &QSlider::valueChanged, this, [this](int v) {
+        ui->echoDecayValueLabel->setText(QString::number(v / 100.0, 'f', 2));
+    });
     // ── Format / bitrate / sample-rate / channel population ─────────────────
     initializeFormats();
     loadSettings();
@@ -92,8 +109,7 @@ AudioExportDialog::~AudioExportDialog()
 void AudioExportDialog::setAudioFiles(const QStringList &files)
 {
     m_audioFiles = files;
-    const QString n = QString::number(files.count());
-    ui->statusLabel->setText(tr("%1 audio chunk(s) ready. Select format and click Export.").arg(n));
+    ui->statusLabel->setText(tr("Ready. Select a format and click Export."));
     ui->previewBtn->setEnabled(!files.isEmpty());
     ui->exportBtn->setEnabled(!files.isEmpty());
 }
@@ -148,6 +164,8 @@ void AudioExportDialog::loadSettings()
     ui->fadeInSpinBox->setValue(s.value(QStringLiteral("audio_export/fade_in"), 0.0).toDouble());
     ui->fadeOutSpinBox->setValue(s.value(QStringLiteral("audio_export/fade_out"), 0.0).toDouble());
     ui->echoCheckBox->setChecked(s.value(QStringLiteral("audio_export/echo"), false).toBool());
+    ui->echoDelaySlider->setValue(s.value(QStringLiteral("audio_export/echo_delay"), 500).toInt());
+    ui->echoDecaySlider->setValue(s.value(QStringLiteral("audio_export/echo_decay"), 50).toInt());
 }
 void AudioExportDialog::saveSettings()
 {
@@ -161,6 +179,8 @@ void AudioExportDialog::saveSettings()
     s.setValue(QStringLiteral("audio_export/fade_in"),     ui->fadeInSpinBox->value());
     s.setValue(QStringLiteral("audio_export/fade_out"),    ui->fadeOutSpinBox->value());
     s.setValue(QStringLiteral("audio_export/echo"),        ui->echoCheckBox->isChecked());
+    s.setValue(QStringLiteral("audio_export/echo_delay"),  ui->echoDelaySlider->value());
+    s.setValue(QStringLiteral("audio_export/echo_decay"),  ui->echoDecaySlider->value());
 }
 // ── Filter chain builder ──────────────────────────────────────────────────────
 QString AudioExportDialog::buildFilterComplex(QString &finalLabel) const
@@ -195,7 +215,13 @@ QString AudioExportDialog::buildFilterComplex(QString &finalLabel) const
     // 4. Echo
     if (ui->echoCheckBox->isChecked()) {
         auto out = next();
-        parts << QStringLiteral("[%1]aecho=0.8:0.9:1000:0.3[%2]").arg(cur, out);
+        const int    echoDelay = ui->echoDelaySlider->value();
+        const double echoDecay = ui->echoDecaySlider->value() / 100.0;
+        parts << QStringLiteral("[%1]aecho=0.8:0.9:%2:%3[%4]")
+                 .arg(cur)
+                 .arg(echoDelay)
+                 .arg(echoDecay, 0, 'f', 2)
+                 .arg(out);
         cur = out;
     }
     // 5. Fade in
@@ -345,15 +371,15 @@ void AudioExportDialog::onPreviewClicked()
         false, 0);
     if (args.isEmpty()) return;
     ui->previewBtn->setEnabled(false);
-    ui->previewBtn->setText(tr("Rendering..."));
-    ui->statusLabel->setText(tr("Rendering preview..."));
+    ui->previewBtn->setText(tr("Please wait…"));
+    ui->statusLabel->setText(tr("Preparing preview…"));
     m_previewProcess->start(QStringLiteral("ffmpeg"), args);
 }
 void AudioExportDialog::onPreviewRenderFinished(int exitCode, QProcess::ExitStatus status)
 {
     if (exitCode != 0 || status != QProcess::NormalExit) {
         const QString err = QString::fromUtf8(m_previewProcess->readAllStandardError()).trimmed();
-        ui->statusLabel->setText(tr("Preview render failed."));
+        ui->statusLabel->setText(tr("Preview failed."));
         ui->previewBtn->setText(tr("Preview"));
         ui->previewBtn->setEnabled(true);
         QMessageBox::warning(this, tr("Preview Failed"),
@@ -365,7 +391,7 @@ void AudioExportDialog::onPreviewRenderFinished(int exitCode, QProcess::ExitStat
     m_previewPlayer->play();
     ui->previewBtn->setText(tr("Stop"));
     ui->previewBtn->setEnabled(true);
-    ui->statusLabel->setText(tr("Previewing with current settings..."));
+    ui->statusLabel->setText(tr("Playing preview…"));
 }
 void AudioExportDialog::onPreviewPlaybackStateChanged()
 {
@@ -401,6 +427,8 @@ void AudioExportDialog::onResetClicked()
     ui->fadeInSpinBox->setValue(0.0);
     ui->fadeOutSpinBox->setValue(0.0);
     ui->echoCheckBox->setChecked(false);
+    ui->echoDelaySlider->setValue(500);
+    ui->echoDecaySlider->setValue(50);
     ui->filenameEdit->setText(m_exportName.isEmpty() ? QStringLiteral("export") : m_exportName);
     ui->statusLabel->setText(tr("Settings reset to defaults."));
     saveSettings();
