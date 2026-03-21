@@ -29,7 +29,9 @@ endif()
 # Windows: embed application icon and version info via resource file
 set(PLATFORM_SOURCES "")
 if(WIN32)
-    list(APPEND PLATFORM_SOURCES glate.rc)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/glate.rc.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/generated/glate.rc @ONLY)
+    list(APPEND PLATFORM_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/generated/glate.rc)
 endif()
 
 qt_add_executable(glate
@@ -104,6 +106,7 @@ target_include_directories(glate PRIVATE
 
 target_compile_definitions(glate PRIVATE
     QT_DEPRECATED_WARNINGS
+    GLATE_APP_VERSION="${GLATE_VERSION}"
     $<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG_OUTPUT>
 )
 
@@ -193,10 +196,10 @@ endif()
 set(CPACK_PACKAGE_NAME "Glate")
 set(CPACK_PACKAGE_VENDOR "KtechPit")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Google Translator for Desktop")
-set(CPACK_PACKAGE_VERSION "4.0.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "4")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_VERSION "${GLATE_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "Glate")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE")
 
@@ -219,15 +222,6 @@ if(WIN32)
     set(CPACK_NSIS_DELETE_ICONS_EXTRA
         "Delete '$DESKTOP\\\\Glate.lnk'"
     )
-elseif(APPLE)
-    set(CPACK_GENERATOR "DragNDrop")
-elseif(UNIX)
-    set(CPACK_GENERATOR "DEB;RPM;TGZ")
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "KtechPit <keshavnrj@gmail.com>")
-    set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6core6, libqt6gui6, libqt6widgets6, libqt6network6, libqt6multimedia6, ffmpeg")
-    set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0")
-    set(CPACK_RPM_PACKAGE_GROUP "Applications/Productivity")
+    include(CPack)
 endif()
 
-include(CPack)

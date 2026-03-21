@@ -1,5 +1,5 @@
 name: glate
-version: '4.0'
+adopt-info: glate
 summary: Google translator for Linux desktop
 description: |
   Glate is a desktop translator with text-to-speech support, line-by-line
@@ -63,6 +63,8 @@ parts:
       - -DCMAKE_INSTALL_PREFIX=/usr
     override-build: |
       craftctl default
+
+      craftctl set version "$(grep -E '^CMAKE_PROJECT_VERSION:STATIC=' ${CRAFT_PART_BUILD}/CMakeCache.txt | cut -d= -f2)"
 
       mkdir -p ${CRAFT_PART_INSTALL}/meta/gui
       cp ${CRAFT_PART_INSTALL}/usr/share/icons/hicolor/512x512/apps/com.ktechpit.glate.png \

@@ -3,6 +3,7 @@
 #include <QGuiApplication>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QString>
 
 // Unique name for the local socket used as a single-instance lock.
 static constexpr auto kInstanceKey = "com.ktechpit.glate.SingleInstance";
@@ -19,7 +20,7 @@ int main(int argc, char *argv[]) {
   QGuiApplication::setDesktopFileName("com.ktechpit.glate");
   QApplication::setApplicationName("Glate");
   QApplication::setOrganizationName("org.keshavnrj.ubuntu");
-  QApplication::setApplicationVersion("4.0");
+  QApplication::setApplicationVersion(QString::fromLatin1(GLATE_APP_VERSION));
 
   // ── Single-instance guard ─────────────────────────────────────────────────
   // Try to contact an already-running instance first.

@@ -72,6 +72,16 @@
   </keywords>
 
   <releases>
+    <release version="4.1" date="2026-03-21">
+      <description>
+        <p>Audio export improvements and usability polish.</p>
+        <ul>
+          <li>Echo effect now exposes delay (100–2000 ms) and decay (0.10–0.90) controls</li>
+          <li>Export dialog remembers the last used folder across sessions</li>
+          <li>Status messages simplified to remove internal technical terms</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.0" date="2026-03-21">
       <description>
         <p>Major update with reworked UX, improved sharing, and single-instance enforcement.</p>

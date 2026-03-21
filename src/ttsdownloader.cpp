@@ -1,5 +1,6 @@
 #include "ttsdownloader.h"
 
+#include <QCoreApplication>
 #include <QFile>
 #include <QNetworkRequest>
 #include <QUrlQuery>
@@ -116,8 +117,12 @@ void TtsDownloader::downloadCurrentChunk() {
   url.setQuery(params);
 
   QNetworkRequest request(url);
-  request.setHeader(QNetworkRequest::UserAgentHeader,
-                    "Mozilla/5.0 (X11; Linux x86_64) Glate/4.0");
+  const QString appVersion = QCoreApplication::applicationVersion().isEmpty()
+                                 ? QStringLiteral("unknown")
+                                 : QCoreApplication::applicationVersion();
+  request.setHeader(
+      QNetworkRequest::UserAgentHeader,
+      QStringLiteral("Mozilla/5.0 (X11; Linux x86_64) Glate/%1").arg(appVersion));
 
   QNetworkReply *reply = m_network->get(request);
   m_reply = reply;
