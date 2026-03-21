@@ -36,6 +36,9 @@ qt_add_executable(glate
     accountdialog.cpp
     accountdialog.h
     accountdialog.ui
+    audioexportdialog.cpp
+    audioexportdialog.h
+    audioexportdialog.ui
     controlbutton.cpp
     controlbutton.h
     licenseservice.cpp

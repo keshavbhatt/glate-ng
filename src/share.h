@@ -1,11 +1,11 @@
 #ifndef SHARE_H
 #define SHARE_H
 
+#include "audioexportdialog.h"
 #include "ttsdownloader.h"
 
 #include <QDesktopServices>
 #include <QNetworkAccessManager>
-#include <QProcess>
 #include <QSettings>
 #include <QWidget>
 
@@ -32,20 +32,18 @@ private slots:
   void on_email_clicked();
   void on_pastebin_clicked();
   void on_download_clicked();
-  void ffmpeg_finished(int k);
 
   static QString getFileNameFromString(const QString &string);
   void showStatus(const QString &message);
   void showStatusWithFile(const QString &message, const QString &filePath);
   bool saveFile(const QString &filename);
-  void concat(const QStringList &audioFiles);
 
 private:
   Ui::Share *ui;
   QSettings settings;
-  QProcess *ffmpeg = nullptr;
   QNetworkAccessManager *m_networkManager = nullptr;
   TtsDownloader *m_ttsDownloader = nullptr;
+  AudioExportDialog *m_audioExportDialog = nullptr;
   QString translationUUID;
   QString translationLangCode;
   QStringList m_downloadedAudioFiles;

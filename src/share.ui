@@ -179,7 +179,7 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>Synthesise the translation with TTS and export to an MP3 file</string>
+        <string>Synthesise TTS audio and open the audio editor/exporter</string>
        </property>
        <property name="text">
         <string>Export as Audio</string>

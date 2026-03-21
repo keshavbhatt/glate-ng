@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AudioExportDialog</class>
+ <widget class="QDialog" name="AudioExportDialog">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>500</width><height>260</height></rect>
+  </property>
+  <property name="windowTitle"><string>Export Audio</string></property>
+  <property name="sizeGripEnabled"><bool>true</bool></property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing"><number>10</number></property>
+   <property name="leftMargin"><number>16</number></property>
+   <property name="topMargin"><number>14</number></property>
+   <property name="rightMargin"><number>16</number></property>
+   <property name="bottomMargin"><number>12</number></property>
+
+   <!-- Status -->
+   <item>
+    <widget class="QLabel" name="statusLabel">
+     <property name="text"><string>Ready. Select a format and click Export.</string></property>
+     <property name="wordWrap"><bool>true</bool></property>
+    </widget>
+   </item>
+
+   <!-- Quick export row -->
+   <item>
+    <layout class="QHBoxLayout" name="quickRow">
+     <property name="spacing"><number>8</number></property>
+     <item>
+      <widget class="QLabel" name="fmtLabel">
+       <property name="text"><string>Format:</string></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="formatCombo">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch><verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="exportBtn">
+       <property name="text"><string>Export</string></property>
+       <property name="default"><bool>true</bool></property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- Advanced options toggle button (inserted by code) -->
+
+   <!-- Advanced options group -->
+   <item>
+    <widget class="QGroupBox" name="advancedGroup">
+     <property name="title"><string/></property>
+     <property name="visible"><bool>false</bool></property>
+     <layout class="QFormLayout" name="advancedForm">
+      <property name="horizontalSpacing"><number>10</number></property>
+      <property name="verticalSpacing"><number>6</number></property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="fnLabel">
+        <property name="text"><string>Filename:</string></property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="filenameEdit">
+        <property name="placeholderText"><string>export</string></property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="bitrateLabel">
+        <property name="text"><string>Bitrate:</string></property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="bitrateCombo"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="srLabel">
+        <property name="text"><string>Sample Rate:</string></property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="sampleRateCombo"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="chLabel">
+        <property name="text"><string>Channels:</string></property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="channelsCombo"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="volLabel">
+        <property name="text"><string>Volume:</string></property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="volRow">
+        <item>
+         <widget class="QSlider" name="volumeSlider">
+          <property name="minimum"><number>0</number></property>
+          <property name="maximum"><number>200</number></property>
+          <property name="value"><number>100</number></property>
+          <property name="orientation"><enum>Qt::Horizontal</enum></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="volumeValueLabel">
+          <property name="text"><string>100%</string></property>
+          <property name="minimumWidth"><number>42</number></property>
+          <property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="spdLabel">
+        <property name="text"><string>Speed/Tempo:</string></property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <layout class="QHBoxLayout" name="spdRow">
+        <item>
+         <widget class="QSlider" name="speedSlider">
+          <property name="minimum"><number>50</number></property>
+          <property name="maximum"><number>200</number></property>
+          <property name="value"><number>100</number></property>
+          <property name="orientation"><enum>Qt::Horizontal</enum></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="speedValueLabel">
+          <property name="text"><string>1.0x</string></property>
+          <property name="minimumWidth"><number>42</number></property>
+          <property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="fiLabel">
+        <property name="text"><string>Fade In (s):</string></property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <layout class="QHBoxLayout" name="fiRow">
+        <item>
+         <widget class="QDoubleSpinBox" name="fadeInSpinBox">
+          <property name="minimum"><double>0.0</double></property>
+          <property name="maximum"><double>10.0</double></property>
+          <property name="singleStep"><double>0.1</double></property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="fiSpacer">
+          <property name="orientation"><enum>Qt::Horizontal</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>40</width><height>0</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="foLabel">
+        <property name="text"><string>Fade Out (s):</string></property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <layout class="QHBoxLayout" name="foRow">
+        <item>
+         <widget class="QDoubleSpinBox" name="fadeOutSpinBox">
+          <property name="minimum"><double>0.0</double></property>
+          <property name="maximum"><double>10.0</double></property>
+          <property name="singleStep"><double>0.1</double></property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="foSpacer">
+          <property name="orientation"><enum>Qt::Horizontal</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>40</width><height>0</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="8" column="0" colspan="2">
+       <widget class="QCheckBox" name="echoCheckBox">
+        <property name="text"><string>Add Echo Effect</string></property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <item><spacer name="vSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>0</width><height>8</height></size></property></spacer></item>
+
+   <!-- Bottom row -->
+   <item>
+    <layout class="QHBoxLayout" name="bottomRow">
+     <property name="spacing"><number>8</number></property>
+     <item>
+      <widget class="QPushButton" name="previewBtn">
+       <property name="text"><string>Preview</string></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetBtn">
+       <property name="text"><string>Reset</string></property>
+       <property name="toolTip"><string>Reset all settings to defaults</string></property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="bottomSpacer">
+       <property name="orientation"><enum>Qt::Horizontal</enum></property>
+       <property name="sizeHint" stdset="0"><size><width>40</width><height>0</height></size></property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeBtn">
+       <property name="text"><string>Close</string></property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <connections/>
+</ui>
+

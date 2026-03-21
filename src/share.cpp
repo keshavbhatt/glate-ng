@@ -23,7 +23,6 @@ Share::Share(QWidget *parent) : QWidget(parent), ui(new Ui::Share) {
           this, [](const QUrl &url) {
               QDesktopServices::openUrl(url);
           });
-  ffmpeg = new QProcess(this);
   m_networkManager = new QNetworkAccessManager(this);
   m_ttsDownloader = new TtsDownloader(this);
 
@@ -38,8 +37,6 @@ Share::Share(QWidget *parent) : QWidget(parent), ui(new Ui::Share) {
           [=](int index) {
             settings.setValue("shareAudioVoiceGender", index);
           });
-  connect(this->ffmpeg, SIGNAL(finished(int)), this,
-          SLOT(ffmpeg_finished(int)));
 
   connect(m_ttsDownloader, &TtsDownloader::progress, this,
           [=](const QString &status) {
@@ -49,13 +46,20 @@ Share::Share(QWidget *parent) : QWidget(parent), ui(new Ui::Share) {
   connect(m_ttsDownloader, &TtsDownloader::finished, this,
           [=](const QStringList &audioFiles) {
             m_downloadedAudioFiles = audioFiles;
+            ui->download->setEnabled(true);
             if (m_downloadedAudioFiles.isEmpty()) {
               showStatus("<span style='color:red'>Share: </span>No audio chunks downloaded.");
-              ui->download->setEnabled(true);
               return;
             }
-            showStatus("<span style='color:green'>Share: </span>Voice download finished...");
-            concat(m_downloadedAudioFiles);
+            showStatus("<span style='color:green'>Share: </span>Voice synthesis complete. Opening audio editor...");
+
+            if (!m_audioExportDialog)
+              m_audioExportDialog = new AudioExportDialog(this);
+
+            const QString exportName = getFileNameFromString(ui->translation->toPlainText());
+            m_audioExportDialog->setExportName(exportName);
+            m_audioExportDialog->setAudioFiles(m_downloadedAudioFiles);
+            m_audioExportDialog->exec();
           });
   connect(m_ttsDownloader, &TtsDownloader::failed, this,
           [=](const QString &error) {
@@ -249,13 +253,6 @@ void Share::on_download_clicked() {
           QStringLiteral("Export as Audio")))
     return;
 
-  // create a dir with uuid to track process,
-  // start donwload manager with tasks,
-  // wait for tasks to finish,
-  // concat downloaded results,
-  // ask user to save file,
-  // destroy uuid and file on close.
-
   QString text = ui->translation->toPlainText();
   const int voiceIdx = ui->voiceGender->currentIndex();
   const auto voices = utils::availableVoices();
@@ -266,64 +263,10 @@ void Share::on_download_clicked() {
       voiceConf.langOverride.isEmpty()
           ? (translationLangCode.isEmpty() ? QString("en") : translationLangCode)
           : voiceConf.langOverride;
-  showStatus("<span style='color:green'>Share: </span>Preparing " +
-             voiceConf.displayName + " voice download...");
+  showStatus("<span style='color:green'>Share: </span>Synthesising " +
+             voiceConf.displayName + " voice...");
   ui->download->setEnabled(false);
   m_downloadedAudioFiles.clear();
   m_ttsDownloader->start(text, ttsLang, selectedGender);
 }
 
-void Share::concat(const QStringList &audioFiles) {
-  QString translation = ui->translation->toPlainText();
-  QString path =
-      settings
-          .value("sharePathAudio", QStandardPaths::writableLocation(
-                                       QStandardPaths::DocumentsLocation))
-          .toString();
-  QString fileName = QFileDialog::getSaveFileName(
-      this, tr("Save Audio File"),
-      QDir(path).filePath(getFileNameFromString(translation) + ".mp3"),
-      tr("Audio Files (*.mp3)"));
-  if (!fileName.isEmpty()) {
-    m_lastExportedFilePath = QFileInfo(fileName).absoluteFilePath();
-
-    QStringList args;
-    QString complex;
-    args << "-v" << "quiet" << "-stats";
-    for (int i = 0; i < audioFiles.count(); i++) {
-      args << "-i" << audioFiles.at(i);
-      complex += "[" + QString::number(i) + ":0]";
-    }
-    complex += "concat=n=" + QString::number(audioFiles.count()) + ":v=0:a=1[out]";
-    args << "-filter_complex" << complex << "-map" << "[out]" << fileName << "-y";
-    ffmpeg->start("ffmpeg", args);
-
-    ui->download->setEnabled(!ffmpeg->waitForStarted());
-    showStatus("<span style='color:green'>Share: </span>Merging audio parts...");
-    settings.setValue("sharePathAudio", QFileInfo(fileName).path());
-  } else {
-    m_lastExportedFilePath.clear();
-    showStatus("<span style='color:red'>Share: </span>file save operation cancelled.");
-    ui->download->setEnabled(true);
-  }
-}
-
-void Share::ffmpeg_finished(int k) {
-  if (k == 0) {
-    if (!m_lastExportedFilePath.isEmpty()) {
-      showStatusWithFile(
-          QStringLiteral("<span style='color:green'>Share: </span>Export finished."),
-          m_lastExportedFilePath);
-    } else {
-      showStatus(QStringLiteral("<span style='color:green'>Share: </span>Export finished."));
-    }
-  } else {
-    const QString err =
-        QString::fromUtf8(ffmpeg->readAllStandardError()).trimmed();
-    showStatus(err.isEmpty()
-                   ? QStringLiteral("<span style='color:red'>Share: </span>Export failed.")
-                   : QStringLiteral("<span style='color:red'>Share: </span>") +
-                         err.toHtmlEscaped());
-  }
-  ui->download->setDisabled(false);
-}
