@@ -64,7 +64,8 @@ parts:
     override-build: |
       craftctl default
 
-      craftctl set version "$(grep -E '^CMAKE_PROJECT_VERSION:STATIC=' ${CRAFT_PART_BUILD}/CMakeCache.txt | cut -d= -f2)"
+      VERSION="$(grep -E '^CMAKE_PROJECT_VERSION:STATIC=' ${CRAFT_PART_BUILD}/CMakeCache.txt | cut -d= -f2 | tr -d '[:space:]')"
+      craftctl set version="${VERSION}"
 
       mkdir -p ${CRAFT_PART_INSTALL}/meta/gui
       cp ${CRAFT_PART_INSTALL}/usr/share/icons/hicolor/512x512/apps/com.ktechpit.glate.png \
