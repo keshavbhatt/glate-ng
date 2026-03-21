@@ -166,6 +166,8 @@ void AudioExportDialog::loadSettings()
     ui->echoCheckBox->setChecked(s.value(QStringLiteral("audio_export/echo"), false).toBool());
     ui->echoDelaySlider->setValue(s.value(QStringLiteral("audio_export/echo_delay"), 500).toInt());
     ui->echoDecaySlider->setValue(s.value(QStringLiteral("audio_export/echo_decay"), 50).toInt());
+    m_lastExportDir = s.value(QStringLiteral("audio_export/last_dir"),
+                              QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
 }
 void AudioExportDialog::saveSettings()
 {
@@ -181,6 +183,8 @@ void AudioExportDialog::saveSettings()
     s.setValue(QStringLiteral("audio_export/echo"),        ui->echoCheckBox->isChecked());
     s.setValue(QStringLiteral("audio_export/echo_delay"),  ui->echoDelaySlider->value());
     s.setValue(QStringLiteral("audio_export/echo_decay"),  ui->echoDecaySlider->value());
+    if (!m_lastExportDir.isEmpty())
+        s.setValue(QStringLiteral("audio_export/last_dir"), m_lastExportDir);
 }
 // ── Filter chain builder ──────────────────────────────────────────────────────
 QString AudioExportDialog::buildFilterComplex(QString &finalLabel) const
@@ -302,8 +306,7 @@ void AudioExportDialog::onExportClicked()
     const auto &fmt = m_formats[fi];
     const QString filename = ui->filenameEdit->text().trimmed();
     const QString defaultName = filename.isEmpty() ? QStringLiteral("export") : filename;
-    const QString downloadsPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
-    const QString defaultPath = QDir(downloadsPath).filePath(defaultName + QLatin1Char('.') + fmt.extension);
+    const QString defaultPath = QDir(m_lastExportDir).filePath(defaultName + QLatin1Char('.') + fmt.extension);
     const QString outPath = QFileDialog::getSaveFileName(
         this, tr("Export Audio"), defaultPath,
         tr("Audio Files (*.%1);;All Files (*)").arg(fmt.extension));
@@ -324,6 +327,7 @@ void AudioExportDialog::onExportFinished(int exitCode, QProcess::ExitStatus stat
 
     if (exitCode == 0 && status == QProcess::NormalExit) {
         const QFileInfo fi(m_lastExportPath);
+        m_lastExportDir = fi.absolutePath();
         ui->statusLabel->setText(tr("Exported: %1").arg(fi.fileName()));
 
         QMessageBox msgBox(this);

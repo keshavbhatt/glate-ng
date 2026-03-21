@@ -78,6 +78,7 @@ private:
     QStringList            m_audioFiles;
     QString                m_exportName;
     QString                m_lastExportPath;
+    QString                m_lastExportDir;
 
     QProcess      *m_exportProcess  = nullptr;
     QProcess      *m_previewProcess = nullptr;
