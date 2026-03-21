@@ -17,10 +17,11 @@
       <li>Translate between 100+ languages instantly</li>
       <li>Line-by-line translation view for structured content</li>
       <li>Text-to-speech playback with voice and gender options</li>
-      <li>Export speech output as MP3 audio</li>
-      <li>Translation history with search and quick copy</li>
-      <li>Share translations via public paste link</li>
-      <li>Dark and light themes with automatic system detection</li>
+      <li>Export speech to audio formats with advanced controls</li>
+      <li>Translation history with search, quick copy, and text export</li>
+      <li>Share translations with built-in paste link support</li>
+      <li>Global quick-translate hotkey support on X11/XWayland</li>
+      <li>Dark and light themes</li>
     </ul>
   </description>
 
@@ -69,6 +70,8 @@
     <keyword>speech</keyword>
     <keyword>tts</keyword>
     <keyword>language</keyword>
+    <keyword>translation</keyword>
+    <keyword>dialect</keyword>
   </keywords>
 
   <releases>
@@ -76,7 +79,8 @@
       <description>
         <p>Audio export improvements and usability polish.</p>
         <ul>
-          <li>Echo effect now exposes delay (100–2000 ms) and decay (0.10–0.90) controls</li>
+          <li>Added read buttons in LineByLine mode</li>
+          <li>Advanced audio export options</li>
           <li>Export dialog remembers the last used folder across sessions</li>
           <li>Status messages simplified to remove internal technical terms</li>
         </ul>
