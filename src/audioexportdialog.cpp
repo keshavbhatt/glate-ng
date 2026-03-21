@@ -45,6 +45,10 @@ AudioExportDialog::AudioExportDialog(QWidget *parent)
     connect(toggleBtn, &QToolButton::toggled, this, [this, toggleBtn](bool on) {
         toggleBtn->setArrowType(on ? Qt::DownArrow : Qt::RightArrow);
         ui->advancedGroup->setVisible(on);
+        ui->exportBtn->setText(on ? QStringLiteral("Advanced Export")
+                                  : QStringLiteral("Export"));
+        ui->exportBtn->setToolTip(on ? QStringLiteral("Export with set advanced options")
+                          : QStringLiteral("Export with default settings"));
         QTimer::singleShot(0, this, [this] { adjustSize(); });
     });
     // ── Format / bitrate / sample-rate / channel population ─────────────────
