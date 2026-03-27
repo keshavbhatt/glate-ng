@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>com.ktechpit.glate</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>LicenseRef-proprietary</project_license>
+  <project_license>LicenseRef-proprietary=https://raw.githubusercontent.com/keshavbhatt/glate-packaging/refs/heads/master/LICENSE</project_license>
   <name>Glate</name>
   <summary>Translate text and generate speech audio on Linux desktop</summary>
 
