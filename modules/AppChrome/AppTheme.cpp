@@ -405,6 +405,7 @@ QString accentOverrideQss(const QColor &accent) {
     QToolButton:checked { color: %1; }
     QSlider::sub-page:horizontal { background: %1; }
     QLineEdit { selection-background-color: %1; selection-color: %2; }
+    QTextEdit:focus, QPlainTextEdit:focus { border: 1px solid palette(mid); }
   )")
       .arg(a, on, hover, pressed);
 }

@@ -433,8 +433,11 @@ QPlainTextEdit {
 }
 QTextEdit:focus,
 QPlainTextEdit:focus { border: 1px solid #e3e6ea; }
-QTextEdit#src1 { padding-right: 18px; }
-QTextEdit#src2 { padding-left: 18px; }
+QTextEdit#src1,
+QTextEdit#src2 {
+    padding-left: 4px;
+    padding-right: 4px;
+}
 
 /* MainWindow splitter handle: visible by default so the pane divider reads as a line. */
 QSplitter#paneSplitter::handle {
