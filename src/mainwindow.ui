@@ -285,7 +285,7 @@
              </property>
              <property name="icon">
               <iconset resource="icons.qrc">
-               <normaloff>:/icons/star-line.png</normaloff>:/icons/star-line.png</iconset>
+               <normaloff>:/icons/user-3-line.png</normaloff>:/icons/user-3-line.png</iconset>
              </property>
              <property name="iconSize">
               <size>
