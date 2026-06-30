@@ -188,20 +188,6 @@ QLineEdit:disabled {
 }
 QLineEdit[echoMode="2"] { lineedit-password-character: 9679; }  /* password dots */
 
-QTextEdit,
-QPlainTextEdit {
-    background-color: #ffffff;
-    color: #1a1d23;
-    border: 1px solid #e3e6ea;
-    border-radius: 6px;
-    padding: 8px;
-    selection-background-color: #1a1d23;
-    selection-color: #ffffff;
-}
-
-QTextEdit:focus,
-QPlainTextEdit:focus { border: 1px solid #e3e6ea; }
-
 /* ====================  COMBO BOX  ======================================= */
 /* Mirrors the default QPushButton: subtle translucent fill, pill radius,
    no border in any state (no stray top line ever appears).                   */
@@ -433,8 +419,22 @@ QScrollBar::sub-page:horizontal { background: transparent; }
 
 QScrollArea { background: transparent; border: none; }
 QScrollArea > QWidget > QWidget { background: transparent; }
-QAbstractScrollArea { background: transparent; border: none; }
+QAbstractScrollArea { background: transparent; }
 QAbstractScrollArea::corner { background: transparent; }
+
+QTextEdit,
+QPlainTextEdit {
+    background-color: #ffffff;
+    color: #1a1d23;
+    border: 1px solid #e3e6ea;
+    padding: 8px;
+    selection-background-color: #1a1d23;
+    selection-color: #ffffff;
+}
+QTextEdit:focus,
+QPlainTextEdit:focus { border: 1px solid #e3e6ea; }
+QTextEdit#src1 { padding-right: 18px; }
+QTextEdit#src2 { padding-left: 18px; }
 
 /* MainWindow splitter handle: visible by default so the pane divider reads as a line. */
 QSplitter#paneSplitter::handle {

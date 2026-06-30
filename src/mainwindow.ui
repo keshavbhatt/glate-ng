@@ -334,9 +334,6 @@
            <property name="layoutDirection">
             <enum>Qt::RightToLeft</enum>
            </property>
-           <property name="styleSheet">
-            <string notr="true">QTextEdit{padding-right: 18px;}</string>
-           </property>
            <property name="acceptRichText">
             <bool>false</bool>
            </property>
@@ -351,9 +348,6 @@
             <font>
              <pointsize>14</pointsize>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QTextEdit{padding-left: 18px;}</string>
            </property>
            <property name="acceptRichText">
             <bool>false</bool>
