@@ -13,10 +13,12 @@
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
+#include <QCoreApplication>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -183,6 +185,7 @@ constexpr auto kKeyMode = "appearance/mode";     // system | light | dark
 constexpr auto kKeySkin = "appearance/skin";     // fusion | fusion2
 constexpr auto kKeyAccent = "appearance/accent"; // #rrggbb
 constexpr auto kKeyCsd = "appearance/csd";       // bool
+constexpr auto kKeyUiLanguage = "ui_language";   // system | locale code
 QColor defaultAccent() { return QColor(0x4a, 0x78, 0xff); }
 } // namespace
 
@@ -197,6 +200,29 @@ void Settings::updateAccentButton() {
       QStringLiteral("QPushButton{background:%1;color:%2;border:1px solid "
                      "palette(mid);border-radius:4px;padding:4px 10px;}")
           .arg(c.name(), dark ? "#ffffff" : "#000000"));
+}
+
+void Settings::promptRestartRequiredDialog() {
+  if (m_restartPromptOpen)
+    return;
+  m_restartPromptOpen = true;
+
+  QMessageBox box(this);
+  box.setIcon(QMessageBox::Information);
+  box.setWindowTitle(tr("Restart Required"));
+  box.setText(tr("This change will take effect after restarting Glate."));
+  auto *restartNow = box.addButton(tr("Restart Now"), QMessageBox::AcceptRole);
+  box.addButton(tr("Restart Later"), QMessageBox::RejectRole);
+  box.exec();
+
+  m_restartPromptOpen = false;
+  if (box.clickedButton() != restartNow)
+    return;
+
+  const QString program = QCoreApplication::applicationFilePath();
+  const QStringList args = QCoreApplication::arguments().mid(1);
+  QProcess::startDetached(program, args);
+  qApp->quit();
 }
 
 void Settings::buildAppearanceSection() {
@@ -231,6 +257,18 @@ void Settings::buildAppearanceSection() {
                              "style; \"Fusion 2\" is richer and branded."));
   form->addRow(tr("Theme:"), m_skinCombo);
 
+  // UI language (applies on next launch).
+  m_languageCombo = new QComboBox(box);
+  m_languageCombo->addItem(tr("Follow system"), QStringLiteral("system"));
+  m_languageCombo->addItem(QStringLiteral("English"), QStringLiteral("en_IN"));
+  m_languageCombo->addItem(QStringLiteral("Deutsch"), QStringLiteral("de_DE"));
+  m_languageCombo->addItem(QStringLiteral("Français"), QStringLiteral("fr_FR"));
+  m_languageCombo->addItem(QStringLiteral("Português (Brasil)"), QStringLiteral("pt_BR"));
+  m_languageCombo->addItem(QStringLiteral("Italiano"), QStringLiteral("it_IT"));
+  m_languageCombo->setToolTip(
+      tr("Interface language. Change takes effect after restart."));
+  form->addRow(tr("Language:"), m_languageCombo);
+
   // Accent colour (+ reset to default).
   auto *accentRow = new QHBoxLayout;
   m_accentButton = new QPushButton(box);
@@ -257,11 +295,13 @@ void Settings::buildAppearanceSection() {
   // ── Load current values ─────────────────────────────────────────────────
   const QString mode = settings.value(kKeyMode, "system").toString();
   const QString skin = settings.value(kKeySkin, "fusion").toString();
+  const QString uiLanguage = settings.value(kKeyUiLanguage, "system").toString();
   m_accentColor = QColor(settings.value(kKeyAccent, defaultAccent().name()).toString());
   if (!m_accentColor.isValid())
     m_accentColor = defaultAccent();
   m_modeCombo->setCurrentIndex(qMax(0, m_modeCombo->findData(mode)));
   m_skinCombo->setCurrentIndex(qMax(0, m_skinCombo->findData(skin)));
+  m_languageCombo->setCurrentIndex(qMax(0, m_languageCombo->findData(uiLanguage)));
   m_csdCheckBox->setChecked(settings.value(kKeyCsd, true).toBool());
   updateAccentButton();
 
@@ -281,6 +321,10 @@ void Settings::buildAppearanceSection() {
           [applyTheme](int) { applyTheme(); });
   connect(m_skinCombo, &QComboBox::currentIndexChanged, this,
           [applyTheme](int) { applyTheme(); });
+  connect(m_languageCombo, &QComboBox::currentIndexChanged, this, [this](int) {
+    settings.setValue(kKeyUiLanguage, m_languageCombo->currentData().toString());
+    promptRestartRequiredDialog();
+  });
   connect(m_accentButton, &QPushButton::clicked, this, [this, applyTheme]() {
     const QColor c = QColorDialog::getColor(
         m_accentColor.isValid() ? m_accentColor : defaultAccent(), this,
@@ -297,5 +341,8 @@ void Settings::buildAppearanceSection() {
     applyTheme();
   });
   connect(m_csdCheckBox, &QCheckBox::toggled, this,
-          [this](bool on) { settings.setValue(kKeyCsd, on); });
+          [this](bool on) {
+            settings.setValue(kKeyCsd, on);
+            promptRestartRequiredDialog();
+          });
 }

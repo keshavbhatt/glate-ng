@@ -2,10 +2,12 @@
 #include <QApplication>
 #include <QColor>
 #include <QGuiApplication>
+#include <QLocale>
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QSettings>
 #include <QString>
+#include <QTranslator>
 
 #include <AppTheme.h>
 #include <ThemeController.h>
@@ -27,6 +29,22 @@ int main(int argc, char *argv[]) {
   QApplication::setApplicationName("Glate");
   QApplication::setOrganizationName("org.keshavnrj.ubuntu");
   QApplication::setApplicationVersion(QString::fromLatin1(GLATE_APP_VERSION));
+
+  // Load the UI translation. "system" follows the OS locale.
+  QTranslator translator;
+  const QString uiLang = QSettings().value("ui_language", "system").toString();
+  QStringList localeCandidates;
+  if (uiLang.isEmpty() || uiLang == QLatin1String("system"))
+    localeCandidates = QLocale::system().uiLanguages();
+  else
+    localeCandidates << uiLang;
+  for (const QString &locale : localeCandidates) {
+    const QString baseName = QStringLiteral("Glate_") + QLocale(locale).name();
+    if (translator.load(QStringLiteral(":/i18n/") + baseName)) {
+      a.installTranslator(&translator);
+      break;
+    }
+  }
 
   // ── Single-instance guard ─────────────────────────────────────────────────
   // Try to contact an already-running instance first.

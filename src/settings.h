@@ -45,6 +45,7 @@ private:
   // ThemeController; supersedes the old dark/light radios.
   void buildAppearanceSection();
   void updateAccentButton();
+  void promptRestartRequiredDialog();
 
   Ui::Settings *ui;
   QSettings settings;
@@ -56,9 +57,11 @@ private:
   ThemeController *m_theme = nullptr;
   QComboBox *m_modeCombo = nullptr;
   QComboBox *m_skinCombo = nullptr;
+  QComboBox *m_languageCombo = nullptr;
   QPushButton *m_accentButton = nullptr;
   QCheckBox *m_csdCheckBox = nullptr;
   QColor m_accentColor;
+  bool m_restartPromptOpen = false;
 };
 
 #endif // SETTINGS_H

@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.10 REQUIRED COMPONENTS Core Gui Widgets Network Multimedia)
+find_package(Qt6 6.10 REQUIRED COMPONENTS Core Gui Widgets Network Multimedia LinguistTools)
 
 qt_standard_project_setup()
 
@@ -90,6 +90,14 @@ qt_add_executable(glate
     resources.qrc
     slides.qrc
     planscomparisiondialog.h planscomparisiondialog.cpp planscomparisiondialog.ui
+)
+
+qt_add_translations(glate TS_FILES
+    Locales/Glate_en_IN.ts
+    Locales/Glate_de_DE.ts
+    Locales/Glate_fr_FR.ts
+    Locales/Glate_pt_BR.ts
+    Locales/Glate_it_IT.ts
 )
 
 # On Windows: suppress the console window (GUI subsystem)

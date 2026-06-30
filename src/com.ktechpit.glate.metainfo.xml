@@ -21,6 +21,7 @@
       <li>Translation history with search, quick copy, and text export</li>
       <li>Share translations with built-in paste link support</li>
       <li>Global quick-translate hotkey support on X11/XWayland</li>
+      <li>Available in English, German, French, Brazilian Portuguese and Italian</li>
       <li>Dark and light themes</li>
     </ul>
   </description>

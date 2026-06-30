@@ -99,3 +99,10 @@ RESOURCES += \
     slides.qrc
 
 DISTFILES +=
+
+TRANSLATIONS += \
+    Locales/Glate_en_IN.ts \
+    Locales/Glate_de_DE.ts \
+    Locales/Glate_fr_FR.ts \
+    Locales/Glate_pt_BR.ts \
+    Locales/Glate_it_IT.ts
