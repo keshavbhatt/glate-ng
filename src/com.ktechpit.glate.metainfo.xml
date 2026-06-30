@@ -78,11 +78,16 @@
   <releases>
     <release version="4.2" date="2026-06-30">
       <description>
-        <p>UI polish</p>
+        <p>Major UI, theming and localization update.</p>
         <ul>
-          <li>Moved About into a standalone dialog and added toolbar access</li>
-          <li>Refined history cards, theme defaults, and combo popup sizing</li>
-          <li>Updated toolbar icons and app metadata</li>
+          <li>Moved About out of Settings into a standalone dialog with direct toolbar access and quick project/developer links.</li>
+          <li>History list UI reworked for consistent row sizing, spacing and controls across Fusion and Fusion 2 themes.</li>
+          <li>Default skin switched to Fusion with a lighter default accent colour for better readability.</li>
+          <li>Fusion combo-box popups now use compact, scrollable height instead of expanding to full screen.</li>
+          <li>Added localization support for English, German, French, Brazilian Portuguese and Italian.</li>
+          <li>Added in-app language selector and startup locale loading from bundled translations.</li>
+          <li>Language and custom title bar (CSD) changes now show a restart prompt with “Restart Now” and “Restart Later”.</li>
+          <li>Updated toolbar/account/about icons and refreshed release metadata.</li>
         </ul>
       </description>
     </release>
