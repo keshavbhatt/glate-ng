@@ -44,13 +44,13 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <property name="leftMargin">
-         <number>7</number>
+         <number>0</number>
         </property>
         <property name="topMargin">
          <number>0</number>
         </property>
         <property name="rightMargin">
-         <number>7</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="QWidget" name="left_buttons_widget" native="true">
@@ -128,7 +128,7 @@
            <item>
             <spacer name="horizontalSpacer_7">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -144,7 +144,7 @@
         <item>
          <spacer name="horizontalSpacer_4">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -163,14 +163,14 @@
            <pixmap>../../../../tmp/logo.png</pixmap>
           </property>
           <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <set>Qt::AlignmentFlag::AlignCenter</set>
           </property>
          </widget>
         </item>
         <item>
          <spacer name="horizontalSpacer_3">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -198,7 +198,7 @@
            <item>
             <spacer name="horizontalSpacer_6">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -313,7 +313,7 @@
           <number>0</number>
          </property>
          <property name="topMargin">
-          <number>7</number>
+          <number>0</number>
          </property>
          <property name="rightMargin">
           <number>0</number>
@@ -332,7 +332,7 @@
             <bool>true</bool>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::RightToLeft</enum>
            </property>
            <property name="acceptRichText">
             <bool>false</bool>
@@ -366,7 +366,7 @@
          <number>7</number>
         </property>
         <property name="topMargin">
-         <number>0</number>
+         <number>7</number>
         </property>
         <property name="rightMargin">
          <number>7</number>
@@ -498,14 +498,14 @@
            <string>-</string>
           </property>
           <property name="textInteractionFlags">
-           <set>Qt::NoTextInteraction</set>
+           <set>Qt::TextInteractionFlag::NoTextInteraction</set>
           </property>
          </widget>
         </item>
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -547,7 +547,7 @@
         <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -563,7 +563,7 @@
            <string/>
           </property>
           <property name="textInteractionFlags">
-           <set>Qt::NoTextInteraction</set>
+           <set>Qt::TextInteractionFlag::NoTextInteraction</set>
           </property>
          </widget>
         </item>

@@ -625,6 +625,11 @@ QSizeGrip { background: transparent; width: 0; height: 0; }
 /* ====================  DIALOG BUTTON BOX  ============================== */
 QDialogButtonBox QPushButton { min-width: 80px; }
 
+QFrame#historyCard QPushButton {
+    padding: 4px 14px;
+    min-height: 0;
+}
+
 
 /* ====================  MISC  =========================================== */
 QToolBar {
