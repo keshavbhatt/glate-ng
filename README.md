@@ -55,7 +55,7 @@ cmake --build cmake-build-release -j
 ./build-flatpak.sh
 ```
 
-This creates a versioned bundle like `glate-4.1.0.flatpak`.
+This creates a versioned bundle like `glate-4.2.0.flatpak`.
 
 ### Snap
 
@@ -83,6 +83,5 @@ If you need system-wide quick-translate hotkeys, run Glate on an X11 session (or
 ## Credits
 
 [Alan Pope](https://github.com/popey) of [Canonical](https://github.com/canonical) helped decide the app name.
-
 
 

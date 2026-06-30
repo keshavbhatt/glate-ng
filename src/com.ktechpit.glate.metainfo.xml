@@ -75,6 +75,16 @@
   </keywords>
 
   <releases>
+    <release version="4.2" date="2026-06-30">
+      <description>
+        <p>UI polish</p>
+        <ul>
+          <li>Moved About into a standalone dialog and added toolbar access</li>
+          <li>Refined history cards, theme defaults, and combo popup sizing</li>
+          <li>Updated toolbar icons and app metadata</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.1" date="2026-03-21">
       <description>
         <p>Audio export improvements and usability polish.</p>
@@ -107,4 +117,3 @@
   <update_contact>98378sub@gmail.com</update_contact>
   <content_rating type="oars-1.1"/>
 </component>
-

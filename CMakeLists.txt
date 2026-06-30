@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(glate VERSION 4.1.0 LANGUAGES CXX)
+project(glate VERSION 4.2.0 LANGUAGES CXX)
 
 # Single source of truth for app versioning reused by packaging/tooling.
 set(GLATE_VERSION "${PROJECT_VERSION}")
