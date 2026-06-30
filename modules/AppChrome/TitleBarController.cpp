@@ -200,8 +200,6 @@ void TitleBarController::buildStrip() {
   auto *strip = new TitleStrip;
   m_strip = strip;
   m_strip->setObjectName(QStringLiteral("AppChromeTitleBar"));
-  // Use the application's default font (not whatever the toolbar may enlarge to).
-  m_strip->setFont(QApplication::font());
 
   auto *lay = new QHBoxLayout(m_strip);
   lay->setContentsMargins(8, 1, 1, 1);

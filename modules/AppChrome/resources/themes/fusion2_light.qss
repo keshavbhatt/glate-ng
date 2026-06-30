@@ -39,11 +39,6 @@
 QWidget {
     background-color: #f5f6f8;
     color: #1a1d23;
-    /* Fusion 2 ships "Circular"/"Gotham" (proprietary). Closest free options:
-       install Montserrat or Inter for the most accurate look. Qt picks the
-       first available family from this list.                                  */
-    font-family: "Montserrat", "Inter", "Segoe UI", "Noto Sans", "Ubuntu", sans-serif;
-    font-size: 13px;
 }
 
 QMainWindow,
@@ -58,17 +53,16 @@ QToolTip {
     border: 1px solid #d2d6dc;
     border-radius: 0px;
     padding: 3px 7px;
-    font-size: 12px;
 }
 
 /* Generic text helpers - assign via objectName, e.g. lbl.setObjectName("H1") */
 QLabel { background-color: transparent; }
-QLabel#H1 { font-size: 28px; font-weight: 700; color: #1a1d23; }
-QLabel#H2 { font-size: 20px; font-weight: 700; color: #1a1d23; }
-QLabel#H3 { font-size: 15px; font-weight: 600; color: #1a1d23; }
+QLabel#H1 { font-weight: 700; color: #1a1d23; }
+QLabel#H2 { font-weight: 700; color: #1a1d23; }
+QLabel#H3 { font-weight: 600; color: #1a1d23; }
 QLabel#Subdued  { color: #5b6472; }
-QLabel#Muted    { color: #8a92a0; font-size: 11px; }
-QLabel#Caption  { color: #5b6472; font-size: 11px; letter-spacing: 1px; }
+QLabel#Muted    { color: #8a92a0; }
+QLabel#Caption  { color: #5b6472; letter-spacing: 1px; }
 
 QLabel:disabled { color: #b0b6bf; }
 
@@ -127,7 +121,6 @@ QPushButton {
     border: none;
     border-radius: 16px;
     padding: 7px 18px;
-    font-size: 13px;
     font-weight: 600;
 }
 
@@ -197,7 +190,6 @@ QComboBox {
     border: none;
     border-radius: 16px;
     padding: 7px 16px;
-    font-size: 13px;
     font-weight: 600;
     /* Scrollable list popup that honours maxVisibleItems, so long lists (e.g.
        the language selector) don't span the whole screen height. */
@@ -422,6 +414,13 @@ QScrollArea > QWidget > QWidget { background: transparent; }
 QAbstractScrollArea { background: transparent; }
 QAbstractScrollArea::corner { background: transparent; }
 
+QAbstractItemView {
+    background-color: #ffffff;
+    color: #1a1d23;
+    border: 1px solid #e3e6ea;
+    outline: 0;
+}
+
 QTextEdit,
 QPlainTextEdit {
     background-color: #ffffff;
@@ -439,31 +438,18 @@ QTextEdit#src2 {
     padding-right: 4px;
 }
 
-/* MainWindow splitter handle: visible by default so the pane divider reads as a line. */
-QSplitter#paneSplitter::handle {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-QSplitter#paneSplitter::handle:hover {
-    background-color: rgba(0, 0, 0, 0.10);
-}
-
-
 /* ====================  LIST / TREE / TABLE VIEWS  ======================= */
 QListView,
 QTreeView,
 QListWidget,
 QTreeWidget {
-    background-color: #f5f6f8;
-    color: #1a1d23;
-    border: none;
-    outline: 0;
     show-decoration-selected: 1;
 }
 QListView::item,
 QTreeView::item,
 QListWidget::item,
 QTreeWidget::item {
-    padding: 4px 10px;
+    padding: 6px 10px;
     border-radius: 4px;
     color: #5b6472;
 }
@@ -485,6 +471,7 @@ QTreeView::branch { background: transparent; }
 /* Sidebar nav variant - flatten selection highlight, dark text when active.
    Give the nav list  setObjectName("Nav")                                    */
 QListWidget#Nav { background-color: #eceef1; padding: 4px; }
+QListWidget#Nav { border: none; }
 QListWidget#Nav::item {
     padding: 10px 14px;
     border-radius: 6px;
@@ -502,13 +489,11 @@ QTableWidget {
     alternate-background-color: #f7f8fa;
     color: #1a1d23;
     gridline-color: transparent;
-    border: none;
-    outline: 0;
     selection-background-color: #e2e5ea;
     selection-color: #1a1d23;
 }
 QTableView::item,
-QTableWidget::item { padding: 8px 10px; border: none; }
+QTableWidget::item { padding: 6px 10px; border: none; }
 QTableView::item:hover,
 QTableWidget::item:hover    { background-color: #f1f2f5; }
 QTableView::item:selected,
@@ -521,7 +506,6 @@ QHeaderView::section {
     border: none;
     border-bottom: 1px solid #e3e6ea;
     padding: 8px 10px;
-    font-size: 11px;
     font-weight: 600;
 }
 QHeaderView::section:hover { color: #1a1d23; }
@@ -558,7 +542,6 @@ QProgressBar {
     border-radius: 3px;
     height: 6px;
     text-align: center;
-    font-size: 11px;
 }
 QProgressBar::chunk {
     background-color: #1a1d23;
