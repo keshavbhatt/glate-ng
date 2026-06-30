@@ -15,14 +15,14 @@
     <p>It supports translation across 100+ languages, per-line translation view, voice playback, history tracking, and sharing translated text or speech output.</p>
     <ul>
       <li>Translate between 100+ languages instantly</li>
-      <li>Line-by-line translation view for structured content</li>
-      <li>Text-to-speech playback with voice and gender options</li>
-      <li>Export speech to audio formats with advanced controls</li>
-      <li>Translation history with search, quick copy, and text export</li>
-      <li>Share translations with built-in paste link support</li>
+      <li>Line-by-line translation view for structured content and review</li>
+      <li>Text-to-speech playback with selectable voice/gender plus audio export tools</li>
+      <li>Translation history with search, quick load, copy, and remove actions</li>
+      <li>Share translations via text save, e-mail, and public paste link generation</li>
+      <li>Standalone About dialog with quick access to project links and developer apps</li>
       <li>Global quick-translate hotkey support on X11/XWayland</li>
       <li>Available in English, German, French, Brazilian Portuguese and Italian</li>
-      <li>Dark and light themes</li>
+      <li>System-following Light/Dark appearance with Fusion and Fusion 2 theme choices</li>
     </ul>
   </description>
 
