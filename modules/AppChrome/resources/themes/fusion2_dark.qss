@@ -196,8 +196,10 @@ QPlainTextEdit {
     selection-background-color: #FFFFFF;
     selection-color: #000000;
 }
+/* Keep the resting border colour on focus — a brighter focus frame around a
+   large text pane reads as an ugly box. */
 QTextEdit:focus,
-QPlainTextEdit:focus { border: 1px solid #535353; }
+QPlainTextEdit:focus { border: 1px solid #282828; }
 
 
 /* ====================  COMBO BOX  ======================================= */

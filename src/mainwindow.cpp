@@ -106,6 +106,12 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   // resizeEvent enforces it (see below).
   ui->src1->setMinimumSize(170, 120);
   ui->src2->setMinimumSize(170, 120);
+  // Breathing room between the text and the (outer-edge) scrollbar so the two
+  // don't visually collide and are each easy to interact with. documentMargin
+  // is side-agnostic, which matters here since src1 is RTL (scrollbar on the
+  // left) and src2 is LTR (scrollbar on the right).
+  ui->src1->document()->setDocumentMargin(10);
+  ui->src2->document()->setDocumentMargin(10);
 
   // Thin themed separators between the top/bottom toolbars and the panes.
   auto makeToolbarSeparator = [this]() {
@@ -123,7 +129,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   // widget size hints — no magic number) and push it to the window manager once
   // the layout is realised, so an interactive resize can't squash the toolbars.
   ui->verticalLayout->setSizeConstraint(QLayout::SetMinimumSize);
-  QTimer::singleShot(0, this, [this]() { setMinimumSize(minimumSizeHint()); });
+  QTimer::singleShot(0, this, [this]() { setMinimumSize(resizeFloor()); });
 
   ui->src1->installEventFilter(this);
 
@@ -507,6 +513,17 @@ void MainWindow::resizeFix() {
                                   ui->left_buttons_widget->height());
 }
 
+QSize MainWindow::resizeFloor() const {
+  QSize floor = minimumSizeHint();
+  if (ui->horizontalLayout_3) {
+    floor = floor.expandedTo(ui->horizontalLayout_3->sizeHint());
+  }
+  if (ui->horizontalLayout_4) {
+    floor = floor.expandedTo(ui->horizontalLayout_4->sizeHint());
+  }
+  return floor;
+}
+
 void MainWindow::closeEvent(QCloseEvent *event) {
 
   m_settings.setValue("geometry", saveGeometry());
@@ -562,7 +579,7 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   // be squashed below what its widgets need. Snap back up to the layout-derived
   // minimum — this is the single source of truth (widget size hints), not a
   // hard-coded number.
-  const QSize floor = minimumSizeHint();
+  const QSize floor = resizeFloor();
   if (event->size().width() < floor.width() ||
       event->size().height() < floor.height()) {
     resize(event->size().expandedTo(floor));
@@ -1110,5 +1127,4 @@ void MainWindow::onLicenseStatusUpdated(
                                       : "Free")
         << "|" << status.message;
 }
-
 

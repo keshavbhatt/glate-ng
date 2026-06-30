@@ -78,6 +78,7 @@ private slots:
   QString getLangCode(const QString &langName) const;
   static void saveByTransId(const QString &translationId, const QString &reply);
   void processTranslation(const QString &reply);
+  QSize resizeFloor() const;
   void startTtsSession(const QString &playerName, const QString &text,
                        const QString &ttsLang, const QString &voiceGender);
   void playCurrentTtsChunk();
