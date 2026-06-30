@@ -1,7 +1,9 @@
 #include "mainwindow.h"
 
 #include <QFile>
+#include <QHBoxLayout>
 #include <QShortcut>
+#include <QSplitter>
 #include <QUrlQuery>
 
 #include "GlateLicenseConfig.h"
@@ -9,6 +11,10 @@
 #include "licenseservice.h"
 #include "ui_mainwindow.h"
 #include "utils.h"
+
+#include <AppTheme.h>
+#include <ThemeController.h>
+#include <WindowChrome.h>
 
 namespace {
 constexpr auto kPlay1IdleTooltip = "Play source text";
@@ -18,8 +24,8 @@ constexpr auto kBufferingTooltip = "Buffering audio...";
 constexpr auto kStopTooltip = "Stop playback";
 }
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), m_theme(theme) {
   ui->setupUi(this);
 
   m_trayManager = new SystemTrayManager(this);
@@ -43,8 +49,17 @@ MainWindow::MainWindow(QWidget *parent)
                        QApplication::applicationVersion());
   this->setWindowIcon(QIcon(":/icons/app/icon-64.png"));
 
-  setStyle(":/qbreeze/" + m_settings.value("theme", "dark").toString() +
-           ".qss");
+  // Theming is now driven globally by AppChrome (AppTheme + ThemeController,
+  // applied in main.cpp) instead of the bundled qbreeze stylesheet. When the
+  // user has client-side decoration enabled, add the app's own title bar +
+  // themed window edge. Must be set before show() so the frameless flag is in
+  // place before the native window is created.
+  if (m_settings.value("appearance/csd", true).toBool()) {
+    WindowChrome::Config cfg;
+    cfg.title = QApplication::applicationName();
+    cfg.icon = QApplication::windowIcon();
+    WindowChrome::install(this, cfg);
+  }
 
   // set layout
   m_translate = new controlButton(ui->translationWidget);
@@ -52,7 +67,9 @@ MainWindow::MainWindow(QWidget *parent)
   m_translate->setFixedSize(36, 36);
   m_translate->setMouseTracking(true);
   m_translate->setToolTip("Translate (Shift + Enter)");
-  m_translate->setStyleSheet("border:none;border-radius:18px;");
+  // Opaque circular background so the splitter line behind it is fully masked.
+  m_translate->setStyleSheet(
+      "border:none;border-radius:18px;background-color:palette(window);");
   m_translate->setIconSize(QSize(28, 28));
   const auto shortcut =
       new QShortcut(QKeySequence(tr("Shift+Return", "Translate")), m_translate,
@@ -62,6 +79,51 @@ MainWindow::MainWindow(QWidget *parent)
   QTimer::singleShot(100, this, SLOT(resizeFix()));
   connect(m_translate, &QAbstractButton::clicked, this,
           &MainWindow::translate_clicked);
+
+  // Make the source/translation panes user-resizable. src1/src2 move out of the
+  // translationWidget layout into a splitter; the translate + switch-language
+  // buttons ride the handle (see positionPaneButtons()).
+  m_splitter = new QSplitter(Qt::Horizontal, ui->translationWidget);
+  m_splitter->setObjectName("paneSplitter");
+  m_splitter->setHandleWidth(6);
+  m_splitter->setChildrenCollapsible(false);
+  m_splitter->addWidget(ui->src1);
+  m_splitter->addWidget(ui->src2);
+  m_splitter->setStretchFactor(0, 1);
+  m_splitter->setStretchFactor(1, 1);
+  if (auto *lay = qobject_cast<QHBoxLayout *>(ui->translationWidget->layout()))
+    lay->addWidget(m_splitter);
+  // The overlay buttons must stay above the splitter (created after them).
+  m_translate->raise();
+  ui->switch_lang->raise();
+  connect(m_splitter, &QSplitter::splitterMoved, this,
+          [this](int, int) { positionPaneButtons(); });
+
+  // The panes are QTextEdits — scroll areas whose minimumSizeHint is ~0, so on
+  // their own they let the window collapse and the layout can't derive a real
+  // floor. Give them a sensible minimum so the window's minimumSizeHint() (which
+  // also accounts for the toolbars) becomes meaningful — no magic number needed;
+  // resizeEvent enforces it (see below).
+  ui->src1->setMinimumSize(170, 120);
+  ui->src2->setMinimumSize(170, 120);
+
+  // Thin themed separators between the top/bottom toolbars and the panes.
+  auto makeToolbarSeparator = [this]() {
+    auto *line = new QFrame(centralWidget());
+    line->setObjectName(QStringLiteral("toolbarSeparator"));
+    line->setFrameShape(QFrame::NoFrame);
+    line->setFixedHeight(1);
+    line->setAttribute(Qt::WA_StyledBackground, true); // paint the QSS background
+    return line;
+  };
+  ui->verticalLayout->insertWidget(1, makeToolbarSeparator()); // under top toolbar
+  ui->verticalLayout->insertWidget(3, makeToolbarSeparator()); // over bottom toolbar
+
+  // Drive the window's minimum from the layout's real minimum (derived from the
+  // widget size hints — no magic number) and push it to the window manager once
+  // the layout is realised, so an interactive resize can't squash the toolbars.
+  ui->verticalLayout->setSizeConstraint(QLayout::SetMinimumSize);
+  QTimer::singleShot(0, this, [this]() { setMinimumSize(minimumSizeHint()); });
 
   ui->src1->installEventFilter(this);
 
@@ -75,6 +137,10 @@ MainWindow::MainWindow(QWidget *parent)
   ui->lang1->addItem(QIcon(":/icons/translate-2.png"), "Auto Detect");
   ui->lang1->addItems(m_langName);
   ui->lang2->addItems(m_langName);
+  // Cap the (very long) language popups so they scroll instead of spanning the
+  // whole screen height (needs `combobox-popup: 0` in the Fusion 2 QSS).
+  ui->lang1->setMaxVisibleItems(14);
+  ui->lang2->setMaxVisibleItems(14);
   for (int i = 0; i < ui->lang1->count(); i++) {
     if (i == 0) {
       ui->lang1->setItemIcon(i, QIcon(":/icons/magic-line.png"));
@@ -347,7 +413,7 @@ void MainWindow::changeEvent(QEvent *e) {
 
 void MainWindow::init_settings() {
   m_nativeHotkey = new QHotkey(this);
-  m_settingsWidget = new Settings(this, m_nativeHotkey);
+  m_settingsWidget = new Settings(this, m_nativeHotkey, m_theme);
   m_settingsWidget->setWindowTitle(QApplication::applicationName() +
                                    " | Settings");
   m_settingsWidget->setWindowFlag(Qt::Dialog);
@@ -361,10 +427,9 @@ void MainWindow::init_settings() {
                                  Qt::WindowActive);
             this->show();
           });
-  connect(m_settingsWidget, &Settings::themeToggled, this, [=]() {
-    setStyle(":/qbreeze/" + m_settings.value("theme", "dark").toString() +
-             ".qss");
-  });
+  // Theme is now driven by the Settings → Appearance section directly through
+  // the ThemeController (the old dark/light radios are superseded), so there's
+  // nothing to handle on themeToggled here.
   const QString platform = QGuiApplication::platformName().toLower();
   const bool hotkeyUnsupported = platform.contains("wayland");
   if (!hotkeyUnsupported && m_settingsWidget->quickResultCheckBoxChecked() &&
@@ -473,13 +538,37 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   QMainWindow::closeEvent(event);
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event) {
-  const int x =
-      ui->translationWidget->geometry().center().x() - m_translate->width() / 2;
+void MainWindow::positionPaneButtons() {
+  // Centre the translate + switch-language buttons on the splitter handle (so
+  // they track the divider as the user drags the panes), falling back to the
+  // translationWidget centre before the splitter is laid out.
+  int cx = ui->translationWidget->width() / 2;
+  if (m_splitter) {
+    if (QWidget *handle = m_splitter->handle(1))
+      cx = handle->mapTo(ui->translationWidget,
+                         QPoint(handle->width() / 2, 0))
+               .x();
+  }
   const int y = ui->translationWidget->geometry().center().y() -
-          (m_translate->height() + m_translate->height() / 2);
-  m_translate->move(x, y);
-  ui->switch_lang->move(x, ui->switch_lang->y());
+                (m_translate->height() + m_translate->height() / 2);
+  m_translate->move(cx - m_translate->width() / 2, y);
+  ui->switch_lang->move(cx - ui->switch_lang->width() / 2,
+                        ui->switch_lang->y());
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event) {
+  // A frameless (client-side-decorated) window isn't reliably held to its
+  // minimum by the compositor during an interactive resize, so the layout could
+  // be squashed below what its widgets need. Snap back up to the layout-derived
+  // minimum — this is the single source of truth (widget size hints), not a
+  // hard-coded number.
+  const QSize floor = minimumSizeHint();
+  if (event->size().width() < floor.width() ||
+      event->size().height() < floor.height()) {
+    resize(event->size().expandedTo(floor));
+    return; // a fresh resizeEvent fires with the clamped size
+  }
+  positionPaneButtons();
   ui->left_buttons_widget->resize(ui->right_button_widget->width(),
                                   ui->left_buttons_widget->height());
   QMainWindow::resizeEvent(event);
@@ -510,102 +599,6 @@ void MainWindow::readLangCode() {
     m_supportedTts.append(ttsCode.trimmed());
   }
   tts.close();
-}
-
-void MainWindow::setStyle(const QString &fname) {
-  QFile styleSheet(fname);
-  if (!styleSheet.open(QIODevice::ReadOnly)) {
-    qWarning("Unable to open file");
-    return;
-  }
-  qApp->setStyleSheet(styleSheet.readAll());
-  styleSheet.close();
-
-  // ── Apply a matching QPalette ─────────────────────────────────────────────
-  // Palette colours are taken directly from the same tokens used in the QSS
-  // files so that palette()-based theme detection (e.g. in AccountDialog) is
-  // always consistent with what the user actually sees.
-  const bool dark = fname.contains(QStringLiteral("dark"));
-
-  QPalette pal;
-
-  if (dark) {
-    // ── Dark palette (dark.qss) ───────────────────────────────────────────
-    const QColor window      ("#31363b");
-    const QColor windowText  ("#eff0f1");
-    const QColor base        ("#232629");  // QLineEdit / QTextEdit background
-    const QColor altBase     ("#2a2929");  // alternate row colour
-    const QColor highlight   ("#2b8fbe");  // selection-background-color
-    const QColor highlightTx ("#0f1419");  // selection-color
-    const QColor tooltipBase ("#1f252b");
-    const QColor tooltipText ("#f5f7fa");
-    const QColor disabled    ("#9aa2ab");
-    const QColor link        ("#3daee9");
-    const QColor mid         ("#232629");
-    const QColor shadow      ("#1a1d20");
-
-    pal.setColor(QPalette::Window,          window);
-    pal.setColor(QPalette::WindowText,      windowText);
-    pal.setColor(QPalette::Base,            base);
-    pal.setColor(QPalette::AlternateBase,   altBase);
-    pal.setColor(QPalette::Text,            windowText);
-    pal.setColor(QPalette::BrightText,      windowText);
-    pal.setColor(QPalette::Button,          window);
-    pal.setColor(QPalette::ButtonText,      windowText);
-    pal.setColor(QPalette::Highlight,       highlight);
-    pal.setColor(QPalette::HighlightedText, highlightTx);
-    pal.setColor(QPalette::ToolTipBase,     tooltipBase);
-    pal.setColor(QPalette::ToolTipText,     tooltipText);
-    pal.setColor(QPalette::Link,            link);
-    pal.setColor(QPalette::LinkVisited,     link.darker(120));
-    pal.setColor(QPalette::Mid,             mid);
-    pal.setColor(QPalette::Shadow,          shadow);
-    // Disabled group
-    pal.setColor(QPalette::Disabled, QPalette::WindowText,  disabled);
-    pal.setColor(QPalette::Disabled, QPalette::Text,        disabled);
-    pal.setColor(QPalette::Disabled, QPalette::ButtonText,  disabled);
-    pal.setColor(QPalette::Disabled, QPalette::Highlight,   mid);
-    pal.setColor(QPalette::Disabled, QPalette::HighlightedText, disabled);
-  } else {
-    // ── Light palette (light.qss) ─────────────────────────────────────────
-    const QColor window      ("#eff0f1");
-    const QColor windowText  ("#232627");
-    const QColor base        ("#fcfcfc");  // QLineEdit / QTextEdit background
-    const QColor altBase     ("#eff0f1");
-    const QColor highlight   ("#2f9dd6");  // selection-background-color
-    const QColor highlightTx ("#0f1419");
-    const QColor tooltipBase ("#1f252b");
-    const QColor tooltipText ("#f5f7fa");
-    const QColor disabled    ("#7c8289");
-    const QColor link        ("#3daee9");
-    const QColor mid         ("#e5e7eb");
-    const QColor shadow      ("#b8bec4");
-
-    pal.setColor(QPalette::Window,          window);
-    pal.setColor(QPalette::WindowText,      windowText);
-    pal.setColor(QPalette::Base,            base);
-    pal.setColor(QPalette::AlternateBase,   altBase);
-    pal.setColor(QPalette::Text,            windowText);
-    pal.setColor(QPalette::BrightText,      windowText);
-    pal.setColor(QPalette::Button,          window);
-    pal.setColor(QPalette::ButtonText,      windowText);
-    pal.setColor(QPalette::Highlight,       highlight);
-    pal.setColor(QPalette::HighlightedText, highlightTx);
-    pal.setColor(QPalette::ToolTipBase,     tooltipBase);
-    pal.setColor(QPalette::ToolTipText,     tooltipText);
-    pal.setColor(QPalette::Link,            link);
-    pal.setColor(QPalette::LinkVisited,     link.darker(120));
-    pal.setColor(QPalette::Mid,             mid);
-    pal.setColor(QPalette::Shadow,          shadow);
-    // Disabled group
-    pal.setColor(QPalette::Disabled, QPalette::WindowText,  disabled);
-    pal.setColor(QPalette::Disabled, QPalette::Text,        disabled);
-    pal.setColor(QPalette::Disabled, QPalette::ButtonText,  disabled);
-    pal.setColor(QPalette::Disabled, QPalette::Highlight,   QColor("#c0c4c8"));
-    pal.setColor(QPalette::Disabled, QPalette::HighlightedText, disabled);
-  }
-
-  qApp->setPalette(pal);
 }
 
 MainWindow::~MainWindow() {

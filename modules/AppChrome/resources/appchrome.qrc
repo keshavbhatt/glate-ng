@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/appchrome">
+    <file>themes/fusion2_dark.qss</file>
+    <file>themes/fusion2_light.qss</file>
+    <file>icons/chevron-down.svg</file>
+    <file>icons/chevron_up_spinbox.svg</file>
+    <file>icons/chevron_down_spinbox.svg</file>
+  </qresource>
+</RCC>

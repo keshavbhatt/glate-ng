@@ -9,11 +9,27 @@
 #include <QShortcut>
 #include <QSystemTrayIcon>
 
-Settings::Settings(QWidget *parent, QHotkey *hotKey)
-    : QWidget(parent), ui(new Ui::Settings) {
+#include <AppTheme.h>
+#include <ThemeController.h>
+
+#include <QCheckBox>
+#include <QColorDialog>
+#include <QComboBox>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
+
+Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
+    : QWidget(parent), ui(new Ui::Settings), m_theme(theme) {
   ui->setupUi(this);
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   this->nativeHotkey = hotKey;
+
+  setWindowTitle(tr("Glate | Settings"));
+  buildAppearanceSection();
 
   // Populate voice combo from central voice list
   ui->voiceGenderGlobal->clear();
@@ -190,4 +206,127 @@ void Settings::on_dark_toggled(bool checked) {
 void Settings::on_light_toggled(bool checked) {
   settings.setValue("theme", checked ? "light" : "dark");
   emit themeToggled();
+}
+
+namespace {
+// Appearance settings keys (kept in sync with main.cpp / mainwindow.cpp).
+constexpr auto kKeyMode = "appearance/mode";     // system | light | dark
+constexpr auto kKeySkin = "appearance/skin";     // fusion | fusion2
+constexpr auto kKeyAccent = "appearance/accent"; // #rrggbb
+constexpr auto kKeyCsd = "appearance/csd";       // bool
+QColor defaultAccent() { return QColor(0x3d, 0x6e, 0xff); }
+} // namespace
+
+void Settings::updateAccentButton() {
+  if (!m_accentButton)
+    return;
+  const QColor c = m_accentColor.isValid() ? m_accentColor : defaultAccent();
+  m_accentButton->setText(QStringLiteral("  %1  ").arg(c.name().toUpper()));
+  // Swatch: fill the button with the colour, readable text on top.
+  const bool dark = c.lightnessF() < 0.6;
+  m_accentButton->setStyleSheet(
+      QStringLiteral("QPushButton{background:%1;color:%2;border:1px solid "
+                     "palette(mid);border-radius:4px;padding:4px 10px;}")
+          .arg(c.name(), dark ? "#ffffff" : "#000000"));
+}
+
+void Settings::buildAppearanceSection() {
+  // The old dark/light radios (and their "Theme" label) are superseded by this
+  // richer section — hide them rather than delete (they live in the .ui form).
+  if (ui->dark)
+    ui->dark->hide();
+  if (ui->light)
+    ui->light->hide();
+  if (auto *lbl = findChild<QLabel *>("label"))
+    lbl->hide(); // the "Theme" label next to the old radios
+
+  auto *box = new QGroupBox(tr("Appearance"), this);
+  auto *form = new QFormLayout(box);
+  form->setContentsMargins(12, 8, 12, 12);
+  form->setSpacing(10);
+  form->setLabelAlignment(Qt::AlignLeft);
+  form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+
+  // Appearance — light/dark, or follow the OS scheme live.
+  m_modeCombo = new QComboBox(box);
+  m_modeCombo->addItem(tr("Follow system"), QStringLiteral("system"));
+  m_modeCombo->addItem(tr("Light"), QStringLiteral("light"));
+  m_modeCombo->addItem(tr("Dark"), QStringLiteral("dark"));
+  form->addRow(tr("Appearance:"), m_modeCombo);
+
+  // Theme (skin).
+  m_skinCombo = new QComboBox(box);
+  m_skinCombo->addItem(tr("Fusion"), QStringLiteral("fusion"));
+  m_skinCombo->addItem(tr("Fusion 2"), QStringLiteral("fusion2"));
+  m_skinCombo->setToolTip(tr("Overall look — \"Fusion\" is the clean native "
+                             "style; \"Fusion 2\" is richer and branded."));
+  form->addRow(tr("Theme:"), m_skinCombo);
+
+  // Accent colour (+ reset to default).
+  auto *accentRow = new QHBoxLayout;
+  m_accentButton = new QPushButton(box);
+  m_accentButton->setToolTip(tr("Accent colour for selections and highlights."));
+  m_accentButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+  auto *accentReset = new QPushButton(tr("Reset"), box);
+  accentReset->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+  accentRow->addWidget(m_accentButton);
+  accentRow->addWidget(accentReset);
+  accentRow->addStretch(1);
+  form->addRow(tr("Accent colour:"), accentRow);
+
+  // Client-side decoration (applies on restart).
+  m_csdCheckBox =
+      new QCheckBox(tr("Use the app's own title bar (custom decorations)"), box);
+  m_csdCheckBox->setToolTip(tr("Replaces the system title bar with the app's "
+                               "own. Takes effect after restart."));
+  form->addRow(QString(), m_csdCheckBox);
+
+  // Insert the section at the top of the settings layout.
+  if (auto *outer = qobject_cast<QVBoxLayout *>(layout()))
+    outer->insertWidget(0, box);
+
+  // ── Load current values ─────────────────────────────────────────────────
+  const QString mode = settings.value(kKeyMode, "system").toString();
+  const QString skin = settings.value(kKeySkin, "fusion2").toString();
+  m_accentColor = QColor(settings.value(kKeyAccent, defaultAccent().name()).toString());
+  if (!m_accentColor.isValid())
+    m_accentColor = defaultAccent();
+  m_modeCombo->setCurrentIndex(qMax(0, m_modeCombo->findData(mode)));
+  m_skinCombo->setCurrentIndex(qMax(0, m_skinCombo->findData(skin)));
+  m_csdCheckBox->setChecked(settings.value(kKeyCsd, true).toBool());
+  updateAccentButton();
+
+  // ── Apply + persist on change (live, no restart for theme/skin/accent) ────
+  auto applyTheme = [this]() {
+    settings.setValue(kKeyMode, m_modeCombo->currentData().toString());
+    settings.setValue(kKeySkin, m_skinCombo->currentData().toString());
+    settings.setValue(kKeyAccent, m_accentColor.name());
+    if (m_theme)
+      m_theme->configure(
+          AppTheme::skinFromString(m_skinCombo->currentData().toString()),
+          AppTheme::modeFromString(m_modeCombo->currentData().toString()),
+          m_accentColor.isValid() ? m_accentColor : defaultAccent());
+  };
+
+  connect(m_modeCombo, &QComboBox::currentIndexChanged, this,
+          [applyTheme](int) { applyTheme(); });
+  connect(m_skinCombo, &QComboBox::currentIndexChanged, this,
+          [applyTheme](int) { applyTheme(); });
+  connect(m_accentButton, &QPushButton::clicked, this, [this, applyTheme]() {
+    const QColor c = QColorDialog::getColor(
+        m_accentColor.isValid() ? m_accentColor : defaultAccent(), this,
+        tr("Choose accent colour"));
+    if (c.isValid()) {
+      m_accentColor = c;
+      updateAccentButton();
+      applyTheme();
+    }
+  });
+  connect(accentReset, &QPushButton::clicked, this, [this, applyTheme]() {
+    m_accentColor = defaultAccent();
+    updateAccentButton();
+    applyTheme();
+  });
+  connect(m_csdCheckBox, &QCheckBox::toggled, this,
+          [this](bool on) { settings.setValue(kKeyCsd, on); });
 }

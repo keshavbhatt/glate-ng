@@ -8,6 +8,7 @@
 
 Slider::Slider(QWidget *parent) : QWidget(parent), ui(new Ui::Slider) {
   ui->setupUi(this);
+  setWindowTitle(tr("Glate | Welcome"));
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   /*  Set Global variables here
    *  total        = total numbers of slides in resource.

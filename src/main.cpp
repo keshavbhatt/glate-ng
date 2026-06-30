@@ -1,9 +1,15 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QColor>
 #include <QGuiApplication>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QSettings>
 #include <QString>
+
+#include <AppTheme.h>
+#include <ThemeController.h>
+#include <WindowChrome.h>
 
 // Unique name for the local socket used as a single-instance lock.
 static constexpr auto kInstanceKey = "com.ktechpit.glate.SingleInstance";
@@ -44,7 +50,30 @@ int main(int argc, char *argv[]) {
   instanceServer.listen(kInstanceKey);
   // ─────────────────────────────────────────────────────────────────────────
 
-  MainWindow w;
+  // ── AppChrome: self-contained theming + client-side decoration ────────────
+  // Apply the skin/appearance/accent the user picked in Settings → Appearance
+  // (Fusion/Fusion 2, follow-system/light/dark) and track the OS scheme live.
+  // Replaces glate's bundled qbreeze stylesheet.
+  QSettings appSettings; // org/app name already set above
+  const QString skin = appSettings.value("appearance/skin", "fusion2").toString();
+  const QString mode = appSettings.value("appearance/mode", "system").toString();
+  QColor accent(appSettings.value("appearance/accent", "#3d6eff").toString());
+  if (!accent.isValid())
+    accent = QColor(0x3d, 0x6e, 0xff);
+  auto *themeController = new ThemeController(a, AppTheme::Accents{}, &a);
+  themeController->configure(AppTheme::skinFromString(skin),
+                             AppTheme::modeFromString(mode), accent);
+
+  // Client-side decoration (opt-in via Settings). When on, give the app's own
+  // dialogs the same custom title bar (close + maximize).
+  if (appSettings.value("appearance/csd", true).toBool()) {
+    WindowChrome::Config dialogCfg;
+    dialogCfg.showMinimize = false;
+    dialogCfg.showMaximize = true;
+    WindowChrome::enableAutoForDialogs(a, dialogCfg);
+  }
+
+  MainWindow w(themeController);
 
   // When a second instance connects, bring this window to the front.
   QObject::connect(&instanceServer, &QLocalServer::newConnection, &w,

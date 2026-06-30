@@ -265,10 +265,11 @@ void History::addRecordItem(const HistoryRecord &record) {
   auto *card = new QFrame();
   card->setObjectName("historyCard");
   card->setFrameShape(QFrame::NoFrame);
-  // Transparent background so the QListWidget selection highlight shows through
-  card->setStyleSheet(
-      "QFrame#historyCard { background: transparent; border: none; }"
-      "QFrame#historyCard QLabel { background: transparent; border: none; }");
+  // No local stylesheet: a plain QFrame is already transparent under the theme
+  // (QFrame { border: 0 }, no background), so the list selection shows through —
+  // and, crucially, setting a stylesheet here stopped the child Load/Remove
+  // QPushButtons from picking up the app's pill button style. Labels are
+  // transparent by default too.
 
   auto *root = new QVBoxLayout(card);
   root->setContentsMargins(10, 8, 10, 8);

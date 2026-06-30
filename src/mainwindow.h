@@ -27,11 +27,15 @@ namespace Ui {
 class MainWindow;
 }
 
+class ThemeController;
+class QSplitter;
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(ThemeController *theme = nullptr,
+                      QWidget *parent = nullptr);
   ~MainWindow();
 
 protected slots:
@@ -68,7 +72,6 @@ private slots:
   QString getTransLang() const;
   QString getSourceLang() const;
   void init_settings();
-  static void setStyle(const QString &fname);
   void showError(const QString &message);
   void textSelectionChanged(QTextEdit *editor);
   QString getLangName(const QString &langCode) const;
@@ -92,6 +95,14 @@ private slots:
 private:
   Ui::MainWindow *ui;
   Ui::textOptionForm textOptionForm;
+
+  // Live theming controller (owned by main); drives the AppChrome Fusion/Fusion2
+  // look and follows the OS light/dark scheme. May be null.
+  ThemeController *m_theme = nullptr;
+
+  // Resizable source/translation panes; the translate button rides its handle.
+  QSplitter *m_splitter = nullptr;
+  void positionPaneButtons(); // place translate + switch-lang over the handle
 
   controlButton *m_translate = nullptr;
   WaitingSpinnerWidget *m_loader = nullptr;

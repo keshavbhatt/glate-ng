@@ -4,6 +4,7 @@
 
 Error::Error(QWidget *parent) : QWidget(parent), ui(new Ui::Error) {
   ui->setupUi(this);
+  setWindowTitle(tr("Glate | Error"));
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
 }
 

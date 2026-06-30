@@ -6,6 +6,7 @@
 LineByLine::LineByLine(QWidget *parent, QClipboard *clipborad)
     : QWidget(parent), ui(new Ui::LineByLine) {
   ui->setupUi(this);
+  setWindowTitle(tr("Glate | Line by Line"));
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   this->clipborad = clipborad;
   ui->readSrc1->setEnabled(false);

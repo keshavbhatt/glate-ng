@@ -85,7 +85,6 @@ qt_add_executable(glate
     slider.ui
     textoptionform.ui
     icons.qrc
-    qbreeze.qrc
     resources.qrc
     slides.qrc
     planscomparisiondialog.h planscomparisiondialog.cpp planscomparisiondialog.ui
@@ -102,6 +101,8 @@ target_include_directories(glate PRIVATE
     # AccountAndLicense module headers (account_license PUBLIC already exposes this,
     # but list explicitly for IDE tooling)
     ${CMAKE_SOURCE_DIR}/modules/AccountAndLicense
+    # AppChrome module headers (app_chrome PUBLIC already exposes this too)
+    ${CMAKE_SOURCE_DIR}/modules/AppChrome
 )
 
 target_compile_definitions(glate PRIVATE
@@ -117,6 +118,7 @@ endif()
 
 target_link_libraries(glate PRIVATE
     account_license
+    app_chrome
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets

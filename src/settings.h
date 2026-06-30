@@ -1,6 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include <QColor>
 #include <QHotkey>
 #include <QProcess>
 #include <QSettings>
@@ -10,11 +11,17 @@ namespace Ui {
 class Settings;
 }
 
+class ThemeController;
+class QComboBox;
+class QPushButton;
+class QCheckBox;
+
 class Settings : public QWidget {
   Q_OBJECT
 
 public:
-  explicit Settings(QWidget *parent = nullptr, QHotkey *hotKey = nullptr);
+  explicit Settings(QWidget *parent = nullptr, QHotkey *hotKey = nullptr,
+                    ThemeController *theme = nullptr);
   ~Settings();
 signals:
   void translationRequest(QString selected);
@@ -41,11 +48,24 @@ private slots:
   void on_light_toggled(bool checked);
 
 private:
+  // Builds the "Appearance" section (theme/skin/accent/CSD) and wires it to the
+  // ThemeController; supersedes the old dark/light radios.
+  void buildAppearanceSection();
+  void updateAccentButton();
+
   Ui::Settings *ui;
   QSettings settings;
   QHotkey *nativeHotkey = nullptr;
   bool m_hotkeySupported = true;
   QString x11_selected;
+
+  // Appearance controls (built in code, AppChrome-driven).
+  ThemeController *m_theme = nullptr;
+  QComboBox *m_modeCombo = nullptr;
+  QComboBox *m_skinCombo = nullptr;
+  QPushButton *m_accentButton = nullptr;
+  QCheckBox *m_csdCheckBox = nullptr;
+  QColor m_accentColor;
 };
 
 #endif // SETTINGS_H
