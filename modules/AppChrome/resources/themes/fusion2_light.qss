@@ -438,6 +438,14 @@ QScrollArea > QWidget > QWidget { background: transparent; }
 QAbstractScrollArea { background: transparent; border: none; }
 QAbstractScrollArea::corner { background: transparent; }
 
+/* MainWindow splitter handle: visible by default so the pane divider reads as a line. */
+QSplitter#paneSplitter::handle {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+QSplitter#paneSplitter::handle:hover {
+    background-color: rgba(0, 0, 0, 0.10);
+}
+
 
 /* ====================  LIST / TREE / TABLE VIEWS  ======================= */
 QListView,
