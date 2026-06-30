@@ -423,6 +423,7 @@ QPlainTextEdit {
     color: #F5F5F5;
     border: 1px solid #282828;
     padding: 8px;
+    border-radius: 4px;
     selection-background-color: #FFFFFF;
     selection-color: #000000;
 }
