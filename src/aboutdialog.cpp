@@ -92,6 +92,10 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
                                     QUrl(QStringLiteral("https://paypal.me/keshavnrj/9")), this));
   linksLayout->addWidget(linkButton(tr("GitHub"), QIcon(QStringLiteral(":/icons/links-line.png")),
                                     QUrl(QStringLiteral("https://github.com/keshavbhatt/glate")), this));
+  linksLayout->addWidget(linkButton(tr("More Apps By Developer"),
+                                    QIcon(QStringLiteral(":/icons/share-line.png")),
+                                    QUrl(QStringLiteral("https://snapcraft.io/publisher/keshavnrj")),
+                                    this));
   linksLayout->addWidget(linkButton(tr("Rate"), QIcon(QStringLiteral(":/icons/star-line.png")),
                                     QUrl(QStringLiteral("snap://glate")), this));
   linksLayout->addStretch();

@@ -183,7 +183,7 @@ constexpr auto kKeyMode = "appearance/mode";     // system | light | dark
 constexpr auto kKeySkin = "appearance/skin";     // fusion | fusion2
 constexpr auto kKeyAccent = "appearance/accent"; // #rrggbb
 constexpr auto kKeyCsd = "appearance/csd";       // bool
-QColor defaultAccent() { return QColor(0x3d, 0x6e, 0xff); }
+QColor defaultAccent() { return QColor(0x4a, 0x78, 0xff); }
 } // namespace
 
 void Settings::updateAccentButton() {
@@ -256,7 +256,7 @@ void Settings::buildAppearanceSection() {
 
   // ── Load current values ─────────────────────────────────────────────────
   const QString mode = settings.value(kKeyMode, "system").toString();
-  const QString skin = settings.value(kKeySkin, "fusion2").toString();
+  const QString skin = settings.value(kKeySkin, "fusion").toString();
   m_accentColor = QColor(settings.value(kKeyAccent, defaultAccent().name()).toString());
   if (!m_accentColor.isValid())
     m_accentColor = defaultAccent();

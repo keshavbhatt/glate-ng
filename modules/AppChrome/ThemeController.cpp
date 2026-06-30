@@ -11,6 +11,7 @@
 #include <QStyleHints>
 #include <QStyleOptionViewItem>
 #include <QStyledItemDelegate>
+#include <QListView>
 
 namespace {
 // Item delegate that drops the focus state before painting. Without it the
@@ -96,6 +97,16 @@ bool ThemeController::eventFilter(QObject *obj, QEvent *event) {
         if (btn->style()) {
           btn->style()->unpolish(btn);
           btn->style()->polish(btn);
+        }
+      }
+      if (m_skin == AppTheme::Skin::Fusion) {
+        if (auto *combo = qobject_cast<QComboBox *>(obj)) {
+          if (auto *view = combo->view()) {
+            view->setMaximumHeight(320);
+            view->setMinimumWidth(combo->minimumWidth());
+          }
+          if (combo->maxVisibleItems() < 14)
+            combo->setMaxVisibleItems(14);
         }
       }
     }

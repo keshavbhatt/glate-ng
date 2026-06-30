@@ -267,6 +267,8 @@ QString styleSheet(const Accents &accents) {
     QToolBar { border: none; border-bottom: 1px solid palette(mid); }
     QToolBar::separator { background: palette(mid); width: 1px; margin: 5px 6px; }
 
+    QComboBox QAbstractItemView { max-height: 320px; }
+
     /* Tabs: consistent palette-driven pane border in both light and dark. */
     QTabWidget::pane { border: 1px solid palette(mid); top: -1px; }
 

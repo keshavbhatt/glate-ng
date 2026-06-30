@@ -55,11 +55,11 @@ int main(int argc, char *argv[]) {
   // (Fusion/Fusion 2, follow-system/light/dark) and track the OS scheme live.
   // Replaces glate's bundled qbreeze stylesheet.
   QSettings appSettings; // org/app name already set above
-  const QString skin = appSettings.value("appearance/skin", "fusion2").toString();
+  const QString skin = appSettings.value("appearance/skin", "fusion").toString();
   const QString mode = appSettings.value("appearance/mode", "system").toString();
-  QColor accent(appSettings.value("appearance/accent", "#3d6eff").toString());
+  QColor accent(appSettings.value("appearance/accent", "#4a78ff").toString());
   if (!accent.isValid())
-    accent = QColor(0x3d, 0x6e, 0xff);
+    accent = QColor(0x4a, 0x78, 0xff);
   auto *themeController = new ThemeController(a, AppTheme::Accents{}, &a);
   themeController->configure(AppTheme::skinFromString(skin),
                              AppTheme::modeFromString(mode), accent);
