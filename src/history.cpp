@@ -18,6 +18,10 @@
 
 #include <algorithm>
 
+namespace {
+QString singleLinePreview(const QString &text) { return text.simplified(); }
+} // namespace
+
 History::History(QWidget *parent) : QWidget(parent), ui(new Ui::History) {
   ui->setupUi(this);
   {
@@ -38,6 +42,8 @@ History::History(QWidget *parent) : QWidget(parent), ui(new Ui::History) {
   ui->historyList->setDragEnabled(false);
   ui->historyList->setDropIndicatorShown(false);
   ui->historyList->setDragDropMode(QAbstractItemView::NoDragDrop);
+  ui->historyList->setUniformItemSizes(false);
+  ui->historyList->setSpacing(8);
 
   connect(ui->searchEdit, &QLineEdit::textChanged,
           this, &History::onSearchChanged);
@@ -265,21 +271,25 @@ void History::addRecordItem(const HistoryRecord &record) {
   auto *card = new QFrame();
   card->setObjectName("historyCard");
   card->setFrameShape(QFrame::NoFrame);
-  // No local stylesheet: a plain QFrame is already transparent under the theme
-  // (QFrame { border: 0 }, no background), so the list selection shows through —
-  // and, crucially, setting a stylesheet here stopped the child Load/Remove
-  // QPushButtons from picking up the app's pill button style. Labels are
-  // transparent by default too.
+  card->setStyleSheet(QStringLiteral(
+      "QFrame#historyCard {"
+      "  background-color: palette(base);"
+      "  border: 1px solid palette(mid);"
+      "  border-radius: 8px;"
+      "}"));
 
   auto *root = new QVBoxLayout(card);
-  root->setContentsMargins(10, 8, 10, 8);
+  root->setContentsMargins(12, 10, 12, 10);
   root->setSpacing(8);
 
   auto *topRow = new QHBoxLayout();
+  topRow->setSpacing(10);
   auto *langLabel = new QLabel(record.from + "  \u2192  " + record.to, card);
   QFont langFont = langLabel->font();
   langFont.setBold(true);
   langLabel->setFont(langFont);
+  langLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  langLabel->setFixedHeight(langLabel->fontMetrics().height() + 4);
 
   auto *dateLabel = new QLabel(record.date, card);
   // Use placeholder/disabled text color — works correctly in both light and dark themes
@@ -287,55 +297,39 @@ void History::addRecordItem(const HistoryRecord &record) {
   datePal.setColor(QPalette::WindowText,
                    qApp->palette().color(QPalette::Disabled, QPalette::Text));
   dateLabel->setPalette(datePal);
+  dateLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  dateLabel->setFixedHeight(dateLabel->fontMetrics().height() + 4);
 
   topRow->addWidget(langLabel);
   topRow->addStretch(1);
   topRow->addWidget(dateLabel);
-  root->addLayout(topRow);
-
-  auto *content = new QHBoxLayout();
-  content->setSpacing(12);
-
-  auto *textColumn = new QGridLayout();
-  textColumn->setHorizontalSpacing(10);
-  textColumn->setVerticalSpacing(4);
-
-  auto *fromCaption = new QLabel(tr("Source"), card);
-  auto *toCaption = new QLabel(tr("Translation"), card);
-  QFont captionFont = fromCaption->font();
-  captionFont.setBold(true);
-  fromCaption->setFont(captionFont);
-  toCaption->setFont(captionFont);
-
-  auto *fromText = new ElidedLabel(record.src1, Qt::ElideRight, card);
-  auto *toText   = new ElidedLabel(record.src2, Qt::ElideRight, card);
-  fromText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-  toText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-  textColumn->addWidget(fromCaption, 0, 0);
-  textColumn->addWidget(toCaption, 0, 1);
-  textColumn->addWidget(fromText, 1, 0);
-  textColumn->addWidget(toText, 1, 1);
-  content->addLayout(textColumn, 1);
-
-  auto *actions = new QVBoxLayout();
-  actions->setSpacing(6);
   auto *loadBtn = new QPushButton(tr("Load"), card);
   auto *removeBtn = new QPushButton(tr("Remove"), card);
   loadBtn->setToolTip(tr("Load this translation into the editor"));
   removeBtn->setToolTip(tr("Remove this history entry"));
-  actions->addWidget(loadBtn);
-  actions->addWidget(removeBtn);
-  actions->addStretch(1);
-  content->addLayout(actions);
+  loadBtn->setFixedHeight(24);
+  removeBtn->setFixedHeight(24);
+  topRow->addSpacing(6);
+  topRow->addWidget(loadBtn);
+  topRow->addWidget(removeBtn);
+  root->addLayout(topRow);
 
-  root->addLayout(content);
+  auto *textColumn = new QGridLayout();
+  textColumn->setHorizontalSpacing(10);
+  textColumn->setVerticalSpacing(0);
 
-  // Subtle separator line at the bottom of each card
-  auto *separator = new QFrame(card);
-  separator->setFrameShape(QFrame::HLine);
-  separator->setFrameShadow(QFrame::Sunken);
-  root->addWidget(separator);
+  auto *fromText = new ElidedLabel(singleLinePreview(record.src1), Qt::ElideRight, card);
+  auto *toText   = new ElidedLabel(singleLinePreview(record.src2), Qt::ElideRight, card);
+  fromText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+  toText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+  fromText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  toText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  fromText->setFixedHeight(fromText->fontMetrics().height() + 6);
+  toText->setFixedHeight(toText->fontMetrics().height() + 6);
+
+  textColumn->addWidget(fromText, 0, 0);
+  textColumn->addWidget(toText, 0, 1);
+  root->addLayout(textColumn);
 
   connect(loadBtn, &QPushButton::clicked, this, [this, record]() {
     emit setTranslationId(record.id);
@@ -353,9 +347,13 @@ void History::addRecordItem(const HistoryRecord &record) {
   auto *item = new QListWidgetItem();
   item->setData(Qt::UserRole, record.id);
   ui->historyList->addItem(item);
-  // Fixed height: prevents items growing with long text now that labels elide.
-  item->setSizeHint(QSize(ui->historyList->viewport()->width(), 110));
   ui->historyList->setItemWidget(item, card);
+  const int rowHeight = root->contentsMargins().top() +
+                        topRow->sizeHint().height() +
+                        root->spacing() +
+                        textColumn->sizeHint().height() +
+                        root->contentsMargins().bottom();
+  item->setSizeHint(QSize(ui->historyList->viewport()->width(), rowHeight));
 }
 
 bool History::matchesSearch(const HistoryRecord &record) const {
@@ -411,4 +409,3 @@ void History::showEvent(QShowEvent *event) {
     restoreGeometry(geom);
   }
 }
-

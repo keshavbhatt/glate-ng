@@ -626,7 +626,7 @@ QSizeGrip { background: transparent; width: 0; height: 0; }
 QDialogButtonBox QPushButton { min-width: 80px; }
 
 QFrame#historyCard QPushButton {
-    padding: 4px 14px;
+    padding: 2px 10px;
     min-height: 0;
 }
 

@@ -3,7 +3,6 @@
 
 #include <QColor>
 #include <QHotkey>
-#include <QProcess>
 #include <QSettings>
 #include <QWidget>
 
@@ -37,12 +36,6 @@ private slots:
   void setShortcut(const QKeySequence &sequence);
 
   void readSettings();
-  static void on_github_clicked();
-
-  static void on_rate_clicked();
-
-  static void on_donate_clicked();
-
   void on_dark_toggled(bool checked);
 
   void on_light_toggled(bool checked);

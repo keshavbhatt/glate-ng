@@ -35,6 +35,8 @@ if(WIN32)
 endif()
 
 qt_add_executable(glate
+    aboutdialog.cpp
+    aboutdialog.h
     accountdialog.cpp
     accountdialog.h
     accountdialog.ui
@@ -226,4 +228,3 @@ if(WIN32)
     )
     include(CPack)
 endif()
-

@@ -6,6 +6,7 @@
 #include <QSplitter>
 #include <QUrlQuery>
 
+#include "aboutdialog.h"
 #include "GlateLicenseConfig.h"
 #include "accountdialog.h"
 #include "licenseservice.h"
@@ -1090,6 +1091,17 @@ void MainWindow::on_help_clicked() {
   }
 }
 
+void MainWindow::on_about_clicked() {
+  if (!m_aboutDialog)
+    m_aboutDialog = new AboutDialog(this);
+  if (m_aboutDialog->isVisible()) {
+    m_aboutDialog->raise();
+    m_aboutDialog->activateWindow();
+    return;
+  }
+  m_aboutDialog->showNormal();
+}
+
 // ── Account / licence ─────────────────────────────────────────────────────────
 
 void MainWindow::on_account_clicked() const {
@@ -1127,4 +1139,3 @@ void MainWindow::onLicenseStatusUpdated(
                                       : "Free")
         << "|" << status.message;
 }
-

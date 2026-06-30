@@ -1,7 +1,5 @@
 #include "settings.h"
 
-#include <QDesktopServices>
-
 #include "ui_settings.h"
 #include "utils.h"
 
@@ -19,6 +17,7 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QProcess>
 #include <QPushButton>
 #include <QVBoxLayout>
 
@@ -84,24 +83,6 @@ Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
   ui->dark->setChecked(settings.value("theme", "dark").toString() == "dark");
   ui->light->setChecked(settings.value("theme").toString() == "light");
 
-  const QString hotkeyNote =
-      m_hotkeySupported
-          ? QString()
-          : tr("<p align=\"center\"><span><b>Note:</b> Global shortcuts are "
-               "not available on native Wayland sessions.</span></p>");
-
-  QString aboutTxt =
-      R"(<p align="center"> <span style="font-weight: bold;">Glate</span></p>
-         <p align="center"><span>Designed and Developed</span></p>
-         <p align="center"><span>by </span><span style="font-weight:bold;">Keshav Bhatt</span>
-         <span> &lt;keshavnrj@gmail.com&gt;</span></p>
-         <p align="center"><span>Website: https://ktechpit.com</span></p>
-         <p align="center"><span>Runtime: %1</span></p>
-         <p align="center"><span>Version: %2</span></p>
-         %3)";
-
-  ui->aboutTextBrowser->setText(
-      aboutTxt.arg(qVersion(), qApp->applicationVersion(), hotkeyNote));
 }
 
 Settings::~Settings() { delete ui; }
@@ -184,18 +165,6 @@ bool Settings::closeToTrayEnabled() const {
 
 QKeySequence Settings::keySequenceEditKeySequence() {
   return ui->keySequenceEdit->keySequence();
-}
-
-void Settings::on_github_clicked() {
-  QDesktopServices::openUrl(QUrl("https://github.com/keshavbhatt/glate"));
-}
-
-void Settings::on_rate_clicked() {
-  QDesktopServices::openUrl(QUrl("snap://glate"));
-}
-
-void Settings::on_donate_clicked() {
-  QDesktopServices::openUrl(QUrl("https://paypal.me/keshavnrj/5"));
 }
 
 void Settings::on_dark_toggled(bool checked) {

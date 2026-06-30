@@ -31,6 +31,7 @@ CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 CONFIG += c++11
 
 SOURCES += \
+        aboutdialog.cpp \
         controlbutton.cpp \
         error.cpp \
         history.cpp \
@@ -47,6 +48,7 @@ SOURCES += \
         waitingspinnerwidget.cpp
 
 HEADERS += \
+        aboutdialog.h \
         controlbutton.h \
         error.h \
         history.h \
@@ -97,4 +99,3 @@ RESOURCES += \
     slides.qrc
 
 DISTFILES +=
-

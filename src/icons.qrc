@@ -14,6 +14,7 @@
         <file>icons/refresh-line.png</file>
         <file>icons/setting-line.png</file>
         <file>icons/star-line.png</file>
+        <file>icons/user-3-line.png</file>
         <file>icons/texture.png</file>
         <file>icons/app/icon-64.png</file>
         <file>icons/app/icon-128.png</file>
@@ -32,6 +33,7 @@
         <file>icons/loader-2-fill.png</file>
         <file>icons/facebook-box-line.png</file>
         <file>icons/file-text-line.png</file>
+        <file>icons/information-2-line.png</file>
         <file>icons/mail-add-line.png</file>
         <file>icons/twitter-line.png</file>
         <file>icons/share-line.png</file>

@@ -29,6 +29,7 @@ class MainWindow;
 
 class ThemeController;
 class QSplitter;
+class AboutDialog;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -60,6 +61,7 @@ private slots:
   void on_history_clicked() const;
   void on_lineByline_clicked();
   void on_help_clicked();
+  void on_about_clicked();
   void on_account_clicked() const;
 
   // Account / licence
@@ -136,6 +138,7 @@ private:
   // Account / licence
   AccountLicenseManager *m_licenseManager  = nullptr;
   AccountDialog         *m_accountDialog   = nullptr;
+  AboutDialog           *m_aboutDialog     = nullptr;
   bool                   m_hasPremiumAccess = false;
 };
 
