@@ -391,7 +391,17 @@ bool TitleBarController::eventFilter(QObject *obj, QEvent *event) {
         return true;
       }
       if (QWindow *wh = m_window->windowHandle()) {
-        wh->startSystemMove();
+        // The strip sits at the top of the window, so its top edge (and top
+        // corners) overlap the window's resize band. A press there must resize,
+        // not move — otherwise the resize cursor shown on that band would
+        // misleadingly drag the window instead of resizing it.
+        const Qt::Edges edges = edgesAt(me->globalPosition().toPoint());
+        if (edges) {
+          clearResizeCursor();
+          wh->startSystemResize(edges);
+        } else {
+          wh->startSystemMove();
+        }
         return true;
       }
     }
