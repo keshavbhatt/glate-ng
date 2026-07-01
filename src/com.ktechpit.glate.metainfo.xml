@@ -76,6 +76,17 @@
   </keywords>
 
   <releases>
+    <release version="4.3" date="2026-07-01">
+      <description>
+        <p>Theming defaults and custom title bar refinements.</p>
+        <ul>
+          <li>Fusion 2 is now the default skin for a cleaner, more modern look out of the box.</li>
+          <li>The app's own title bar (client-side decorations) now turns on automatically on GNOME/Wayland sessions, where the compositor draws no window controls of its own.</li>
+          <li>Improved the custom title bar's window border colour for better contrast against the desktop.</li>
+          <li>More reliable window interaction on the custom title bar, cleanly distinguishing move from edge/corner resize.</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.2" date="2026-06-30">
       <description>
         <p>Major UI, theming and localization update.</p>

@@ -55,7 +55,7 @@ cmake --build cmake-build-release -j
 ./build-flatpak.sh
 ```
 
-This creates a versioned bundle like `glate-4.2.0.flatpak`.
+This creates a versioned bundle like `glate-4.3.0.flatpak`.
 
 ### Snap
 
