@@ -84,6 +84,7 @@
           <li>The app's own title bar (client-side decorations) now turns on automatically on GNOME/Wayland sessions, where the compositor draws no window controls of its own.</li>
           <li>Improved the custom title bar's window border colour for better contrast against the desktop.</li>
           <li>More reliable window interaction on the custom title bar, cleanly distinguishing move from edge/corner resize.</li>
+          <li>Settings now offer an explicit "On close" choice between quitting Glate and minimizing to the system tray.</li>
         </ul>
       </description>
     </release>
