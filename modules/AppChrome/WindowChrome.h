@@ -37,6 +37,13 @@ struct Config {
                              // visually distinct
 };
 
+// The recommended default for whether CSD should be enabled on this session.
+// True on GNOME/Wayland — where the compositor draws no server-side title bar,
+// so the app must provide its own — and false everywhere else (X11 and other
+// Wayland compositors give windows proper native decorations). Used to seed the
+// "appearance/csd" setting on first run.
+bool defaultEnabled();
+
 // Installs CSD on `w`. Returns a controller parented to `w` (you may ignore it).
 // Returns nullptr if `w` is null.
 TitleBarController *install(QWidget *w, const Config &cfg);

@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
   // (Fusion/Fusion 2, follow-system/light/dark) and track the OS scheme live.
   // Replaces glate's bundled qbreeze stylesheet.
   QSettings appSettings; // org/app name already set above
-  const QString skin = appSettings.value("appearance/skin", "fusion").toString();
+  const QString skin = appSettings.value("appearance/skin", "fusion2").toString();
   const QString mode = appSettings.value("appearance/mode", "system").toString();
   QColor accent(appSettings.value("appearance/accent", "#4a78ff").toString());
   if (!accent.isValid())
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 
   // Client-side decoration (opt-in via Settings). When on, give the app's own
   // dialogs the same custom title bar (close + maximize).
-  if (appSettings.value("appearance/csd", true).toBool()) {
+  if (appSettings.value("appearance/csd", WindowChrome::defaultEnabled()).toBool()) {
     WindowChrome::Config dialogCfg;
     dialogCfg.showMinimize = false;
     dialogCfg.showMaximize = true;

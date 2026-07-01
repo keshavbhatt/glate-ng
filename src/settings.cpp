@@ -9,6 +9,7 @@
 
 #include <AppTheme.h>
 #include <ThemeController.h>
+#include <WindowChrome.h>
 
 #include <QCheckBox>
 #include <QColorDialog>
@@ -294,7 +295,7 @@ void Settings::buildAppearanceSection() {
 
   // ── Load current values ─────────────────────────────────────────────────
   const QString mode = settings.value(kKeyMode, "system").toString();
-  const QString skin = settings.value(kKeySkin, "fusion").toString();
+  const QString skin = settings.value(kKeySkin, "fusion2").toString();
   const QString uiLanguage = settings.value(kKeyUiLanguage, "system").toString();
   m_accentColor = QColor(settings.value(kKeyAccent, defaultAccent().name()).toString());
   if (!m_accentColor.isValid())
@@ -302,7 +303,8 @@ void Settings::buildAppearanceSection() {
   m_modeCombo->setCurrentIndex(qMax(0, m_modeCombo->findData(mode)));
   m_skinCombo->setCurrentIndex(qMax(0, m_skinCombo->findData(skin)));
   m_languageCombo->setCurrentIndex(qMax(0, m_languageCombo->findData(uiLanguage)));
-  m_csdCheckBox->setChecked(settings.value(kKeyCsd, true).toBool());
+  m_csdCheckBox->setChecked(
+      settings.value(kKeyCsd, WindowChrome::defaultEnabled()).toBool());
   updateAccentButton();
 
   // ── Apply + persist on change (live, no restart for theme/skin/accent) ────

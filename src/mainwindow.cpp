@@ -55,7 +55,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   // user has client-side decoration enabled, add the app's own title bar +
   // themed window edge. Must be set before show() so the frameless flag is in
   // place before the native window is created.
-  if (m_settings.value("appearance/csd", true).toBool()) {
+  if (m_settings.value("appearance/csd", WindowChrome::defaultEnabled()).toBool()) {
     WindowChrome::Config cfg;
     cfg.title = QApplication::applicationName();
     cfg.icon = QApplication::windowIcon();

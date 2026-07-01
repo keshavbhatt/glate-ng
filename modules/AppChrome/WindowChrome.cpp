@@ -3,17 +3,30 @@
 #include "TitleBarController.h"
 
 #include <QApplication>
+#include <QByteArray>
 #include <QColorDialog>
 #include <QDialog>
 #include <QEvent>
 #include <QFileDialog>
 #include <QFontDialog>
+#include <QGuiApplication>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QWidget>
 
 namespace WindowChrome {
+
+bool defaultEnabled() {
+  // GNOME on Wayland never draws a server-side title bar (it doesn't implement
+  // the xdg-decoration protocol), so without CSD the window has no controls.
+  // Elsewhere the native decorations are fine, so leave CSD off by default.
+  const bool wayland =
+      QGuiApplication::platformName().toLower().contains(QLatin1String("wayland"));
+  const QByteArray desktop = qgetenv("XDG_CURRENT_DESKTOP").toLower();
+  const bool gnome = desktop.contains("gnome");
+  return wayland && gnome;
+}
 
 TitleBarController *install(QWidget *w, const Config &cfg) {
   if (!w)

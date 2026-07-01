@@ -125,11 +125,11 @@ public:
 protected:
   void paintEvent(QPaintEvent *) override {
     QPainter p(this);
-    // Match the inside line/divider colour so the window edge reads as part of
-    // the same visual language. Single source of truth: AppTheme::separatorColor.
-    // Picked by the window lightness so it tracks the active theme.
+    // A slightly stronger variant of the inside divider so the window edge stays
+    // distinct against a neighbouring window. Single source of truth:
+    // AppTheme::windowBorderColor. Picked by window lightness to track the theme.
     const bool dark = palette().color(QPalette::Window).lightnessF() < 0.5;
-    QPen pen(AppTheme::separatorColor(dark));
+    QPen pen(AppTheme::windowBorderColor(dark));
     pen.setWidth(1); // hairline
     pen.setCosmetic(true);
     p.setPen(pen);

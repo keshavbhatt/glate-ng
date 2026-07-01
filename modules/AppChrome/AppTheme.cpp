@@ -488,4 +488,11 @@ QColor separatorColor(bool dark) {
   return dark ? QColor(0x28, 0x28, 0x28) : QColor(0xe3, 0xe6, 0xea);
 }
 
+QColor windowBorderColor(bool dark) {
+  // Slightly stronger than the inner divider so a frameless window's outer edge
+  // stays noticeable: a touch darker in light, a touch lighter in dark.
+  return dark ? separatorColor(true).lighter(140)   // #282828 -> ~#383838
+              : separatorColor(false).darker(112);  // #e3e6ea -> ~#cbced2
+}
+
 } // namespace AppTheme

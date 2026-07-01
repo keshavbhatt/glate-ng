@@ -52,6 +52,11 @@ QString styleSheet(const Accents &accents = {});
 // in-window separators.
 QColor separatorColor(bool dark);
 
+// The colour for a frameless window's outer edge hairline (CSD). A slightly
+// stronger variant of separatorColor so the window boundary reads clearly
+// against a neighbouring window without becoming a heavy frame.
+QColor windowBorderColor(bool dark);
+
 // Resolve a requested mode to a concrete Light/Dark. System is resolved from
 // QStyleHints::colorScheme() (Qt 6.5+), falling back to a window-lightness
 // heuristic on older Qt.
