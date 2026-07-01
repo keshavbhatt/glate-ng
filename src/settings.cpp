@@ -46,14 +46,17 @@ Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
   connect(ui->voiceGenderGlobal, &QComboBox::currentIndexChanged, this,
           [=](int index) { settings.setValue("voiceGender", index); });
 
-  connect(ui->closeToTrayCheckBox, &QCheckBox::toggled, this, [=](bool checked) {
+  // The two radios are mutually exclusive; the tray radio's state is the single
+  // source of truth for the "closeToTray" flag (checked = minimize, unchecked =
+  // quit), so one connection covers both selections.
+  connect(ui->closeTrayRadio, &QRadioButton::toggled, this, [=](bool checked) {
     settings.setValue("closeToTray", checked);
   });
 
   if (!QSystemTrayIcon::isSystemTrayAvailable()) {
-    ui->closeToTrayCheckBox->setChecked(false);
-    ui->closeToTrayCheckBox->setEnabled(false);
-    ui->closeToTrayCheckBox->setToolTip(
+    ui->closeQuitRadio->setChecked(true);
+    ui->closeTrayRadio->setEnabled(false);
+    ui->closeTrayRadio->setToolTip(
         tr("System tray is not available in this session."));
     settings.setValue("closeToTray", false);
   }
@@ -133,8 +136,9 @@ void Settings::readSettings() {
       settings.value("voiceGender", 0).toInt());
 
   // close-to-tray behaviour
-  ui->closeToTrayCheckBox->setChecked(
-      settings.value("closeToTray", true).toBool());
+  const bool closeToTray = settings.value("closeToTray", true).toBool();
+  ui->closeTrayRadio->setChecked(closeToTray);
+  ui->closeQuitRadio->setChecked(!closeToTray);
 }
 
 void Settings::get_selected_word_fromX11() {
@@ -163,7 +167,7 @@ bool Settings::quickResultCheckBoxChecked() {
 }
 
 bool Settings::closeToTrayEnabled() const {
-  return ui->closeToTrayCheckBox->isChecked();
+  return ui->closeTrayRadio->isChecked();
 }
 
 QKeySequence Settings::keySequenceEditKeySequence() {

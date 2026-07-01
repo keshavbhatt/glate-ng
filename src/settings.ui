@@ -79,21 +79,49 @@
         <item row="3" column="0">
          <widget class="QLabel" name="closeLabel">
           <property name="text">
-           <string>Close button</string>
+           <string>On close</string>
           </property>
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QCheckBox" name="closeToTrayCheckBox">
-          <property name="toolTip">
-           <string>When checked, closing the window minimizes Glate to the system tray instead of quitting</string>
-          </property>
-          <property name="text">
-           <string>Minimize to tray on close</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
+         <widget class="QWidget" name="closeBehaviorWidget" native="true">
+          <layout class="QHBoxLayout" name="closeBehaviorLayout">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QRadioButton" name="closeQuitRadio">
+             <property name="toolTip">
+              <string>Closing the window quits Glate.</string>
+             </property>
+             <property name="text">
+              <string>Quit Glate</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="closeTrayRadio">
+             <property name="toolTip">
+              <string>Closing the window hides Glate to the system tray instead of quitting.</string>
+             </property>
+             <property name="text">
+              <string>Minimize to system tray</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
