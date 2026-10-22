@@ -5,7 +5,7 @@ Glate uses a tag-based flow (DOCS/DECISIONS.md ADR-007).
 | Event | Snap Store | GitHub | Flathub |
 |---|---|---|---|
 | Push to `main` (app code changed) | `edge`, version `X.Y.Z+git<hash>` | CI only | nothing |
-| Tag `vX.Y.Z` | `stable`, version `X.Y.Z` | release with Windows zip, Flatpak bundle, checksums | the update bot opens a pull request for the tag |
+| Tag `vX.Y.Z` | `stable`, version `X.Y.Z` | release with Windows zip and checksums | the update bot opens a pull request for the tag |
 | By hand | | | merge the Flathub pull request |
 
 A tag reaches every stable user directly, so check the edge build of the commit before

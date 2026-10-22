@@ -112,7 +112,7 @@ arm64 on every push to `main` that touches the app and publishes it to `edge` wi
 version `X.Y.Z+git<hash>`; a `vX.Y.Z` tag publishes `X.Y.Z` straight to `stable` (owner,
 2026-10-22: edge is the testing channel, so a tag is the decision to ship; omnidict stops at
 candidate). The tag must equal `project(VERSION)`, checked by both workflows.
-The tag workflow (`release.yml`) makes the GitHub release with the Windows portable build
-and a Flatpak bundle; the snap no longer goes there. Flathub follows tags through the
-manifest's `x-checker-data`. Publishing is gated by the `SNAPCRAFT_STORE_CREDENTIALS` secret
+The tag workflow (`release.yml`) makes the GitHub release with the Windows portable build;
+the snap and the Flatpak no longer go there (owner, 2026-10-22: Flathub already publishes
+the Flatpak). Flathub follows tags through the manifest's `x-checker-data`. Publishing is gated by the `SNAPCRAFT_STORE_CREDENTIALS` secret
 and the `PUBLISH_TO_STORE` repository variable. The steps are in `.github/RELEASE.md`.
