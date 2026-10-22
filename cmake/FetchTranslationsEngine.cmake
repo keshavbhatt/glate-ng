@@ -149,6 +149,14 @@ foreach(_tgt marian bergamot-translator-source)
     endif()
 endforeach()
 
+# On ARM, marian's headers pick NEON code (simd_utils) that needs ARM, FMA and
+# SSE defined, but marian sets them with add_compile_definitions(), which only
+# reaches its own directory. Export them so the translator layer and glate,
+# which include those headers, see the same.
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64|arm.*)$")
+    target_compile_definitions(marian INTERFACE ARM FMA SSE)
+endif()
+
 add_library(glate_translations_engine INTERFACE)
 target_link_libraries(glate_translations_engine INTERFACE bergamot-translator-source)
 add_library(glate::translations_engine ALIAS glate_translations_engine)
