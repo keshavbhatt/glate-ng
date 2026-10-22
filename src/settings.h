@@ -14,6 +14,7 @@ class ThemeController;
 class QComboBox;
 class QPushButton;
 class QCheckBox;
+class QLabel;
 
 class Settings : public QWidget {
   Q_OBJECT
@@ -25,6 +26,17 @@ public:
 signals:
   void translationRequest(QString selected);
   void themeToggled();
+  // Offline translation (Pro): the checkbox changed, or "Manage languages" was clicked.
+  void offlineModeChanged(bool enabled);
+  void offlineLanguagesRequested();
+public:
+  // Settings key for offline mode; read by MainWindow.
+  static constexpr const char *kKeyOfflineMode = "offlineMode";
+  // Hides the section when this build has no offline engine.
+  void setOfflineAvailable(bool available);
+  // "3 languages downloaded" and the like, shown next to the button.
+  void setOfflineSummary(const QString &summary);
+  void setOfflineModeChecked(bool checked);
 public slots:
   QKeySequence keySequenceEditKeySequence();
   bool quickResultCheckBoxChecked();
@@ -46,6 +58,8 @@ private:
   void buildAppearanceSection();
   void updateAccentButton();
   void promptRestartRequiredDialog();
+  // Builds the "Offline translation" section under Appearance.
+  void buildOfflineSection();
 
   Ui::Settings *ui;
   QSettings settings;
@@ -62,6 +76,11 @@ private:
   QCheckBox *m_csdCheckBox = nullptr;
   QColor m_accentColor;
   bool m_restartPromptOpen = false;
+
+  // Offline translation controls.
+  QWidget *m_offlineBox = nullptr;
+  QCheckBox *m_offlineCheckBox = nullptr;
+  QLabel *m_offlineSummary = nullptr;
 };
 
 #endif // SETTINGS_H

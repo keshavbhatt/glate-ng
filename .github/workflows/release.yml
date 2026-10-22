@@ -31,6 +31,12 @@ jobs:
         with:
           arch: x64
 
+      # The offline engine's bundled PCRE2 build declares an old CMake minimum
+      # that CMake 4 refuses without this.
+      - name: Allow the engine's old CMake minimums
+        shell: bash
+        run: echo "CMAKE_POLICY_VERSION_MINIMUM=3.5" >> "$GITHUB_ENV"
+
       - name: Build application
         shell: cmd
         run: |

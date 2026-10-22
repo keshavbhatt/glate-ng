@@ -49,6 +49,9 @@ parts:
     source: .
     plugin: cmake
     build-packages:
+      # offline engine: fetched at configure time (git), sentence splitter (PCRE2)
+      - git
+      - libpcre2-dev
       - libx11-dev
       - libxcb1-dev
       - libx11-xcb-dev

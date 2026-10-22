@@ -27,7 +27,8 @@ qrc_*.cpp
 ui_*.h
 *.qmlc
 *.jsc
-Makefile*
+# qmake output (the top-level Makefile is ours)
+/src/Makefile*
 *build-*
 *.qm
 *.prl
@@ -54,3 +55,9 @@ compile_commands.json
 .idea
 
 build
+
+# Offline engine checkout and test models (fetched, not tracked)
+/third_party/
+
+# Python bytecode (tools/)
+__pycache__/

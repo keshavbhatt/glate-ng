@@ -10,8 +10,20 @@
 #include "GlateLicenseConfig.h"
 #include "accountdialog.h"
 #include "licenseservice.h"
+#include "offlinemodelsdialog.h"
 #include "ui_mainwindow.h"
 #include "utils.h"
+
+#include "Languages.h"
+#include "ModelManager.h"
+#include "ModelStore.h"
+#include "OfflineTranslator.h"
+#include "TranslationEngine.h"
+
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QMessageBox>
+#include <QTimer>
 
 #include <AppTheme.h>
 #include <ThemeController.h>
@@ -338,6 +350,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
 
   // init settings
   init_settings();
+  initOffline();
 
   // init history
   init_history();
@@ -656,6 +669,13 @@ void MainWindow::translate_clicked() {
 
     const QString src1 = ui->src1->toPlainText();
 
+    if (offlineModeEnabled()) {
+      m_request->deleteLater();
+      m_request = nullptr;
+      translateOffline(src1);
+      return;
+    }
+
     QUrl url("https://translate.googleapis.com/translate_a/single");
     QUrlQuery urlQuery;
 
@@ -781,6 +801,7 @@ void MainWindow::on_clear_clicked() {
   m_currentTranslationData.clear();
   m_translationId.clear();
   m_lineByLine->clearData();
+  m_offlineRequest = 0; // drop a result still on its way
 }
 
 void MainWindow::on_paste_clicked() const {
@@ -1138,4 +1159,244 @@ void MainWindow::onLicenseStatusUpdated(
             : status.evaluationActive ? "Evaluation"
                                       : "Free")
         << "|" << status.message;
+}
+
+// ── Offline translation ─────────────────────────────────────────────────────
+
+void MainWindow::initOffline() {
+  using namespace glate::offline;
+  m_modelStore = new ModelStore(utils::returnPath("models"));
+  m_modelManager =
+      new ModelManager(m_modelStore, ModelManager::defaultCatalogUrl(), this);
+  m_offline = new OfflineTranslator(m_modelStore, this);
+
+  const bool available = TranslationEngine::isAvailable();
+  m_settingsWidget->setOfflineAvailable(available);
+  if (!available)
+    m_settingsWidget->setOfflineModeChecked(false);
+
+  connect(m_settingsWidget, &Settings::offlineLanguagesRequested, this,
+          [this]() { showOfflineLanguages(); });
+  connect(m_settingsWidget, &Settings::offlineModeChanged, this,
+          [this](bool enabled) {
+            // Turning it on with nothing downloaded: show what can be downloaded.
+            if (enabled && m_modelStore->installed().isEmpty())
+              showOfflineLanguages();
+          });
+  auto modelsChanged = [this](const QString &) {
+    m_offline->reloadModels();
+    updateOfflineSummary();
+  };
+  connect(m_modelManager, &ModelManager::installed, this, modelsChanged);
+  connect(m_modelManager, &ModelManager::removed, this, modelsChanged);
+
+  connect(m_offline, &OfflineTranslator::finished, this,
+          [this](quint64 requestId, const QList<QStringList> &pairs) {
+            if (requestId != m_offlineRequest)
+              return;
+            m_offlineRequest = 0;
+            m_loader->stop();
+            // Same shape as Google's reply, so display, history and the
+            // line-by-line view work unchanged.
+            QJsonArray sentences;
+            for (const QStringList &pair : pairs)
+              sentences.append(QJsonArray{pair.value(0), pair.value(1)});
+            const QString reply = QString::fromUtf8(
+                QJsonDocument(QJsonArray{sentences}).toJson(QJsonDocument::Compact));
+            m_translationId = utils::generateRandomId(20);
+            saveByTransId(m_translationId, reply);
+            processTranslation(reply);
+            m_settings.setValue("lastTranslation", m_translationId);
+          });
+  connect(m_offline, &OfflineTranslator::failed, this,
+          [this](quint64 requestId, const QString &message) {
+            if (requestId != m_offlineRequest && requestId != 0)
+              return;
+            m_offlineRequest = 0;
+            m_loader->stop();
+            showError(message);
+          });
+
+  updateOfflineSummary();
+}
+
+bool MainWindow::offlineModeEnabled() const {
+  return glate::offline::TranslationEngine::isAvailable() &&
+         m_settings.value(Settings::kKeyOfflineMode, false).toBool();
+}
+
+void MainWindow::translateOffline(const QString &text) {
+  using glate::offline::TranslationPlan;
+  // The licence may have lapsed since offline mode was turned on. Never fall
+  // back to the online service silently: the user expects text to stay local.
+  if (!LicenseService::instance()->checkAccess(tr("Offline translation")))
+    return;
+
+  const QString from = getSourceLang();
+  const QString to = getTransLang();
+  const TranslationPlan plan = m_offline->plan(from, to);
+
+  if (plan.status == TranslationPlan::Status::MissingModels) {
+    QStringList codes;
+    for (const auto &direction : plan.missing) {
+      const QString side = direction.from == glate::offline::kPivotLanguage
+                               ? direction.to
+                               : direction.from;
+      const QString code = glate::offline::toGlateCode(side);
+      if (!codes.contains(code))
+        codes.append(code);
+    }
+    QStringList names;
+    for (const QString &code : codes)
+      names.append(getLangName(code));
+    QMessageBox box(this);
+    box.setWindowTitle(tr("Offline translation"));
+    box.setIcon(QMessageBox::Information);
+    box.setText(tr("To translate offline, download: %1.").arg(names.join(", ")));
+    box.setInformativeText(
+        tr("Downloads happen once; after that this pair works without internet."));
+    QPushButton *download = box.addButton(tr("Download"), QMessageBox::AcceptRole);
+    box.addButton(QMessageBox::Cancel);
+    box.exec();
+    if (box.clickedButton() == download)
+      showOfflineLanguages(codes);
+    return;
+  }
+  if (plan.status == TranslationPlan::Status::NeedsSourceLanguage) {
+    QMessageBox::information(
+        this, tr("Offline translation"),
+        tr("Choose the language you are translating from. Detecting it "
+           "automatically needs the online service."));
+    return;
+  }
+
+  m_loader->start();
+  m_offlineRequest = m_offline->translate(from, to, text);
+  if (m_offlineRequest == 0)
+    m_loader->stop(); // failed() follows with the reason
+}
+
+void MainWindow::showOfflineLanguages(const QStringList &downloadCodes) {
+  if (m_offlineDialog == nullptr) {
+    QHash<QString, QString> names;
+    for (int i = 0; i < m_langCode.size(); ++i)
+      names.insert(m_langCode.at(i).trimmed(), m_langName.value(i).trimmed());
+    m_offlineDialog =
+        new OfflineModelsDialog(m_modelManager, m_modelStore, names, this);
+  }
+  if (downloadCodes.isEmpty()) {
+    m_offlineDialog->show();
+    m_offlineDialog->raise();
+    m_offlineDialog->activateWindow();
+  } else {
+    m_offlineDialog->downloadLanguages(downloadCodes);
+  }
+}
+
+void MainWindow::updateOfflineSummary() {
+  qint64 bytes = 0;
+  QStringList languages;
+  for (const auto &model : m_modelStore->installed()) {
+    bytes += model.size;
+    for (const QString &side : {model.from, model.to}) {
+      if (side != glate::offline::kPivotLanguage && !languages.contains(side))
+        languages.append(side);
+    }
+  }
+  const QString size = QLocale().formattedDataSize(bytes, 1);
+  QString summary;
+  if (languages.isEmpty())
+    summary = tr("No languages downloaded");
+  else if (languages.size() == 1)
+    summary = tr("1 language, %1").arg(size);
+  else
+    summary = tr("%1 languages, %2").arg(languages.size()).arg(size);
+  m_settingsWidget->setOfflineSummary(summary);
+}
+
+// ── Developer aid ───────────────────────────────────────────────────────────
+//
+//   GLATE_DEBUG_WINDOW_SIZE=WxH        size of the main window
+//   GLATE_DEBUG_LANGS=from:to          glate codes, "auto" allowed for from
+//   GLATE_DEBUG_TEXT=<text>            source text, translated once the window is up
+//   GLATE_DEBUG_OFFLINE=0|1            offline mode on or off for this run
+//   GLATE_DEBUG_OPEN=settings|history|linebyline|offline|share|about|account
+//   GLATE_DEBUG_GRAB=<png>[,<seconds>] saves the opened screen (or the main
+//                                      window) after the delay, then quits
+
+void MainWindow::debugRun() {
+  const QString size = qEnvironmentVariable("GLATE_DEBUG_WINDOW_SIZE");
+  if (size.contains('x'))
+    resize(size.section('x', 0, 0).toInt(), size.section('x', 1, 1).toInt());
+
+  if (qEnvironmentVariableIsSet("GLATE_DEBUG_OFFLINE"))
+    m_settingsWidget->setOfflineModeChecked(
+        qEnvironmentVariable("GLATE_DEBUG_OFFLINE") == QStringLiteral("1"));
+
+  const QStringList langs = qEnvironmentVariable("GLATE_DEBUG_LANGS").split(':');
+  if (langs.size() == 2) {
+    const int from = langs.at(0) == QStringLiteral("auto")
+                         ? 0
+                         : int(m_langCode.indexOf(langs.at(0))) + 1;
+    const int to = int(m_langCode.indexOf(langs.at(1)));
+    if (from >= 0)
+      ui->lang1->setCurrentIndex(from);
+    if (to >= 0)
+      ui->lang2->setCurrentIndex(to);
+  }
+
+  const QString text = qEnvironmentVariable("GLATE_DEBUG_TEXT");
+  if (!text.isEmpty()) {
+    ui->src1->setPlainText(text);
+    QTimer::singleShot(500, this, [this]() { translate_clicked(); });
+  }
+
+  QWidget *target = this;
+  const QString open = qEnvironmentVariable("GLATE_DEBUG_OPEN");
+  if (open == QStringLiteral("settings"))
+    target = m_settingsWidget;
+  else if (open == QStringLiteral("history"))
+    target = m_historyWidget;
+  else if (open == QStringLiteral("linebyline"))
+    target = m_lineByLine;
+  else if (open == QStringLiteral("share"))
+    target = m_share;
+  else if (open == QStringLiteral("account"))
+    target = m_accountDialog;
+  if (!open.isEmpty()) {
+    // After the translation has had time to land.
+    QTimer::singleShot(3000, this, [this, open]() {
+      if (open == QStringLiteral("settings"))
+        on_settings_clicked();
+      else if (open == QStringLiteral("history"))
+        on_history_clicked();
+      else if (open == QStringLiteral("linebyline"))
+        on_lineByline_clicked();
+      else if (open == QStringLiteral("share"))
+        on_share_clicked();
+      else if (open == QStringLiteral("about"))
+        on_about_clicked();
+      else if (open == QStringLiteral("account"))
+        on_account_clicked();
+      else if (open == QStringLiteral("offline"))
+        showOfflineLanguages();
+    });
+  }
+
+  if (qEnvironmentVariableIsSet("GLATE_DEBUG_GRAB")) {
+    const QStringList spec = qEnvironmentVariable("GLATE_DEBUG_GRAB").split(',');
+    const int delayMs = spec.size() > 1 ? spec.at(1).toInt() * 1000 : 6000;
+    QTimer::singleShot(delayMs, this, [this, spec, open, target]() {
+      QWidget *shot = target;
+      if (open == QStringLiteral("offline"))
+        shot = m_offlineDialog;
+      else if (open == QStringLiteral("about"))
+        shot = m_aboutDialog;
+      if (shot == nullptr)
+        shot = this;
+      // The top-level window, so a custom title bar comes along.
+      shot->window()->grab().save(spec.first());
+      QApplication::quit();
+    });
+  }
 }

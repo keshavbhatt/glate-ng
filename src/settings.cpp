@@ -1,5 +1,6 @@
 #include "settings.h"
 
+#include "licenseservice.h"
 #include "ui_settings.h"
 #include "utils.h"
 
@@ -22,6 +23,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
+#include <QSignalBlocker>
 #include <QVBoxLayout>
 
 Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
@@ -32,6 +34,7 @@ Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
 
   setWindowTitle(tr("Glate | Settings"));
   buildAppearanceSection();
+  buildOfflineSection();
 
   // Populate voice combo from central voice list
   ui->voiceGenderGlobal->clear();
@@ -351,4 +354,63 @@ void Settings::buildAppearanceSection() {
             settings.setValue(kKeyCsd, on);
             promptRestartRequiredDialog();
           });
+}
+
+void Settings::buildOfflineSection() {
+  auto *box = new QGroupBox(tr("Offline translation"), this);
+  m_offlineBox = box;
+  auto *column = new QVBoxLayout(box);
+  column->setContentsMargins(12, 8, 12, 12);
+  column->setSpacing(8);
+
+  m_offlineCheckBox = new QCheckBox(tr("Translate offline"), box);
+  m_offlineCheckBox->setToolTip(
+      tr("Translate on this computer with downloaded languages. "
+         "Your text never leaves your device. Pro feature."));
+  column->addWidget(m_offlineCheckBox);
+
+  auto *row = new QHBoxLayout;
+  m_offlineSummary = new QLabel(box);
+  m_offlineSummary->setEnabled(false);
+  auto *manage = new QPushButton(tr("Manage languages..."), box);
+  manage->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+  row->addWidget(m_offlineSummary, 1);
+  row->addWidget(manage);
+  column->addLayout(row);
+
+  // Directly under Appearance.
+  if (auto *outer = qobject_cast<QVBoxLayout *>(layout()))
+    outer->insertWidget(1, box);
+
+  m_offlineCheckBox->setChecked(settings.value(kKeyOfflineMode, false).toBool());
+
+  connect(m_offlineCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+    if (checked && !LicenseService::instance()->checkAccess(tr("Offline translation"))) {
+      QSignalBlocker block(m_offlineCheckBox);
+      m_offlineCheckBox->setChecked(false);
+      return;
+    }
+    settings.setValue(kKeyOfflineMode, checked);
+    emit offlineModeChanged(checked);
+  });
+  connect(manage, &QPushButton::clicked, this,
+          &Settings::offlineLanguagesRequested);
+}
+
+void Settings::setOfflineAvailable(bool available) {
+  if (m_offlineBox)
+    m_offlineBox->setVisible(available);
+}
+
+void Settings::setOfflineSummary(const QString &summary) {
+  if (m_offlineSummary)
+    m_offlineSummary->setText(summary);
+}
+
+void Settings::setOfflineModeChecked(bool checked) {
+  if (!m_offlineCheckBox)
+    return;
+  QSignalBlocker block(m_offlineCheckBox);
+  m_offlineCheckBox->setChecked(checked);
+  settings.setValue(kKeyOfflineMode, checked);
 }

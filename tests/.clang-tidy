@@ -1,0 +1,11 @@
+---
+# Qt Test conventions that the project-wide checks misread: test functions are
+# slots (never static), *_data slots are named by Qt, QVERIFY guards optionals
+# before they are read, and a test reads best as one straight sequence.
+InheritParentConfig: true
+Checks: >
+  -readability-convert-member-functions-to-static,
+  -readability-function-size,
+  -readability-function-cognitive-complexity,
+  -bugprone-unchecked-optional-access,
+  -readability-identifier-naming

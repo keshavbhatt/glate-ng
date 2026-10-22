@@ -1,0 +1,78 @@
+# Builds against the KDE Qt snap SDK the snap ships with (DOCS/DECISIONS.md ADR-001),
+# runs the tests, and lints the code held to the strict standards (ADR-002).
+# Windows builds stay in windows-build.yml.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # Same majors as the development machines; Ubuntu's own packages are older.
+  CLANG_FORMAT_VERSION: "22.1.1"
+  CLANG_TIDY_VERSION: "22.1.8"
+
+jobs:
+  tools:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Models tool tests
+        run: python3 -m unittest discover -s tools/models
+
+  app:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: KDE Qt SDK and runtime snaps
+        run: |
+          sudo snap install kde-qt6-core24-sdk
+          sudo snap install kf6-core24
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build shellcheck
+
+      - name: Cache the translation engine checkout
+        uses: actions/cache@v4
+        with:
+          path: third_party/translations
+          key: translations-engine-${{ hashFiles('cmake/FetchTranslationsEngine.cmake') }}
+
+      - name: Cache the test models
+        uses: actions/cache@v4
+        with:
+          path: third_party/test-models
+          key: test-models-${{ hashFiles('tools/models/models.lock.json') }}
+
+      - name: Test models (en-de, de-en)
+        run: python3 tools/models/models.py install third_party/test-models en-de de-en
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Build with warnings as errors on new code
+        env:
+          GLATE_CMAKE_ARGS: "-DGLATE_BUILD_TESTS=ON -DGLATE_WERROR=ON"
+        run: scripts/dev-build.sh
+
+      - name: Test
+        run: scripts/dev-run.sh --ctest
+
+      - name: clang-format
+        run: |
+          find tests modules/OfflineTranslation -name '*.cpp' -o -name '*.h' \
+            | xargs uvx --from "clang-format==${CLANG_FORMAT_VERSION}" clang-format --dry-run --Werror
+
+      - name: clang-tidy
+        run: |
+          find tests modules/OfflineTranslation -name '*.cpp' \
+            | xargs uvx --from "clang-tidy==${CLANG_TIDY_VERSION}" clang-tidy -p build-sdk --quiet --warnings-as-errors='*'
+
+      - name: shellcheck
+        run: shellcheck -x scripts/*.sh
+
+  reuse:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: fsfe/reuse-action@v5

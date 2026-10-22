@@ -30,6 +30,13 @@ class MainWindow;
 class ThemeController;
 class QSplitter;
 class AboutDialog;
+class OfflineModelsDialog;
+
+namespace glate::offline {
+class ModelManager;
+class ModelStore;
+class OfflineTranslator;
+} // namespace glate::offline
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -38,6 +45,11 @@ public:
   explicit MainWindow(ThemeController *theme = nullptr,
                       QWidget *parent = nullptr);
   ~MainWindow();
+
+  // Developer aid for headless verification and store screenshots, driven by
+  // GLATE_DEBUG_* environment variables (see scripts/screenshots.sh). Does
+  // nothing when none is set.
+  void debugRun();
 
 protected slots:
   void changeEvent(QEvent *e) override;
@@ -80,6 +92,12 @@ private slots:
   QString getLangCode(const QString &langName) const;
   static void saveByTransId(const QString &translationId, const QString &reply);
   void processTranslation(const QString &reply);
+  // Offline translation (modules/OfflineTranslation, Pro).
+  void initOffline();
+  bool offlineModeEnabled() const;
+  void translateOffline(const QString &text);
+  void showOfflineLanguages(const QStringList &downloadCodes = {});
+  void updateOfflineSummary();
   QSize resizeFloor() const;
   void startTtsSession(const QString &playerName, const QString &text,
                        const QString &ttsLang, const QString &voiceGender);
@@ -140,6 +158,13 @@ private:
   AccountDialog         *m_accountDialog   = nullptr;
   AboutDialog           *m_aboutDialog     = nullptr;
   bool                   m_hasPremiumAccess = false;
+
+  // Offline translation
+  glate::offline::ModelStore        *m_modelStore    = nullptr;
+  glate::offline::ModelManager      *m_modelManager  = nullptr;
+  glate::offline::OfflineTranslator *m_offline       = nullptr;
+  OfflineModelsDialog               *m_offlineDialog = nullptr;
+  quint64                            m_offlineRequest = 0;
 };
 
 #endif // MAINWINDOW_H

@@ -1,0 +1,68 @@
+# Mirrors the Firefox translation models pinned in tools/models/models.lock.json into the
+# rolling `models` release that glate's offline mode downloads from (DOCS/DECISIONS.md
+# ADR-004). Runs only when started by hand. The release lives in this repository, which
+# the app reads from (ModelManager::defaultCatalogUrl).
+name: models
+
+on:
+  workflow_dispatch:
+    inputs:
+      prune:
+        description: Delete release assets that are no longer in the lock file
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: models
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      TAG: models
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Tool tests
+        run: python3 -m unittest discover -s tools/models
+
+      - name: Download and verify the locked models
+        run: |
+          python3 tools/models/models.py mirror out \
+            --base-url "https://github.com/${REPO}/releases/download/${TAG}/"
+          du -sh out
+
+      - name: Create the release if it is missing
+        run: |
+          if ! gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            gh release create "$TAG" --repo "$REPO" --title "Offline translation models" --latest=false \
+              --notes "Firefox translation models (MPL-2.0) for Glate's offline mode, mirrored unchanged from Mozilla. Glate downloads them on demand; there is no need to download them by hand."
+          fi
+
+      - name: Upload new assets
+        run: |
+          existing=$(gh release view "$TAG" --repo "$REPO" --json assets -q '.assets[].name' | sort)
+          for f in out/*; do
+            name=$(basename "$f")
+            [ "$name" = catalog.json ] && continue
+            grep -qxF "$name" <<<"$existing" || gh release upload "$TAG" "$f" --repo "$REPO"
+          done
+
+      # Last, so the catalogue never names a file that is not there yet.
+      - name: Publish the catalogue
+        run: gh release upload "$TAG" out/catalog.json --repo "$REPO" --clobber
+
+      - name: Prune assets no longer listed
+        if: ${{ inputs.prune }}
+        run: |
+          keep=$(ls out | sort)
+          gh release view "$TAG" --repo "$REPO" --json assets -q '.assets[].name' | sort | while read -r name; do
+            grep -qxF "$name" <<<"$keep" || gh release delete-asset "$TAG" "$name" --repo "$REPO" --yes
+          done

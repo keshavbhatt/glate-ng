@@ -7,8 +7,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.10 REQUIRED COMPONENTS Core Gui Widgets Network Multimedia LinguistTools)
-
 qt_standard_project_setup()
 
 # QHotkey sources
@@ -55,6 +53,8 @@ qt_add_executable(glate
     history.h
     linebyline.cpp
     linebyline.h
+    offlinemodelsdialog.cpp
+    offlinemodelsdialog.h
     main.cpp
     mainwindow.cpp
     mainwindow.h
@@ -100,6 +100,8 @@ qt_add_translations(glate TS_FILES
     Locales/Glate_it_IT.ts
 )
 
+glate_set_legacy_warnings(glate)
+
 # On Windows: suppress the console window (GUI subsystem)
 if(WIN32)
     set_target_properties(glate PROPERTIES WIN32_EXECUTABLE TRUE)
@@ -127,6 +129,7 @@ if(MSVC)
 endif()
 
 target_link_libraries(glate PRIVATE
+    offline_translation
     account_license
     app_chrome
     Qt6::Core
@@ -137,11 +140,7 @@ target_link_libraries(glate PRIVATE
 )
 
 if(UNIX AND NOT APPLE)
-    find_package(X11 REQUIRED)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(XCB REQUIRED xcb)
-    target_link_libraries(glate PRIVATE X11 ${XCB_LIBRARIES})
-    target_include_directories(glate PRIVATE ${XCB_INCLUDE_DIRS})
+    target_link_libraries(glate PRIVATE X11::X11 X11::xcb)
 elseif(APPLE)
     target_link_libraries(glate PRIVATE "-framework Carbon")
 elseif(WIN32)
