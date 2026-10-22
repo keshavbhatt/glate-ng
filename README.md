@@ -131,7 +131,7 @@ builds from a release tag of this repository, with Mozilla's engine as pinned so
 ./build-flatpak.sh
 ```
 
-This creates a versioned bundle like `glate-4.3.0.flatpak`.
+This creates a versioned bundle like `glate-4.4.0.flatpak`.
 
 ### Windows
 

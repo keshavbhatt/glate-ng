@@ -1,7 +1,7 @@
 # Derives version metadata for the build.
 #
-# GLATE_VERSION         -> "4.3.0" (from project(VERSION))
-# GLATE_VERSION_SHORT   -> "4.3"
+# GLATE_VERSION         -> "4.4.0" (from project(VERSION))
+# GLATE_VERSION_SHORT   -> "4.4"
 # GLATE_GIT_REVISION    -> short hash or "unknown"
 #
 # Handed to the code through compile definitions, never string literals in sources.

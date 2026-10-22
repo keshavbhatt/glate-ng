@@ -94,6 +94,19 @@
   </keywords>
 
   <releases>
+    <release version="4.4.0" date="2026-10-22">
+      <description>
+        <p>Offline translation, and Glate becomes open source under the GPL.</p>
+        <ul>
+          <li>New offline mode (Pro): translate on your own computer with Mozilla's Firefox translation models, so your text never leaves your device.</li>
+          <li>Download languages on demand from the new "Manage languages" dialog; nearly 60 languages are available, and pairs without English go through English.</li>
+          <li>Every downloaded model file is checked against its SHA-256 before it is used.</li>
+          <li>Glate is now free software under the GPL-3.0-or-later; the account and licence code is source-available.</li>
+          <li>Snap builds for both amd64 and arm64.</li>
+          <li>New store screenshots.</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.3" date="2026-07-01">
       <description>
         <p>Theming defaults and custom title bar refinements.</p>
