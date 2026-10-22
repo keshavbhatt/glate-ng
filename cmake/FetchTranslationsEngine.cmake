@@ -117,6 +117,13 @@ set(GIT_SUBMODULE OFF CACHE BOOL "" FORCE)
 # Flatpak all carry it); a bundled build elsewhere.
 if(WIN32 OR APPLE)
     set(SSPLIT_USE_INTERNAL_PCRE2 ON CACHE BOOL "" FORCE)
+    # The bundled PCRE2 is a separate CMake project configured at build time with the
+    # default generator (Visual Studio on Windows), but installed with this build's make
+    # tool. Both have to match, through the CMAKE_GENERATOR environment variable.
+    if(WIN32 AND CMAKE_GENERATOR MATCHES "Makefiles" AND NOT "$ENV{CMAKE_GENERATOR}" STREQUAL CMAKE_GENERATOR)
+        message(WARNING "Set the environment variable CMAKE_GENERATOR=\"${CMAKE_GENERATOR}\" "
+                        "for the build too, or the engine's bundled PCRE2 fails to install.")
+    endif()
 else()
     set(SSPLIT_USE_INTERNAL_PCRE2 OFF CACHE BOOL "" FORCE)
 endif()
