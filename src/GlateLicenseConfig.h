@@ -35,7 +35,7 @@ inline AccountLicenseConfig glateAccountLicenseConfig()
         QStringLiteral("https://ktechpit.com/USS/public/user/");
 
     // ── Policy ────────────────────────────────────────────────────────────────
-    cfg.evaluationDurationSecs = 30 * 24 * 3600; // 30 days
+    cfg.evaluationDurationSecs = 15 * 24 * 3600; // 15 days
     return cfg;
 }
 
