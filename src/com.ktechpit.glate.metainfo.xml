@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>com.ktechpit.glate</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>LicenseRef-proprietary=https://raw.githubusercontent.com/keshavbhatt/glate-packaging/refs/heads/master/LICENSE</project_license>
+  <project_license>GPL-3.0-or-later AND LicenseRef-proprietary=https://github.com/keshavbhatt/glate-ng/blob/main/LICENSES/LicenseRef-Ktechpit-Licensing-Module.txt</project_license>
   <name>Glate</name>
   <summary>Translate text and generate speech audio on Linux desktop</summary>
 
@@ -13,8 +13,10 @@
   <description>
     <p>Glate is a fast desktop translator with built-in text-to-speech for everyday translation workflows.</p>
     <p>It supports translation across 100+ languages, per-line translation view, voice playback, history tracking, and sharing translated text or speech output.</p>
+    <p>Offline mode translates on your own computer with Mozilla's Firefox translation models: download a language once and translate without internet, and your text never leaves your device.</p>
     <ul>
       <li>Translate between 100+ languages instantly</li>
+      <li>Offline translation for nearly 60 languages, with models downloaded on demand (Pro)</li>
       <li>Line-by-line translation view for structured content and review</li>
       <li>Text-to-speech playback with selectable voice/gender plus audio export tools</li>
       <li>Translation history with search, quick load, copy, and remove actions</li>
@@ -35,24 +37,40 @@
 
   <screenshots>
     <screenshot type="default">
-      <caption>Main translation view with dark theme</caption>
-      <image>https://raw.githubusercontent.com/keshavbhatt/glate-packaging/master/screenshots/1.jpg</image>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-ng/main/screenshots/00-hero.png</image>
+      <caption>Translate between 100+ languages, side by side</caption>
     </screenshot>
     <screenshot>
-      <caption>Settings and language options</caption>
-      <image>https://raw.githubusercontent.com/keshavbhatt/glate-packaging/master/screenshots/2.jpg</image>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-ng/main/screenshots/01-offline.png</image>
+      <caption>Offline mode: translate on your computer, without internet</caption>
     </screenshot>
     <screenshot>
-      <caption>Share dialog and export options</caption>
-      <image>https://raw.githubusercontent.com/keshavbhatt/glate-packaging/master/screenshots/3.jpg</image>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-ng/main/screenshots/02-languages.png</image>
+      <caption>Download only the offline languages you need</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-ng/main/screenshots/03-linebyline.png</image>
+      <caption>Line-by-line view with copy and read aloud</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-ng/main/screenshots/04-history.png</image>
+      <caption>Searchable translation history</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-ng/main/screenshots/05-share.png</image>
+      <caption>Share by email or link, save as text, or export speech as audio</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/keshavbhatt/glate-ng/main/screenshots/06-settings.png</image>
+      <caption>Light or dark, two themes and your accent colour</caption>
     </screenshot>
   </screenshots>
 
   <icon type="stock">com.ktechpit.glate</icon>
 
   <url type="homepage">https://ktechpit.com/USS/public/product.php?slug=glate</url>
-  <url type="bugtracker">https://github.com/keshavbhatt/glate-packaging/issues</url>
-  <url type="vcs-browser">https://github.com/keshavbhatt/glate-packaging</url>
+  <url type="bugtracker">https://github.com/keshavbhatt/glate-ng/issues</url>
+  <url type="vcs-browser">https://github.com/keshavbhatt/glate-ng</url>
   <url type="donation">https://www.paypal.me/keshavnrj/9</url>
 
   <provides>

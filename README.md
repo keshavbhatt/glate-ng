@@ -1,14 +1,15 @@
 # Glate - Translator and Text-to-Speech for Desktop
 
-<p align="center">
-  <img width="200" height="200" src="https://github.com/keshavbhatt/glate/blob/master/icons/icon-256.png?raw=true">
-</p>
+![Glate: translate and listen, online or offline](screenshots/banner.png)
 
 Glate is a fast desktop translator with built-in text-to-speech, history, and sharing tools.
+It translates online, or offline on your own computer with downloadable language models.
 
 ## Features
 
 - Translate between 100+ languages
+- Offline mode: download a language once and translate without internet; your text never
+  leaves your device (Pro)
 - Line-by-line translation view for structured text
 - Text-to-speech playback with voice and gender options
 - Export speech to audio formats with advanced controls
@@ -19,13 +20,16 @@ Glate is a fast desktop translator with built-in text-to-speech, history, and sh
 
 ## Screenshots
 
-![Glate main window with dark theme](https://github.com/keshavbhatt/glate/blob/master/screenshots/1.jpg?raw=true)
-![Glate settings window with light theme](https://github.com/keshavbhatt/glate/blob/master/screenshots/2.jpg?raw=true)
-![Glate share and export dialog](https://github.com/keshavbhatt/glate/blob/master/screenshots/3.jpg?raw=true)
+![Translate between 100+ languages](screenshots/00-hero.png)
+![Translate offline, privately](screenshots/01-offline.png)
+![Nearly 60 languages offline](screenshots/02-languages.png)
+![Check it line by line](screenshots/03-linebyline.png)
+![Every translation, kept](screenshots/04-history.png)
+![Share it, or listen to it](screenshots/05-share.png)
+![Make it yours](screenshots/06-settings.png)
 
-## Preview
-
-[![Glate desktop preview](https://github.com/keshavbhatt/glate/blob/master/screenshots/preview.jpg?raw=true)](https://www.youtube.com/watch?v=FxTDqcIgk7g "Glate desktop preview")
+The screenshots are made with `scripts/screenshots.sh` from a dev build. An older video tour
+of Glate is on [YouTube](https://www.youtube.com/watch?v=FxTDqcIgk7g).
 
 ## Install via Snap
 
@@ -85,3 +89,9 @@ If you need system-wide quick-translate hotkeys, run Glate on an X11 session (or
 [Alan Pope](https://github.com/popey) of [Canonical](https://github.com/canonical) helped decide the app name.
 
 
+
+## Licence
+
+Glate is free software under the GPL-3.0-or-later. The account and licence code is
+source-available under the Ktechpit Licensing Module License. See [LICENSING.md](LICENSING.md)
+for which files are covered by which licence. Glate 4.3.0 and earlier were released under MIT.
