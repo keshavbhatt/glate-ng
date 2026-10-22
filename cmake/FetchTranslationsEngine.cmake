@@ -145,16 +145,15 @@ set(CMAKE_CXX_CLANG_TIDY "${_glate_saved_tidy}")
 unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 # ssplit links its bundled PCRE2 as pcre2-8.lib, but with MSVC PCRE2 names its
-# static library pcre2-8-static.lib. Copy it to the name ssplit expects.
-if(MSVC AND TARGET pcre2)
-    include(ExternalProject)
-    include(GNUInstallDirs)
-    set(_glate_pcre2_lib "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
-    ExternalProject_Add_Step(pcre2 glate_msvc_name
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-                "${_glate_pcre2_lib}/pcre2-8-static.lib" "${_glate_pcre2_lib}/pcre2-8.lib"
-        DEPENDEES install
-    )
+# static library pcre2-8-static.lib. Point ssplit's link list at that file.
+if(MSVC AND TARGET pcre2 AND TARGET ssplit)
+    foreach(_prop LINK_LIBRARIES INTERFACE_LINK_LIBRARIES)
+        get_target_property(_libs ssplit ${_prop})
+        if(_libs)
+            string(REPLACE "/pcre2-8.lib" "/pcre2-8-static.lib" _libs "${_libs}")
+            set_target_properties(ssplit PROPERTIES ${_prop} "${_libs}")
+        endif()
+    endforeach()
 endif()
 
 # marian builds with -Werror (/WX), which newer compilers trip on with false

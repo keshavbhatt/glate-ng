@@ -77,8 +77,8 @@ jobs:
           rem The engine's bundled PCRE2 is a separate CMake project; without this it picks
           rem the Visual Studio generator and its install step fails under nmake.
           set CMAKE_GENERATOR=NMake Makefiles
-          cmake -S . -B build-win -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%Qt6_DIR%
-          cmake --build build-win
+          cmake -S . -B build-win -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%Qt6_DIR% || exit /b 1
+          cmake --build build-win || exit /b 1
 
       - name: Package Windows portable build
         shell: powershell
