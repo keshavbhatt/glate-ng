@@ -94,6 +94,14 @@
   </keywords>
 
   <releases>
+    <release version="4.4.1" date="2026-10-22">
+      <description>
+        <p>The Windows portable build is back.</p>
+        <ul>
+          <li>Glate builds on Windows again, including offline translation.</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.4.0" date="2026-10-22">
       <description>
         <p>Offline translation, and Glate becomes open source under the GPL.</p>

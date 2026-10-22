@@ -68,7 +68,7 @@ parts:
       craftctl default
 
       # The version comes from the CMake project. A build that is not exactly a
-      # version tag (the edge channel) carries the commit: 4.4.0+git1a2b3c4.
+      # version tag (the edge channel) carries the commit: 4.4.1+git1a2b3c4.
       VERSION="$(grep -E '^CMAKE_PROJECT_VERSION:STATIC=' ${CRAFT_PART_BUILD}/CMakeCache.txt | cut -d= -f2 | tr -d '[:space:]')"
       if ! git -c safe.directory="*" -C "${CRAFT_PART_SRC}" describe --exact-match --tags --match "v${VERSION}" >/dev/null 2>&1; then
         HASH="$(git -c safe.directory="*" -C "${CRAFT_PART_SRC}" rev-parse --short=7 HEAD 2>/dev/null || true)"
