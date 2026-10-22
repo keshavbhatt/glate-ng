@@ -50,6 +50,9 @@ flatpak install flathub com.ktechpit.glate
 sudo snap install glate
 ```
 
+Every change on `main` is published to the `edge` channel and every release to `stable`;
+`sudo snap install glate --edge` tries the newest build.
+
 ### Windows
 
 A portable build (`Glate-Portable-<version>-Win64.zip`) is attached to every
@@ -115,7 +118,8 @@ The offline translation tests use real models; install them once with
 snapcraft
 ```
 
-The snap version is derived from the CMake project version during the build.
+The snap version is derived from the CMake project version during the build. Releases are
+tag based: see `.github/RELEASE.md`.
 
 ### Flatpak
 

@@ -1,3 +1,6 @@
+# A version tag (v1.2.3) becomes a GitHub release with the Windows portable build and a
+# Flatpak bundle (DOCS/DECISIONS.md ADR-007). The snap for the tag goes to the stable
+# channel through snap.yml; Flathub picks the tag up through its x-checker-data.
 name: Build and Release Artifacts
 
 on:
@@ -9,7 +12,22 @@ permissions:
   contents: write
 
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: The tag must match project(VERSION)
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          project=$(sed -nE 's/^project\(glate VERSION ([0-9.]+).*/\1/p' CMakeLists.txt)
+          if [ "${TAG#v}" != "$project" ]; then
+            echo "tag $TAG does not match project(VERSION) $project in CMakeLists.txt" >&2
+            exit 1
+          fi
+
   build-windows:
+    needs: check-version
     runs-on: windows-latest
 
     steps:
@@ -59,26 +77,8 @@ jobs:
           name: glate-windows
           path: Glate-Portable-${{ github.ref_name }}-Win64.zip
 
-  build-snap:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Build snap
-        id: snapcraft
-        uses: snapcore/action-build@v1
-        with:
-          path: .
-
-      - name: Upload snap artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: glate-snap
-          path: ${{ steps.snapcraft.outputs.snap }}
-
   build-flatpak:
+    needs: check-version
     runs-on: ubuntu-latest
 
     steps:
@@ -106,7 +106,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-windows
-      - build-snap
       - build-flatpak
 
     steps:
@@ -114,12 +113,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: glate-windows
-          path: release-assets
-
-      - name: Download Snap artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: glate-snap
           path: release-assets
 
       - name: Download Flatpak artifact
@@ -144,7 +137,8 @@ jobs:
 
             Automated release artifacts:
             - Windows portable build (`Glate-Portable-...-Win64.zip`)
-            - Snap package (`*.snap`)
             - Flatpak bundle (`glate-<version>.flatpak`)
+
+            The snap is in the Snap Store's stable channel (`snap install glate`).
             - SHA256 checksums (`checksums.txt`)
 

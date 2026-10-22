@@ -36,5 +36,8 @@ Mozilla's engine into `third_party/translations` (ADR-003).
 - The repository is public: never commit credentials, tokens, customer data or local paths.
 - No translation model ships with the app; models are downloaded on demand (ADR-004).
 - `.github/workflows/models.yml` publishes models publicly and runs only when the owner starts it.
+- Releases are tag based (ADR-007, `.github/RELEASE.md`): pushes to `main` publish the snap to
+  edge, `vX.Y.Z` tags straight to stable. Never push a tag or merge a Flathub pull request
+  without the owner.
 - Verify headlessly before asking the owner to look. Run `make test` and `make lint` before
   declaring a task done.

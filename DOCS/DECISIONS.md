@@ -101,3 +101,18 @@ The repository was checked before it went public: no credentials, tokens or priv
 the working tree or in any of its 167 commits; the licence server endpoints are public by
 nature (they ship in every build), and history before 2026-03-19 was already public in
 keshavbhatt/glate.
+
+## ADR-007: Tag-based releases; main goes to edge, tags to stable (2026-10-22)
+
+**Context.** Releases were cut by hand: the tag workflow built artifacts, and the snap was
+uploaded separately. omnidict publishes from CI.
+
+**Decision.** As in omnidict, `.github/workflows/snap.yml` builds the snap for amd64 and
+arm64 on every push to `main` that touches the app and publishes it to `edge` with the
+version `X.Y.Z+git<hash>`; a `vX.Y.Z` tag publishes `X.Y.Z` straight to `stable` (owner,
+2026-10-22: edge is the testing channel, so a tag is the decision to ship; omnidict stops at
+candidate). The tag must equal `project(VERSION)`, checked by both workflows.
+The tag workflow (`release.yml`) makes the GitHub release with the Windows portable build
+and a Flatpak bundle; the snap no longer goes there. Flathub follows tags through the
+manifest's `x-checker-data`. Publishing is gated by the `SNAPCRAFT_STORE_CREDENTIALS` secret
+and the `PUBLISH_TO_STORE` repository variable. The steps are in `.github/RELEASE.md`.

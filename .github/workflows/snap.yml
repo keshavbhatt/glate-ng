@@ -1,0 +1,72 @@
+# Builds the snap for amd64 and arm64 and publishes it (DOCS/DECISIONS.md ADR-007):
+#   push to main        -> edge      (version 4.3.0+git<hash>)
+#   version tag v1.2.3  -> stable    (version 1.2.3; the tag must match project(VERSION))
+# Edge is where a build is checked before it is tagged.
+#
+# Publishing needs the SNAPCRAFT_STORE_CREDENTIALS secret (`snapcraft export-login`
+# with access to the glate snap) and the repo variable PUBLISH_TO_STORE=true; without
+# them the snap is still built and kept as a workflow artifact.
+name: snap
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - 'src/**'
+      - 'modules/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'snap/**'
+      - '.github/workflows/snap.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: snap-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check that the tag matches the CMake version
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          project=$(sed -nE 's/^project\(glate VERSION ([0-9.]+).*/\1/p' CMakeLists.txt)
+          if [ "${TAG#v}" != "$project" ]; then
+            echo "tag $TAG does not match project(VERSION) $project in CMakeLists.txt" >&2
+            exit 1
+          fi
+
+      - name: Build snap (${{ matrix.arch }})
+        uses: snapcore/action-build@v1
+        id: build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glate-snap-${{ matrix.arch }}
+          path: ${{ steps.build.outputs.snap }}
+          retention-days: 14
+
+      - name: Publish to the Snap Store
+        if: >-
+          vars.PUBLISH_TO_STORE == 'true' && github.event_name == 'push' &&
+          (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') && 'stable' || 'edge' }}
