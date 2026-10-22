@@ -1,5 +1,5 @@
 # Builds the snap for amd64 and arm64 and publishes it (DOCS/DECISIONS.md ADR-007):
-#   push to main        -> edge      (version 4.4.1+git<hash>)
+#   push to main        -> edge      (version 4.5.0+git<hash>)
 #   version tag v1.2.3  -> stable    (version 1.2.3; the tag must match project(VERSION))
 # Edge is where a build is checked before it is tagged.
 #

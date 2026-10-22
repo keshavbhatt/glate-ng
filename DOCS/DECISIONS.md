@@ -116,3 +116,26 @@ The tag workflow (`release.yml`) makes the GitHub release with the Windows porta
 the snap and the Flatpak no longer go there (owner, 2026-10-22: Flathub already publishes
 the Flatpak). Flathub follows tags through the manifest's `x-checker-data`. Publishing is gated by the `SNAPCRAFT_STORE_CREDENTIALS` secret
 and the `PUBLISH_TO_STORE` repository variable. The steps are in `.github/RELEASE.md`.
+
+## ADR-008: App shell module, as in omnidict (2026-10-23)
+
+**Context.** Glate had a popup slide show on first start, an About text box, no log, no way
+to report a bug from the app, and nothing that showed when offline mode was on. omnidict
+has a shell for all of this.
+
+**Decision.** A strict, reusable `modules/AppShell` (namespace `glate::shell`) ports
+omnidict's pieces: `LogSink` (Qt message handler, `<AppData>/logs/glate.log` rotated at 2 MB,
+the last 1000 lines in memory), logging categories `glate.*`, diagnostics text, the About,
+What's new, bug report and shortcuts windows, a first-run `WelcomeCard` shown in place in the
+empty result pane (never a popup), and a `StatusPill` for the "Offline" indicator.
+`src/glateshell.*` holds what is specific to Glate. Every screen had an approved HTML mock
+first (`DOCS/mocks/`). Differences from omnidict:
+
+- What's new reads the `<releases>` notes of the metainfo file (bundled as `:/meta/`), so the
+  release notes are written once; `tst_app_shell` fails when the newest release does not
+  match `project(VERSION)`.
+- The bug report can include the last 200 log lines (ticked by default). The log never
+  holds the text being translated or its translation: request URLs are logged without their
+  query (`redactUrlQueries`), and the home directory is replaced with `~`.
+- An existing install without a recorded version (no `shell/whatsNewSeenVersion`, but a
+  `firstRun` key) counts as an update and sees What's new once.

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(glate VERSION 4.4.1 LANGUAGES CXX)
+project(glate VERSION 4.5.0 LANGUAGES CXX)
 
 # ---------------------------------------------------------------------------
 # Options
@@ -50,6 +50,9 @@ add_subdirectory(modules/AppChrome)
 
 # Offline translation: model downloads and Mozilla's engine (ADR-003)
 add_subdirectory(modules/OfflineTranslation)
+
+# App shell: logging, release notes, About, What's new, bug report (ADR-008)
+add_subdirectory(modules/AppShell)
 
 add_subdirectory(src)
 

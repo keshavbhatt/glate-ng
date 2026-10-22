@@ -18,6 +18,7 @@ struct HistoryRecord {
   QString src1;
   QString src2;
   QString date;
+  bool offline = false;
   QDateTime modifiedAt;
 };
 

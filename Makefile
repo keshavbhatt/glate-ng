@@ -11,7 +11,7 @@ BUILD_DIR ?= build-sdk
 
 # Code held to the omnidict standards. Legacy src/ and the older modules are
 # left as they are until they are cleaned up (ADR-002).
-STRICT_DIRS := tests $(wildcard modules/OfflineTranslation)
+STRICT_DIRS := tests $(wildcard modules/OfflineTranslation modules/AppShell)
 CXX_SOURCES := $(shell find $(STRICT_DIRS) -name '*.cpp' -o -name '*.h')
 TIDY_SOURCES := $(shell find $(STRICT_DIRS) -name '*.cpp')
 

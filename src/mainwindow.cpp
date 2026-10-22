@@ -6,7 +6,7 @@
 #include <QSplitter>
 #include <QUrlQuery>
 
-#include "aboutdialog.h"
+#include "glateshell.h"
 #include "GlateLicenseConfig.h"
 #include "accountdialog.h"
 #include "licenseservice.h"
@@ -20,10 +20,22 @@
 #include "OfflineTranslator.h"
 #include "TranslationEngine.h"
 
+#include "Diagnostics.h"
+#include "Logging.h"
+#include "StatusPill.h"
+#include "ShellStyle.h"
+#include "WelcomeCard.h"
+
 #include <QJsonArray>
+#include <QLabel>
+#include <QBuffer>
+#include <QMenu>
+#include <QPainter>
 #include <QJsonDocument>
 #include <QMessageBox>
 #include <QTimer>
+
+#include <utility>
 
 #include <AppTheme.h>
 #include <ThemeController.h>
@@ -35,6 +47,9 @@ constexpr auto kPlay2IdleTooltip = "Play translation";
 constexpr auto kPreparingTooltip = "Preparing audio...";
 constexpr auto kBufferingTooltip = "Buffering audio...";
 constexpr auto kStopTooltip = "Stop playback";
+// First-run card: shown while both panes are empty, until this many translations.
+constexpr int kWelcomeTranslations = 3;
+constexpr auto kTranslationCountKey = "shell/translationCount";
 }
 
 MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
@@ -112,10 +127,10 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   connect(m_splitter, &QSplitter::splitterMoved, this,
           [this](int, int) { positionPaneButtons(); });
 
-  // The panes are QTextEdits — scroll areas whose minimumSizeHint is ~0, so on
+  // The panes are QTextEdits, scroll areas whose minimumSizeHint is ~0, so on
   // their own they let the window collapse and the layout can't derive a real
   // floor. Give them a sensible minimum so the window's minimumSizeHint() (which
-  // also accounts for the toolbars) becomes meaningful — no magic number needed;
+  // also accounts for the toolbars) becomes meaningful, no magic number needed;
   // resizeEvent enforces it (see below).
   ui->src1->setMinimumSize(170, 120);
   ui->src2->setMinimumSize(170, 120);
@@ -139,7 +154,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   ui->verticalLayout->insertWidget(3, makeToolbarSeparator()); // over bottom toolbar
 
   // Drive the window's minimum from the layout's real minimum (derived from the
-  // widget size hints — no magic number) and push it to the window manager once
+  // widget size hints, no magic number) and push it to the window manager once
   // the layout is realised, so an interactive resize can't squash the toolbars.
   ui->verticalLayout->setSizeConstraint(QLayout::SetMinimumSize);
   QTimer::singleShot(0, this, [this]() { setMinimumSize(resizeFloor()); });
@@ -231,7 +246,8 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
             m_ttsLocalFiles = audioFiles;
             m_ttsCurrentIndex = 0;
             if (m_ttsLocalFiles.isEmpty()) {
-              showError("TTS service returned no audio data.");
+              showError(tr("Could not play the audio"),
+                        tr("The speech service returned no audio."), QString());
               stopTtsSession(false);
               return;
             }
@@ -240,7 +256,10 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   connect(m_ttsDownloader, &TtsDownloader::failed, this,
           [=](const QString &error) {
             stopTtsSession(false);
-            showError(error);
+            qCWarning(glate::shell::lcSpeech).noquote()
+                << "speech download failed:" << glate::shell::redactUrlQueries(error);
+            showError(tr("Could not play the audio"), QString(),
+                      glate::shell::redactUrlQueries(error));
           });
   connect(m_player, &QMediaPlayer::playbackStateChanged, this,
           [=](QMediaPlayer::PlaybackState state) {
@@ -265,8 +284,10 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
           [=](QMediaPlayer::Error error, const QString &errorString) {
             Q_UNUSED(error);
             stopTtsSession(false);
-            showError(errorString.isEmpty() ? m_player->errorString()
-                                            : errorString);
+            const QString message =
+                errorString.isEmpty() ? m_player->errorString() : errorString;
+            qCWarning(glate::shell::lcSpeech).noquote() << "playback failed:" << message;
+            showError(tr("Could not play the audio"), QString(), message);
           });
 
   connect(m_player, &QMediaPlayer::mediaStatusChanged, this,
@@ -300,7 +321,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
 
   resetPlayIcons();
 
-  // Disable TTS buttons initially — re-enabled by on_src*_textChanged
+  // Disable TTS buttons initially, re-enabled by on_src*_textChanged
   // as soon as the user types or text is loaded.
   ui->play1->setEnabled(!ui->src1->toPlainText().isEmpty());
   ui->play2->setEnabled(!ui->src2->toPlainText().isEmpty());
@@ -373,7 +394,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   connect(m_licenseManager, &AccountLicenseManager::licenseStatusUpdated,
           this, &MainWindow::onLicenseStatusUpdated);
 
-  // Account dialog — created once, shown on demand via the toolbar button
+  // Account dialog, created once, shown on demand via the toolbar button
   m_accountDialog = new AccountDialog(this);
   m_accountDialog->setWindowFlag(Qt::Dialog);
   m_accountDialog->setWindowModality(Qt::NonModal);
@@ -384,12 +405,10 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   m_accountDialog->setSerial(m_licenseManager->serial());
   m_licenseManager->checkPurchase(m_licenseManager->serial());
 
-  if (m_settings.value("firstRun").isValid() == false) {
-    QTimer::singleShot(3000, this, [this]() {
-      on_help_clicked();
-    });
-    m_settings.setValue("firstRun", false);
-  }
+  initShell();
+  // What's new reads "firstRun" to tell an update from a new install.
+  m_shell->showWhatsNewIfUpdated();
+  m_settings.setValue("firstRun", false);
 }
 
 // TODO skip duplicate history item by checking translationId
@@ -418,6 +437,9 @@ void MainWindow::init_history() {
               src2 = historyItemMeta.at(3);
               ui->src1->setText(src1);
               ui->src2->setText(src2);
+              m_resultOffline = historyItemMeta.value(4) == QLatin1String("offline");
+              m_resultPair = tr("%1 to %2").arg(from, to);
+              updateOfflineCaption();
               ui->lang1->setCurrentText(from);
               ui->lang2->setCurrentText(to);
             }
@@ -502,6 +524,8 @@ void MainWindow::textSelectionChanged(QTextEdit *editor) {
 }
 
 bool MainWindow::eventFilter(QObject *o, QEvent *e) {
+  if (o == ui->src2->viewport() && e->type() == QEvent::Resize)
+    positionPaneOverlays();
   // simulate translate shortcut instead of going to new line when cursor is on
   // textEdit widgets.
   if (e->type() == QEvent::KeyRelease || e->type() == QEvent::KeyPress ||
@@ -591,7 +615,7 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   // A frameless (client-side-decorated) window isn't reliably held to its
   // minimum by the compositor during an interactive resize, so the layout could
   // be squashed below what its widgets need. Snap back up to the layout-derived
-  // minimum — this is the single source of truth (widget size hints), not a
+  // minimum, this is the single source of truth (widget size hints), not a
   // hard-coded number.
   const QSize floor = resizeFloor();
   if (event->size().width() < floor.width() ||
@@ -657,6 +681,7 @@ void MainWindow::translate_clicked() {
     connect(m_request, &Request::requestFinished, this, [=](QString reply) {
       // save cache for line by line use
       saveByTransId(m_translationId, reply);
+      m_nextResultOffline = false;
       // load to view
       processTranslation(reply);
       m_loader->stop();
@@ -664,7 +689,12 @@ void MainWindow::translate_clicked() {
     });
     connect(m_request, &Request::downloadError, this, [=](QString errorString) {
       m_loader->stop();
-      showError(errorString);
+      const QString detail = glate::shell::redactUrlQueries(errorString);
+      qCWarning(glate::shell::lcNetwork).noquote() << "translation failed:" << detail;
+      showError(tr("Could not translate"),
+                tr("The translation service did not answer. Check your "
+                   "connection and try again."),
+                detail);
     });
 
     const QString src1 = ui->src1->toPlainText();
@@ -690,7 +720,9 @@ void MainWindow::translate_clicked() {
     url.setQuery(urlQuery);
 
     const QString urlStr = url.toString(QUrl::FullyEncoded);
-    qDebug() << urlStr;
+    qCInfo(glate::shell::lcNetwork) << "online translation" << getSourceLang()
+                                    << "->" << getTransLang() << src1.size()
+                                    << "characters";
 
     if (urlStr.isEmpty()) {
       showError("Invalid Input.");
@@ -723,8 +755,11 @@ void MainWindow::processTranslation(const QString &reply) {
   m_currentTranslationData.clear();
   const QJsonDocument jsonResponse = QJsonDocument::fromJson(reply.toUtf8());
   if (jsonResponse.isEmpty()) {
-    showError(
-        "Empty response returned.\n Please report to keshavnrj@gmail.com");
+    qCWarning(glate::shell::lcNetwork) << "empty translation reply";
+    showError(tr("Could not translate"),
+              tr("The translation service returned nothing. Try again in a "
+                 "moment."),
+              QString());
     return;
   }
   QJsonArray jsonArray = jsonResponse.array();
@@ -746,13 +781,23 @@ void MainWindow::processTranslation(const QString &reply) {
   }
   // scroll to top
   ui->src2->verticalScrollBar()->triggerAction(QScrollBar::SliderToMinimum);
+  m_resultOffline = m_nextResultOffline;
+  m_nextResultOffline = false;
+  m_resultPair = tr("%1 to %2").arg(getLangName(getSourceLang()),
+                                     getLangName(getTransLang()));
+  updateOfflineCaption();
   // history save
-  m_historyWidget->insertItem(
-      QStringList() << getLangName(getSourceLang())
-                    << getLangName(getTransLang()) << ui->src1->toPlainText()
-                    << ui->src2->toPlainText()
-                    << QDateTime::currentDateTime().toLocalTime().toString(),
-      false, m_translationId);
+  QStringList meta = QStringList()
+                     << getLangName(getSourceLang())
+                     << getLangName(getTransLang()) << ui->src1->toPlainText()
+                     << ui->src2->toPlainText()
+                     << QDateTime::currentDateTime().toLocalTime().toString();
+  if (m_resultOffline)
+    meta << QStringLiteral("offline");
+  m_historyWidget->insertItem(meta, false, m_translationId);
+  m_settings.setValue(kTranslationCountKey,
+                      m_settings.value(kTranslationCountKey, 0).toInt() + 1);
+  updateWelcomeCard();
 }
 
 QString MainWindow::getSourceLang() const {
@@ -770,23 +815,31 @@ QString MainWindow::getTransLang() const {
 }
 
 void MainWindow::showError(const QString &message) {
-  QString temp = message;
-  if (temp.contains("host", Qt::CaseInsensitive) ||
-      temp.contains("translate.googleapis.com")) {
-    temp.replace("translate.googleapis.com", "host");
-  }
-  // init error
+  showError(tr("Something went wrong"), QString(), message);
+}
+
+void MainWindow::showError(const QString &heading, const QString &explanation,
+                           const QString &detail) {
+  QString temp = detail;
+  temp.replace("translate.googleapis.com", "host");
+  qCWarning(glate::shell::lcApp).noquote()
+      << "error shown:" << heading << glate::shell::redactUrlQueries(temp);
   m_error = new Error(this);
   m_error->setAttribute(Qt::WA_DeleteOnClose, true);
-  m_error->setWindowTitle(QApplication::applicationName() + " | Error dialog");
+  m_error->setWindowTitle(QApplication::applicationName() + " | Error");
   m_error->setWindowFlag(Qt::Dialog);
   m_error->setWindowModality(Qt::NonModal);
-  m_error->setError("An Error ocurred while processing your request!", temp);
+  m_error->setError(heading, explanation, temp);
+  connect(m_error, &Error::reportRequested, this, [this, heading](const QString &d) {
+    m_shell->showBugReport(heading + QStringLiteral("\n\n") +
+                           glate::shell::redactUrlQueries(d));
+  });
   m_error->show();
 }
 
 void MainWindow::on_clear_clicked() {
   stopTtsSession(true);
+  m_pendingOfflineText = QString();
 
   ui->src1->clear();
   ui->src2->clear();
@@ -950,7 +1003,7 @@ void MainWindow::toggleOrStartTts(const QString &buttonName,
   const bool isPlaying =
       m_player->playbackState() == QMediaPlayer::PlayingState;
 
-  // Toggle off — never consumes a play credit.
+  // Toggle off, never consumes a play credit.
   if (isPlaying && activeButton == buttonName) {
     stopTtsSession(true);
     return;
@@ -1099,6 +1152,10 @@ QString MainWindow::getLangCode(const QString &langName) const {
 }
 
 void MainWindow::on_help_clicked() {
+  m_helpMenu->popup(ui->help->mapToGlobal(QPoint(0, ui->help->height())));
+}
+
+void MainWindow::showTour() {
   if (m_slider == nullptr) {
     m_slider = new Slider(this);
     m_slider->setWindowTitle(QApplication::applicationName() +
@@ -1112,16 +1169,7 @@ void MainWindow::on_help_clicked() {
   }
 }
 
-void MainWindow::on_about_clicked() {
-  if (!m_aboutDialog)
-    m_aboutDialog = new AboutDialog(this);
-  if (m_aboutDialog->isVisible()) {
-    m_aboutDialog->raise();
-    m_aboutDialog->activateWindow();
-    return;
-  }
-  m_aboutDialog->showNormal();
-}
+void MainWindow::on_about_clicked() { m_shell->showAbout(); }
 
 // ── Account / licence ─────────────────────────────────────────────────────────
 
@@ -1139,7 +1187,7 @@ void MainWindow::onLicenseStatusUpdated(
 {
     m_hasPremiumAccess = status.hasPaidAccess;
 
-    // Keep the centralized gate in sync — all Pro-gated features read from here.
+    // Keep the centralized gate in sync, all Pro-gated features read from here.
     LicenseService::instance()->setHasPaidAccess(status.hasPaidAccess);
 
     // Let the upgrade dialog know whether the user has had a trial so it can
@@ -1153,12 +1201,18 @@ void MainWindow::onLicenseStatusUpdated(
     LicenseService::instance()->setEvaluationState(evalState);
     LicenseService::instance()->setEvaluationDurationDays(m_licenseManager->config().evaluationDurationSecs / 86400);
 
-    qDebug().noquote()
-        << "[Glate licence]"
+    qCInfo(glate::shell::lcLicense)
+        << "licence status:"
         << (status.active           ? "Pro"
             : status.evaluationActive ? "Evaluation"
-                                      : "Free")
-        << "|" << status.message;
+                                      : "Free");
+    m_licenseKnown = true;
+    refreshOfflineIndicator();
+    if (!m_pendingOfflineText.isNull()) {
+        const QString pending = std::exchange(m_pendingOfflineText, QString());
+        m_loader->stop();
+        translateOffline(pending);
+    }
 }
 
 // ── Offline translation ─────────────────────────────────────────────────────
@@ -1179,11 +1233,14 @@ void MainWindow::initOffline() {
           [this]() { showOfflineLanguages(); });
   connect(m_settingsWidget, &Settings::offlineModeChanged, this,
           [this](bool enabled) {
+            qCInfo(glate::shell::lcOffline) << "offline mode" << (enabled ? "on" : "off");
+            refreshOfflineIndicator();
             // Turning it on with nothing downloaded: show what can be downloaded.
             if (enabled && m_modelStore->installed().isEmpty())
               showOfflineLanguages();
           });
-  auto modelsChanged = [this](const QString &) {
+  auto modelsChanged = [this](const QString &id) {
+    qCInfo(glate::shell::lcOffline) << "models changed:" << id;
     m_offline->reloadModels();
     updateOfflineSummary();
   };
@@ -1205,6 +1262,7 @@ void MainWindow::initOffline() {
                 QJsonDocument(QJsonArray{sentences}).toJson(QJsonDocument::Compact));
             m_translationId = utils::generateRandomId(20);
             saveByTransId(m_translationId, reply);
+            m_nextResultOffline = true;
             processTranslation(reply);
             m_settings.setValue("lastTranslation", m_translationId);
           });
@@ -1214,7 +1272,8 @@ void MainWindow::initOffline() {
               return;
             m_offlineRequest = 0;
             m_loader->stop();
-            showError(message);
+            qCWarning(glate::shell::lcOffline).noquote() << "translation failed:" << message;
+            showError(tr("Could not translate offline"), QString(), message);
           });
 
   updateOfflineSummary();
@@ -1227,6 +1286,23 @@ bool MainWindow::offlineModeEnabled() const {
 
 void MainWindow::translateOffline(const QString &text) {
   using glate::offline::TranslationPlan;
+  // Right after start the licence status is not known yet; wait for it (up to
+  // 5 s) instead of asking a Pro or evaluation user to upgrade.
+  if (!m_licenseKnown) {
+    const bool waiting = !m_pendingOfflineText.isNull();
+    m_pendingOfflineText = text;
+    m_loader->start();
+    if (!waiting)
+      QTimer::singleShot(5000, this, [this]() {
+        if (m_pendingOfflineText.isNull())
+          return;
+        m_licenseKnown = true; // no answer: let checkAccess() decide from what it has
+        const QString pending = std::exchange(m_pendingOfflineText, QString());
+        m_loader->stop();
+        translateOffline(pending);
+      });
+    return;
+  }
   // The licence may have lapsed since offline mode was turned on. Never fall
   // back to the online service silently: the user expects text to stay local.
   if (!LicenseService::instance()->checkAccess(tr("Offline translation")))
@@ -1270,6 +1346,8 @@ void MainWindow::translateOffline(const QString &text) {
     return;
   }
 
+  qCInfo(glate::shell::lcOffline) << "offline translation" << from << "->" << to
+                                  << text.size() << "characters";
   m_loader->start();
   m_offlineRequest = m_offline->translate(from, to, text);
   if (m_offlineRequest == 0)
@@ -1314,13 +1392,170 @@ void MainWindow::updateOfflineSummary() {
   m_settingsWidget->setOfflineSummary(summary);
 }
 
+// ── App shell ───────────────────────────────────────────────────────────────
+
+void MainWindow::initShell() {
+  m_shell = new GlateShell(this, [this]() { return diagnosticsLines(); });
+  m_helpMenu = m_shell->createHelpMenu(this, [this]() { showTour(); });
+  auto *keys = new QShortcut(QKeySequence(Qt::Key_F1), this);
+  keys->setContext(Qt::ApplicationShortcut);
+  connect(keys, &QShortcut::activated, m_shell, &GlateShell::showShortcuts);
+
+  // The "Offline" pill takes the top bar's centre, where an empty logo label sat.
+  m_offlinePill = new glate::shell::StatusPill(
+      tr("Offline"), QStringLiteral(":/icons/computer-line.png"), this);
+  m_offlinePill->setObjectName(QStringLiteral("offlinePill"));
+  m_offlinePill->setToolTip(tr("Offline mode is on: translations happen on this "
+                               "computer. Click to manage languages."));
+  connect(m_offlinePill, &QAbstractButton::clicked, this,
+          [this]() { showOfflineLanguages(); });
+  const int logoIndex = ui->horizontalLayout_3->indexOf(ui->label);
+  ui->label->hide();
+  ui->horizontalLayout_3->insertWidget(logoIndex, m_offlinePill);
+
+  // "Translated on this device" under an offline result.
+  m_offlineCaption = new QLabel(ui->src2->viewport());
+  m_offlineCaption->setObjectName(QStringLiteral("offlineCaption"));
+  m_offlineCaption->setAttribute(Qt::WA_TransparentForMouseEvents);
+  m_offlineCaption->hide();
+
+  // First run: a card in the empty result pane instead of a popup.
+  m_welcome = new glate::shell::WelcomeCard(
+      tr("Welcome to Glate"),
+      tr("Translate text and listen to it, online or on this computer."),
+      {{QStringLiteral(":/icons/file-text-line.png"),
+        tr("Type or paste on the left, then press <b>Shift</b>+<b>Enter</b> or "
+           "the arrow.")},
+       {QStringLiteral(":/icons/swap-box-line.png"),
+        tr("Pick both languages below; the middle button swaps them.")},
+       {QStringLiteral(":/icons/computer-line.png"),
+        tr("Turn on offline mode in Settings to translate without internet "
+           "(Pro).")}},
+      tr("Take the tour"), ui->src2->viewport());
+  m_resultPlaceholder = ui->src2->placeholderText();
+  connect(m_welcome, &glate::shell::WelcomeCard::buttonClicked, this,
+          [this]() { showTour(); });
+
+  ui->src2->viewport()->installEventFilter(this);
+  connect(ui->src1, &QTextEdit::textChanged, this, [this]() { updateWelcomeCard(); });
+  connect(ui->src2, &QTextEdit::textChanged, this, [this]() {
+    if (ui->src2->document()->isEmpty())
+      m_resultOffline = false;
+    updateOfflineCaption();
+    updateWelcomeCard();
+  });
+  if (m_theme != nullptr)
+    connect(m_theme, &ThemeController::effectiveModeChanged, this,
+            [this]() { refreshOfflineIndicator(); updateOfflineCaption(); });
+
+  refreshOfflineIndicator();
+  updateOfflineCaption();
+  updateWelcomeCard();
+}
+
+QStringList MainWindow::diagnosticsLines() const {
+  QStringList languages;
+  if (m_modelStore != nullptr) {
+    for (const auto &model : m_modelStore->installed()) {
+      for (const QString &side : {model.from, model.to}) {
+        if (side != glate::offline::kPivotLanguage && !languages.contains(side))
+          languages.append(side);
+      }
+    }
+  }
+  languages.sort();
+  const bool engine = glate::offline::TranslationEngine::isAvailable();
+  return {
+      QStringLiteral("Offline engine: %1, mode %2, %3 language(s)%4")
+          .arg(engine ? QStringLiteral("available") : QStringLiteral("not built"),
+               offlineModeEnabled() ? QStringLiteral("on") : QStringLiteral("off"))
+          .arg(languages.size())
+          .arg(languages.isEmpty() ? QString()
+                                   : QStringLiteral(" (%1)").arg(languages.join(", "))),
+      QStringLiteral("UI language: %1, theme: %2 %3")
+          .arg(m_settings.value("ui_language", "system").toString(),
+               m_settings.value("appearance/skin", "fusion2").toString(),
+               m_settings.value("appearance/mode", "system").toString()),
+  };
+}
+
+void MainWindow::refreshOfflineIndicator() {
+  if (m_offlinePill == nullptr)
+    return;
+  // Hidden once the licence is known to have lapsed: translating then asks to upgrade.
+  const bool on = offlineModeEnabled() && (!m_licenseKnown || m_hasPremiumAccess);
+  m_offlinePill->setVisible(on);
+
+  QPixmap arrow = QIcon(":/icons/arrow-right-circle-line.png").pixmap(64, 64);
+  if (on) {
+    QPainter painter(&arrow);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(QPen(palette().color(QPalette::Window), 4));
+    painter.setBrush(glate::shell::offlineColor(this));
+    painter.drawEllipse(QRectF(42, 4, 18, 18));
+  }
+  m_translate->setIcon(QIcon(arrow));
+  m_translate->setToolTip(on ? tr("Translate offline (Shift + Enter)")
+                             : tr("Translate (Shift + Enter)"));
+}
+
+void MainWindow::updateOfflineCaption() {
+  if (m_offlineCaption == nullptr)
+    return;
+  const bool show = m_resultOffline && !ui->src2->document()->isEmpty();
+  if (show) {
+    const QColor muted = glate::shell::mutedColor(this);
+    const QColor green = glate::shell::offlineColor(this);
+    const QPixmap icon = glate::shell::tintedIcon(
+        QStringLiteral(":/icons/computer-line.png"), green).pixmap(14, 14);
+    QByteArray png;
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+    icon.save(&buffer, "PNG");
+    m_offlineCaption->setText(
+        QStringLiteral("<img src=\"data:image/png;base64,%1\" width=14 height=14> "
+                       "<span style=\"color:%2\">%3</span>")
+            .arg(QString::fromLatin1(png.toBase64()), muted.name(),
+                 tr("Translated on this device, %1").arg(m_resultPair).toHtmlEscaped()));
+  }
+  m_offlineCaption->setVisible(show);
+  positionPaneOverlays();
+}
+
+void MainWindow::updateWelcomeCard() {
+  if (m_welcome == nullptr)
+    return;
+  const bool show = ui->src1->document()->isEmpty() &&
+                    ui->src2->document()->isEmpty() &&
+                    m_settings.value(kTranslationCountKey, 0).toInt() <
+                        kWelcomeTranslations;
+  m_welcome->setVisible(show);
+  // The card sits on the pane; its placeholder would show through.
+  ui->src2->setPlaceholderText(show ? QString() : m_resultPlaceholder);
+  positionPaneOverlays();
+}
+
+void MainWindow::positionPaneOverlays() {
+  const QRect area = ui->src2->viewport()->rect();
+  // isHidden(), not isVisible(): before the window is shown nothing is visible.
+  if (m_welcome != nullptr && !m_welcome->isHidden())
+    m_welcome->setGeometry(area);
+  if (m_offlineCaption != nullptr && !m_offlineCaption->isHidden()) {
+    m_offlineCaption->adjustSize();
+    m_offlineCaption->move(area.left() + 12,
+                           area.bottom() - m_offlineCaption->height() - 8);
+    m_offlineCaption->raise();
+  }
+}
+
 // ── Developer aid ───────────────────────────────────────────────────────────
 //
 //   GLATE_DEBUG_WINDOW_SIZE=WxH        size of the main window
 //   GLATE_DEBUG_LANGS=from:to          glate codes, "auto" allowed for from
 //   GLATE_DEBUG_TEXT=<text>            source text, translated once the window is up
 //   GLATE_DEBUG_OFFLINE=0|1            offline mode on or off for this run
-//   GLATE_DEBUG_OPEN=settings|history|linebyline|offline|share|about|account
+//   GLATE_DEBUG_OPEN=settings|history|linebyline|offline|share|about|account|
+//                    whatsnew|bugreport|shortcuts|helpmenu|error
 //   GLATE_DEBUG_GRAB=<png>[,<seconds>] saves the opened screen (or the main
 //                                      window) after the delay, then quits
 
@@ -1329,9 +1564,11 @@ void MainWindow::debugRun() {
   if (size.contains('x'))
     resize(size.section('x', 0, 0).toInt(), size.section('x', 1, 1).toInt());
 
-  if (qEnvironmentVariableIsSet("GLATE_DEBUG_OFFLINE"))
+  if (qEnvironmentVariableIsSet("GLATE_DEBUG_OFFLINE")) {
     m_settingsWidget->setOfflineModeChecked(
         qEnvironmentVariable("GLATE_DEBUG_OFFLINE") == QStringLiteral("1"));
+    refreshOfflineIndicator(); // setOfflineModeChecked() emits nothing
+  }
 
   const QStringList langs = qEnvironmentVariable("GLATE_DEBUG_LANGS").split(':');
   if (langs.size() == 2) {
@@ -1380,6 +1617,20 @@ void MainWindow::debugRun() {
         on_account_clicked();
       else if (open == QStringLiteral("offline"))
         showOfflineLanguages();
+      else if (open == QStringLiteral("whatsnew"))
+        m_shell->showWhatsNew();
+      else if (open == QStringLiteral("bugreport"))
+        m_shell->showBugReport();
+      else if (open == QStringLiteral("shortcuts"))
+        m_shell->showShortcuts();
+      else if (open == QStringLiteral("helpmenu"))
+        on_help_clicked();
+      else if (open == QStringLiteral("error"))
+        showError(tr("Could not translate"),
+                  tr("The translation service did not answer. Check your "
+                     "connection and try again."),
+                  QStringLiteral("Error transferring https://host/translate_a/single - "
+                                 "server replied: Service Unavailable"));
     });
   }
 
@@ -1391,9 +1642,27 @@ void MainWindow::debugRun() {
       if (open == QStringLiteral("offline"))
         shot = m_offlineDialog;
       else if (open == QStringLiteral("about"))
-        shot = m_aboutDialog;
+        shot = m_shell->aboutDialog();
+      else if (open == QStringLiteral("whatsnew"))
+        shot = m_shell->whatsNewDialog();
+      else if (open == QStringLiteral("bugreport"))
+        shot = m_shell->bugReportDialog();
+      else if (open == QStringLiteral("shortcuts"))
+        shot = m_shell->shortcutsDialog();
+      else if (open == QStringLiteral("error"))
+        shot = m_error;
       if (shot == nullptr)
         shot = this;
+      if (open == QStringLiteral("helpmenu")) {
+        // A popup is its own window: paint the main window with the menu on it.
+        QPixmap canvas = grab();
+        QPainter painter(&canvas);
+        painter.drawPixmap(mapFromGlobal(m_helpMenu->pos()), m_helpMenu->grab());
+        painter.end();
+        canvas.save(spec.first());
+        QApplication::quit();
+        return;
+      }
       // The top-level window, so a custom title bar comes along.
       shot->window()->grab().save(spec.first());
       QApplication::quit();

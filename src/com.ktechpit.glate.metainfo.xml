@@ -21,7 +21,7 @@
       <li>Text-to-speech playback with selectable voice/gender plus audio export tools</li>
       <li>Translation history with search, quick load, copy, and remove actions</li>
       <li>Share translations via text save, e-mail, and public paste link generation</li>
-      <li>Standalone About dialog with quick access to project links and developer apps</li>
+      <li>Report a bug from the app, with the system details filled in for you</li>
       <li>Global quick-translate hotkey support on X11/XWayland</li>
       <li>Available in English, German, French, Brazilian Portuguese and Italian</li>
       <li>System-following Light/Dark appearance with Fusion and Fusion 2 theme choices</li>
@@ -94,6 +94,19 @@
   </keywords>
 
   <releases>
+    <release version="4.5.0" date="2026-10-23">
+      <description>
+        <p>A clearer app around the translator.</p>
+        <ul>
+          <li>See at a glance when offline mode is on, and which results were translated on your computer.</li>
+          <li>A new About window with credits, licences and diagnostics.</li>
+          <li>Report a bug from the Help menu, with the details filled in for you.</li>
+          <li>What's new opens once after each update.</li>
+          <li>A short welcome for new users instead of the slide show.</li>
+          <li>Offline translation no longer asks to upgrade when used right after start.</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.4.1" date="2026-10-22">
       <description>
         <p>The Windows portable build is back.</p>

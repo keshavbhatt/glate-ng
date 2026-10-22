@@ -8,6 +8,8 @@
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QJsonObject>
+
+#include "ShellStyle.h"
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
@@ -109,7 +111,10 @@ void History::loadHistoryItem(const QString &itemPath) {
     to = jsonObject.value("to").toString();
     src1 = jsonObject.value("src1").toString();
     src2 = jsonObject.value("src2").toString();
-    emit historyItemMeta(QStringList() << from << to << src1 << src2);
+    QStringList meta = QStringList() << from << to << src1 << src2;
+    if (jsonObject.value("offline").toBool())
+      meta << QStringLiteral("offline");
+    emit historyItemMeta(meta);
   }
 }
 
@@ -129,6 +134,8 @@ void History::save(const QStringList &meta, const QString &translationId) {
     map.insert("to", to);
     map.insert("src1", src1);
     map.insert("src2", src2);
+    if (meta.value(5) == QLatin1String("offline"))
+      map.insert("offline", true);
     QJsonObject object = QJsonObject::fromVariantMap(map);
     QJsonDocument document;
     document.setObject(object);
@@ -186,6 +193,7 @@ void History::loadHistory() {
     record.src1 = jsonObject.value("src1").toString();
     record.src2 = jsonObject.value("src2").toString();
     record.date = jsonObject.value("date").toString();
+    record.offline = jsonObject.value("offline").toBool();
     record.modifiedAt = fileInfo.lastModified();
     if (record.date.trimmed().isEmpty()) {
       record.date = record.modifiedAt.toLocalTime().toString();
@@ -292,7 +300,7 @@ void History::addRecordItem(const HistoryRecord &record) {
   langLabel->setFixedHeight(langLabel->fontMetrics().height() + 4);
 
   auto *dateLabel = new QLabel(record.date, card);
-  // Use placeholder/disabled text color — works correctly in both light and dark themes
+  // Use placeholder/disabled text color, works correctly in both light and dark themes
   QPalette datePal = dateLabel->palette();
   datePal.setColor(QPalette::WindowText,
                    qApp->palette().color(QPalette::Disabled, QPalette::Text));
@@ -301,6 +309,19 @@ void History::addRecordItem(const HistoryRecord &record) {
   dateLabel->setFixedHeight(dateLabel->fontMetrics().height() + 4);
 
   topRow->addWidget(langLabel);
+  if (record.offline) {
+    auto *offlineLabel = new QLabel(tr("Offline"), card);
+    offlineLabel->setToolTip(tr("Translated on this device"));
+    // The card's style sheet wins over a palette, so the colour goes in one too.
+    offlineLabel->setStyleSheet(
+        QStringLiteral("color: %1;").arg(glate::shell::offlineColor(card).name()));
+    offlineLabel->setFixedHeight(langLabel->fontMetrics().height() + 4);
+    offlineLabel->setAlignment(Qt::AlignVCenter);
+    QFont small = offlineLabel->font();
+    small.setPointSizeF(small.pointSizeF() * 0.9);
+    offlineLabel->setFont(small);
+    topRow->addWidget(offlineLabel);
+  }
   topRow->addStretch(1);
   topRow->addWidget(dateLabel);
   auto *loadBtn = new QPushButton(tr("Load"), card);

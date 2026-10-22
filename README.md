@@ -20,6 +20,7 @@ It translates online, or offline on your own computer with downloadable language
 - Export speech to audio formats with advanced controls
 - Translation history with search, quick copy, and text export
 - Share translations by email, a share link, or a text file
+- Report a bug from the Help menu, with the system details filled in
 - Global quick-translate hotkey on X11/XWayland
 - Light and dark appearance, two themes, your accent colour
 - Interface in English, German, French, Brazilian Portuguese and Italian
@@ -131,7 +132,7 @@ builds from a release tag of this repository, with Mozilla's engine as pinned so
 ./build-flatpak.sh
 ```
 
-This creates a versioned bundle like `glate-4.4.1.flatpak`.
+This creates a versioned bundle like `glate-4.5.0.flatpak`.
 
 ### Windows
 

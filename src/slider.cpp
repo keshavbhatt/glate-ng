@@ -16,7 +16,7 @@ Slider::Slider(QWidget *parent) : QWidget(parent), ui(new Ui::Slider) {
    * set in timeout progeressbar = show slide timer based progressbar on top.
    *  duration     = duration of slide while auto playback
    */
-  total = 8;
+  total = 9;
   currentIndex = 0;
   duration = 10000;
   progressbar = false;

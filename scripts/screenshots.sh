@@ -27,9 +27,12 @@ MODELS="$PROFILE/data/org.keshavnrj.ubuntu/Glate/models"
 # A fresh profile each time, so history holds only what these runs translate.
 rm -rf "$PROFILE" "$RAW"
 mkdir -p "$(dirname "$CONF")" "$MODELS" "$RAW"
+VERSION=$(sed -nE 's/^project\(glate VERSION ([0-9.]+).*/\1/p' "$DIR/CMakeLists.txt")
 cat > "$CONF" <<CONF
 [General]
 firstRun=false
+shell/whatsNewSeenVersion=$VERSION
+shell/translationCount=5
 closeToTray=false
 voiceGender=0
 appearance/mode=dark

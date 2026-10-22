@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+class QPushButton;
+
 namespace Ui {
 class Error;
 }
@@ -15,12 +17,21 @@ public:
   ~Error();
 
 public slots:
-  void setError(QString shortMessage, QString detail);
+  // heading: what failed ("Could not translate"); explanation: what to do;
+  // detail: the technical message, also passed on to a bug report.
+  void setError(const QString &heading, const QString &explanation,
+                const QString &detail);
+
+signals:
+  void reportRequested(const QString &detail);
+
 private slots:
   void on_ok_clicked();
 
 private:
   Ui::Error *ui;
+  QPushButton *m_report = nullptr;
+  QString m_detail;
 };
 
 #endif // ERROR_H

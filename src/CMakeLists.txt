@@ -33,8 +33,6 @@ if(WIN32)
 endif()
 
 qt_add_executable(glate
-    aboutdialog.cpp
-    aboutdialog.h
     accountdialog.cpp
     accountdialog.h
     accountdialog.ui
@@ -48,6 +46,8 @@ qt_add_executable(glate
     elidedlabel.cpp
     elidedlabel.h
     error.cpp
+    glateshell.cpp
+    glateshell.h
     error.h
     history.cpp
     history.h
@@ -92,6 +92,9 @@ qt_add_executable(glate
     planscomparisiondialog.h planscomparisiondialog.cpp planscomparisiondialog.ui
 )
 
+# The release notes, for What's new (modules/AppShell reads <releases>).
+qt_add_resources(glate "metainfo" PREFIX "/meta" FILES com.ktechpit.glate.metainfo.xml)
+
 qt_add_translations(glate TS_FILES
     Locales/Glate_en_IN.ts
     Locales/Glate_de_DE.ts
@@ -130,6 +133,7 @@ endif()
 
 target_link_libraries(glate PRIVATE
     offline_translation
+    app_shell
     account_license
     app_chrome
     Qt6::Core
@@ -221,8 +225,8 @@ if(WIN32)
     set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/icons/app/glate.ico")
     set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/icons/app/glate.ico")
     set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\glate.exe")
-    set(CPACK_NSIS_HELP_LINK "https://github.com/keshavnrj/glate")
-    set(CPACK_NSIS_URL_INFO_ABOUT "https://github.com/keshavnrj/glate")
+    set(CPACK_NSIS_HELP_LINK "https://github.com/keshavbhatt/glate-ng/issues")
+    set(CPACK_NSIS_URL_INFO_ABOUT "https://github.com/keshavbhatt/glate-ng")
     set(CPACK_NSIS_CONTACT "keshavnrj@gmail.com")
     set(CPACK_NSIS_MODIFY_PATH OFF)
     set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)

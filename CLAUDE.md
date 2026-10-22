@@ -2,7 +2,7 @@
 
 Glate is a Qt 6 / C++ desktop translator (online through Google, offline through Mozilla's
 Firefox translation models). CMake root is the repository root. `src/` is the app,
-`modules/` holds reusable libraries (AccountAndLicense, AppChrome, OfflineTranslation).
+`modules/` holds reusable libraries (AccountAndLicense, AppChrome, AppShell, OfflineTranslation).
 Decisions live in `DOCS/DECISIONS.md`, third-party components in `THIRD_PARTY.md`.
 The build tooling follows the owner's omnidict project.
 
@@ -27,8 +27,13 @@ Mozilla's engine into `third_party/translations` (ADR-003).
 ## Standing rules
 
 - No em dashes or en dashes anywhere.
-- New code (`modules/OfflineTranslation`, `tests/`) follows `.clang-format`, `.clang-tidy` and
-  `glate_set_warnings()` with warnings as errors; legacy `src/` is not reformatted (ADR-002).
+- Mocks before screens: every new screen or visible UI change first gets an HTML mock in
+  `DOCS/mocks/` that the owner approves; approval is recorded in `DOCS/mocks/index.html`.
+- Never log the text being translated, its translation, or paths under the home folder: the
+  log can go into a bug report (ADR-008). Use the `glate.*` categories from `Logging.h`.
+- New code (`modules/OfflineTranslation`, `modules/AppShell`, `tests/`) follows `.clang-format`,
+  `.clang-tidy` and `glate_set_warnings()` with warnings as errors; legacy `src/` is not
+  reformatted (ADR-002).
 - No new third-party dependency without an ADR and a `THIRD_PARTY.md` row.
 - Licensing (ADR-006, `LICENSING.md`): GPL-3.0-or-later, except the licensing module under the
   Ktechpit Licensing Module License. New module files go into `REUSE.toml` and `LICENSING.md`

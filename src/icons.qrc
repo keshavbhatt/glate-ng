@@ -39,5 +39,16 @@
         <file>icons/share-line.png</file>
         <file>icons/error-warning-line.png</file>
         <file>icons/play-line.png</file>
+        <file>icons/apps-line.png</file>
+        <file>icons/bug-line.png</file>
+        <file>icons/computer-line.png</file>
+        <file>icons/external-link-line.png</file>
+        <file>icons/gift-line.png</file>
+        <file>icons/github-line.png</file>
+        <file>icons/global-line.png</file>
+        <file>icons/heart-line.png</file>
+        <file>icons/keyboard-line.png</file>
+        <file>icons/lightbulb-line.png</file>
+        <file>icons/mail-line.png</file>
     </qresource>
 </RCC>

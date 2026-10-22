@@ -28,9 +28,15 @@ class MainWindow;
 }
 
 class ThemeController;
+class QLabel;
 class QSplitter;
-class AboutDialog;
+class GlateShell;
 class OfflineModelsDialog;
+
+namespace glate::shell {
+class StatusPill;
+class WelcomeCard;
+} // namespace glate::shell
 
 namespace glate::offline {
 class ModelManager;
@@ -87,6 +93,16 @@ private slots:
   QString getSourceLang() const;
   void init_settings();
   void showError(const QString &message);
+  void showError(const QString &heading, const QString &explanation,
+                 const QString &detail);
+  // App shell (modules/AppShell): help menu, offline indicator, first run.
+  void initShell();
+  void showTour();
+  QStringList diagnosticsLines() const;
+  void refreshOfflineIndicator();
+  void updateOfflineCaption();
+  void updateWelcomeCard();
+  void positionPaneOverlays();
   void textSelectionChanged(QTextEdit *editor);
   QString getLangName(const QString &langCode) const;
   QString getLangCode(const QString &langName) const;
@@ -156,8 +172,8 @@ private:
   // Account / licence
   AccountLicenseManager *m_licenseManager  = nullptr;
   AccountDialog         *m_accountDialog   = nullptr;
-  AboutDialog           *m_aboutDialog     = nullptr;
   bool                   m_hasPremiumAccess = false;
+  bool                   m_licenseKnown     = false;
 
   // Offline translation
   glate::offline::ModelStore        *m_modelStore    = nullptr;
@@ -165,6 +181,18 @@ private:
   glate::offline::OfflineTranslator *m_offline       = nullptr;
   OfflineModelsDialog               *m_offlineDialog = nullptr;
   quint64                            m_offlineRequest = 0;
+
+  // App shell
+  GlateShell                *m_shell          = nullptr;
+  glate::shell::StatusPill  *m_offlinePill    = nullptr;
+  glate::shell::WelcomeCard *m_welcome        = nullptr;
+  QLabel                    *m_offlineCaption = nullptr;
+  QMenu                     *m_helpMenu       = nullptr;
+  bool                       m_nextResultOffline = false; // set before processTranslation()
+  bool                       m_resultOffline  = false;    // what src2 shows now
+  QString                    m_resultPair;                // "English to Spanish"
+  QString                    m_pendingOfflineText;        // waits for the licence status
+  QString                    m_resultPlaceholder;         // src2's, hidden under the welcome card
 };
 
 #endif // MAINWINDOW_H

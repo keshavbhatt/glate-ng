@@ -51,3 +51,10 @@ target_sources(tst_offline_models_dialog PRIVATE
     "${PROJECT_SOURCE_DIR}/src/offlinemodelsdialog.h")
 target_include_directories(tst_offline_models_dialog PRIVATE "${PROJECT_SOURCE_DIR}/src")
 target_link_libraries(tst_offline_models_dialog PRIVATE Qt6::Widgets)
+
+# modules/AppShell
+glate_add_test(tst_app_shell tst_app_shell.cpp app_shell)
+target_compile_definitions(tst_app_shell PRIVATE
+    GLATE_METAINFO_PATH="${PROJECT_SOURCE_DIR}/src/com.ktechpit.glate.metainfo.xml"
+    GLATE_VERSION="${PROJECT_VERSION}")
+glate_add_test(tst_shell_dialogs tst_shell_dialogs.cpp app_shell GUI)

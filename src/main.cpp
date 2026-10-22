@@ -9,6 +9,10 @@
 #include <QString>
 #include <QTranslator>
 
+#include "glateshell.h"
+#include "LogSink.h"
+#include "Logging.h"
+
 #include <AppTheme.h>
 #include <ThemeController.h>
 #include <WindowChrome.h>
@@ -17,6 +21,9 @@
 static constexpr auto kInstanceKey = "com.ktechpit.glate.SingleInstance";
 
 int main(int argc, char *argv[]) {
+  // First, so every message from here on reaches the log (modules/AppShell).
+  glate::shell::LogSink::install();
+
   // Qt6 on Linux routes qDebug/qWarning to journald when the process is not
   // attached to a TTY (e.g. when launched from an IDE).  Force stderr output
   // so the IDE Run console always captures debug logs.
@@ -52,8 +59,8 @@ int main(int argc, char *argv[]) {
     QLocalSocket probe;
     probe.connectToServer(kInstanceKey);
     if (probe.waitForConnected(500)) {
-      // Another instance is running — ask it to raise itself and exit.
-      qInfo() << "Another instance is already running; asking it to raise itself.";
+      // Another instance is running, ask it to raise itself and exit.
+      qCInfo(glate::shell::lcApp) << "another instance is running; asking it to raise itself";
       probe.write("raise");
       probe.flush();
       probe.waitForBytesWritten(500);
@@ -66,6 +73,12 @@ int main(int argc, char *argv[]) {
   QLocalServer::removeServer(kInstanceKey);
   QLocalServer instanceServer;
   instanceServer.listen(kInstanceKey);
+
+  // Only the running instance writes the log file.
+  glate::shell::LogSink::setLogFile(GlateShell::logFilePath());
+  qCInfo(glate::shell::lcApp).noquote()
+      << "Glate" << QApplication::applicationVersion() << "starting, Qt"
+      << qVersion() << "on" << QGuiApplication::platformName();
   // ─────────────────────────────────────────────────────────────────────────
 
   // ── AppChrome: self-contained theming + client-side decoration ────────────

@@ -40,7 +40,7 @@ precedence = "override"
 SPDX-FileCopyrightText = ["2012-2014 Alexander Turkin", "2014 William Hallatt", "2015 Jacob Dawid"]
 SPDX-License-Identifier = "MIT"
 
-# UI glyphs from Remix Icon (Apache-2.0 at the version used, 2020).
+# UI glyphs from Remix Icon (Apache-2.0 at the versions used: a 2020 snapshot and 2.5.0).
 [[annotations]]
 path = ["src/icons/*-line.png", "src/icons/*-fill.png"]
 precedence = "override"
