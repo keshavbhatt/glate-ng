@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Error with report</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script></head>
+<body>
+<div class="window" data-main data-src="Good morning!" data-result="">
+  <div class="overlay"><div class="dialog" style="width:460px">
+    <div class="dtitle">Glate | Error<span class="x">&#x2715;</span></div>
+    <div class="dbody">
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--danger)"><svg class="ic" style="width:28px;height:28px"><use href="#i-alert"/></svg></span>
+      <div><b>Could not translate</b><p class="small muted" style="margin-top:4px">The translation service did not answer. Check your connection and try again.</p></div></div>
+      <div class="mono" style="font-size:11px;white-space:pre-wrap">Error transferring https://host/translate_a/single - server replied: Service Unavailable</div>
+    </div>
+    <div class="dfoot"><span class="btn"><svg class="ic s"><use href="#i-bug"/></svg>Report a bug...</span><span class="grow"></span><span class="btn primary">OK</span></div>
+  </div></div>
+  <span class="pin" style="left:calc(50% - 222px);bottom:150px">1</span>
+</div>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li>The error window gets a <b>Report a bug</b> button that opens the bug report with the error added to the description. The heading says what failed ("Could not translate") instead of today's "An Error ocurred while processing your request!", and the "Please report to keshavnrj@gmail.com" text goes away.</li>
+</ol></div>
+</body></html>

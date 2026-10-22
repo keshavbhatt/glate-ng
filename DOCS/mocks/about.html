@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: About</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script></head>
+<body>
+<div class="window" data-main data-src="Good morning!" data-result="¡Buen día!">
+  <div class="overlay"><div class="dialog" style="width:640px">
+    <div class="dtitle">About Glate<span class="x">&#x2715;</span></div>
+    <div class="dbody" style="gap:14px">
+      <div style="display:flex;gap:16px;align-items:center">
+        <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#5b8cff,#2f5be0);display:grid;place-items:center;color:#fff;font-weight:700;font-size:28px">G</div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <h2 style="font-size:20px">Glate</h2>
+          <span class="muted">Translate text and listen to it, online or on your computer.</span>
+          <span class="small">Version 4.5.0 <span class="btn link small">What's new</span></span>
+          <span class="small muted">Designed and developed by Keshav Bhatt, ktechpit.com</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="btn"><svg class="ic s"><use href="#i-bug"/></svg>Report a bug...</span>
+        <span class="btn"><svg class="ic s"><use href="#i-code"/></svg>Source code</span>
+        <span class="btn"><svg class="ic s"><use href="#i-globe"/></svg>Website</span>
+        <span class="btn"><svg class="ic s"><use href="#i-heart"/></svg>Donate</span>
+        <span class="btn"><svg class="ic s"><use href="#i-grid"/></svg>More apps</span>
+        <span class="btn"><svg class="ic s"><use href="#i-star"/></svg>Rate</span>
+      </div>
+      <div class="tabs"><span class="on" data-t="credits">Credits</span><span data-t="oss">Open source</span><span data-t="diag">Diagnostics</span></div>
+      <div data-p="credits" class="rows">
+        <div><b>Offline translation</b><span>Engine and models by Mozilla (Firefox Translations), MPL-2.0. Models are downloaded on demand from this project's mirror.</span></div>
+        <div><b>Online translation</b><span>Google Translate web service.</span></div>
+        <div><b>App name</b><span>Alan Pope helped choose the name.</span></div>
+        <div><b>Interface translations</b><span>German, French, Brazilian Portuguese and Italian.</span></div>
+      </div>
+      <div data-p="oss" class="rows" style="display:none">
+        <div><b>Glate</b><span>GPL-3.0-or-later; the account and licence code is source-available (LICENSING.md)</span></div>
+        <div><b>Qt 6.11</b><span>LGPL-3.0</span></div>
+        <div><b>Mozilla translations engine</b><span>MPL-2.0, with Marian, sentencepiece, intgemm, ruy and ssplit (MIT, Apache-2.0, BSD)</span></div>
+        <div><b>QHotkey</b><span>BSD-3-Clause</span></div>
+        <div><b>QtWaitingSpinner</b><span>MIT</span></div>
+        <div><b>Remix Icon</b><span>Apache-2.0</span></div>
+      </div>
+      <div data-p="diag" style="display:none;flex-direction:column;gap:8px">
+        <div class="mono">Glate 4.5.0 (3baa5e9)
+Qt 6.11.0 (built with 6.11.0)
+OS: Ubuntu 24.04 LTS, kernel 6.8.0, x86_64
+Session: wayland (KDE), package: snap
+Offline engine: available, mode on, 3 languages (de, fr, es)
+UI language: en_IN, theme: Fusion 2 dark</div>
+        <div style="display:flex;gap:8px"><span class="btn"><svg class="ic s"><use href="#i-copy"/></svg>Copy</span><span class="btn"><svg class="ic s"><use href="#i-folder"/></svg>Open log folder</span></div>
+      </div>
+    </div>
+    <div class="dfoot"><span class="grow"></span><span class="btn primary">Close</span></div>
+  </div></div>
+  <span class="pin" style="left:calc(50% - 300px);top:116px">1</span>
+  <span class="pin" style="left:calc(50% - 300px);top:226px">2</span>
+  <span class="pin" style="left:calc(50% - 300px);top:276px">3</span>
+</div>
+<script>document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.tabs span').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tabs span').forEach(x=>x.classList.toggle('on',x===t));document.querySelectorAll('[data-p]').forEach(p=>p.style.display=p.dataset.p===t.dataset.t?'flex':'none');});});</script>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Header.</b> App icon, name, one-line description, version with a What's new link, and the author line. Today this sits inside a text box; it becomes a proper header.</li>
+  <li><b>Links.</b> Report a bug opens the bug report window. Source code goes to github.com/keshavbhatt/glate-ng (today's GitHub button still points at the old glate repository). Website, Donate, More apps and Rate stay.</li>
+  <li><b>Tabs</b> (click them): Credits; Open source with every licence from THIRD_PARTY.md; Diagnostics, the same text a bug report includes, with Copy and Open log folder. Diagnostics never contain your text, history or paths under the home folder.</li>
+</ol></div>
+</body></html>

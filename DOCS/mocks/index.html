@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Index</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script></head>
+<body>
+<style>
+  .idx { max-width: 960px; margin: 0 auto; padding: 8px 0 80px; }
+  .idx h1 { font-size: 24px; margin-bottom: 6px; } .idx h2 { margin-top: 24px; font-size: 16px; }
+  .idx .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
+  .idx .grid a { display: block; padding: 14px 16px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); color: var(--text); }
+  .idx .grid a:hover { background: var(--hover); }
+  .idx .grid a b { display: block; margin-bottom: 2px; }
+  .idx .grid a span { color: var(--muted); font-size: 12px; display: block; }
+  .idx .grid a em { font-style: normal; font-size: 11px; color: var(--warning); display: block; margin-top: 6px; }
+  .idx .grid a em.ok { color: var(--offline); }
+</style>
+<div class="idx">
+  <h1>Glate mocks</h1>
+  <p class="muted">Every new screen before it is coded. The toolbar at the bottom right switches dark and light and hides the review notes; yellow pins match the numbered notes under each window. Approval is recorded here.</p>
+  <h2>App shell</h2>
+  <div class="grid">
+    <a href="main-offline.html"><b>Offline mode indicator</b><span>Top bar pill, translate button dot, result caption</span><em class="ok">Approved 2026-10-23</em></a>
+    <a href="main-welcome.html"><b>First run</b><span>Welcome card in the empty result pane, no popup</span><em class="ok">Approved 2026-10-23</em></a>
+    <a href="help-menu.html"><b>Help menu</b><span>Tour, What's new, shortcuts, Report a bug, log folder</span><em class="ok">Approved 2026-10-23</em></a>
+    <a href="about.html"><b>About</b><span>Header, links, Credits, Open source and Diagnostics tabs</span><em class="ok">Approved 2026-10-23</em></a>
+    <a href="whats-new.html"><b>What's new</b><span>Once after an update, from the metainfo release notes</span><em class="ok">Approved 2026-10-23</em></a>
+    <a href="bug-report.html"><b>Bug report</b><span>GitHub issue or email, details on the clipboard</span><em class="ok">Approved 2026-10-23</em></a>
+    <a href="error.html"><b>Error with report</b><span>Clear heading and a Report a bug button</span><em class="ok">Approved 2026-10-23</em></a>
+  </div>
+</div>
+
+</body></html>

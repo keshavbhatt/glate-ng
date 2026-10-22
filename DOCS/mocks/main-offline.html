@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Offline mode indicator</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script></head>
+<body>
+<div class="window" data-main data-offline="1" data-caption="1" data-src="Good morning! The train to the old town leaves from platform 4 at half past nine.<br>Tickets are cheaper online, and children under twelve travel free.<br><br>Please keep your luggage with you at all times." data-result="¡Buen día!<br>El tren que va al casco antiguo sale del andén 4 a las nueve y media.<br><br>Los billetes son más baratos online y los niños menores de doce años viajan gratis.<br><br>Por favor mantenga su equipaje con usted en todo momento.">
+  <span class="pin" style="left:calc(50% - 64px);top:38px">1</span>
+  <span class="pin" style="left:calc(50% + 8px);top:calc(50% - 40px)">2</span>
+  <span class="pin" style="right:24px;bottom:84px">3</span>
+</div>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Offline pill.</b> Shown in the middle of the top bar only while offline mode is on, so it is never there for online use. Green, with a laptop glyph and the word "Offline". Tooltip: "Offline mode is on: translations happen on this computer. Click to manage languages." Clicking opens the Offline languages window. It goes away the moment offline mode is turned off in Settings, or when the Pro licence lapses.</li>
+  <li><b>Translate button.</b> A small green dot on the arrow while offline mode is on. The tooltip changes from "Translate" to "Translate offline".</li>
+  <li><b>Result caption.</b> Under a result that was translated offline: "Translated on this device, English to Spanish". It is cleared as soon as the result is cleared or an online translation replaces it. History entries keep a small offline marker too.</li>
+  <li>Both colours follow the light and dark themes (try the toolbar). Green is used rather than the accent so the pill does not look like a button the user must press.</li>
+</ol></div>
+</body></html>

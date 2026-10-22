@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: First run</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script></head>
+<body>
+<div class="window" data-main data-welcome="1">
+  <span class="pin" style="right:calc(25% - 10px);top:120px">1</span>
+  <span class="pin" style="right:calc(25% + 120px);bottom:150px">2</span>
+</div>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>No popup on first start.</b> Today the 8-slide welcome window opens by itself 3 seconds after the first start. Instead, the empty result pane shows this card, in place, until the first translation. It does not block anything and comes back whenever both panes are empty, until the user has translated 3 times.</li>
+  <li><b>Take the tour</b> opens the existing welcome slides, which stay available from Help as well. The slides get one new page for offline mode.</li>
+  <li>Updating from an older version never shows this card; it shows What's new instead (see that mock).</li>
+</ol></div>
+</body></html>

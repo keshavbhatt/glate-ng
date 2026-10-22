@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Bug report</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script></head>
+<body>
+<div class="window" data-main data-src="Good morning!" data-result="¡Buen día!">
+  <div class="overlay"><div class="dialog" style="width:580px">
+    <div class="dtitle">Report a bug<span class="x">&#x2715;</span></div>
+    <div class="dbody">
+      <p class="small muted">Describe what went wrong. Glate does not send anything itself: it opens a GitHub issue or an email for you to review and send.</p>
+      <label class="field">Title<span class="input" style="display:flex;align-items:center">Offline translation stops after the first line</span></label>
+      <label class="field">What happened?<textarea class="input">I translated a German text with offline mode on. Only the first line came back.</textarea></label>
+      <div class="check"><i class="on">&#x2713;</i>Include the last 200 lines of the log</div>
+      <div class="small" style="display:flex;align-items:center;gap:6px;color:var(--accent)"><svg class="ic s"><use href="#i-down"/></svg>Details that will be included</div>
+      <div class="mono" style="max-height:110px">Glate 4.5.0 (3baa5e9), Qt 6.11.0, Ubuntu 24.04 LTS x86_64
+Session: wayland (KDE), package: snap
+Offline engine: available, mode on, 3 languages (de, fr, es)
+--- log ---
+2026-10-23 10:12:01.420 [glate.offline] info: model de-en loaded
+2026-10-23 10:12:03.118 [glate.offline] warning: translation failed: ...</div>
+    </div>
+    <div class="dfoot"><span class="btn"><svg class="ic s"><use href="#i-copy"/></svg>Copy details</span><span class="grow"></span><span class="btn"><svg class="ic s"><use href="#i-mail"/></svg>Send by email</span><span class="btn primary"><svg class="ic s"><use href="#i-external"/></svg>Open GitHub issue</span></div>
+  </div></div>
+  <span class="pin" style="left:calc(50% - 280px);top:288px">1</span>
+  <span class="pin" style="left:calc(50% - 280px);top:340px">2</span>
+  <span class="pin" style="right:calc(50% - 300px);bottom:56px">3</span>
+</div>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Log lines</b>, on by default. The log never holds the text you typed or its translation, only events such as "model loaded" or network errors. Unticking leaves only the system details.</li>
+  <li><b>Details</b> fold out to show exactly what will be included: the same text as About, Diagnostics.</li>
+  <li><b>Open GitHub issue</b> opens github.com/keshavbhatt/glate-ng/issues/new with the title and description filled in, and puts the details on the clipboard to paste (URLs have a length limit). Send by email does the same as a mail to keshavnrj@gmail.com. Copy details only copies.</li>
+</ol></div>
+</body></html>
