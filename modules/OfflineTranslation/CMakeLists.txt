@@ -50,4 +50,12 @@ if(GLATE_OFFLINE_ENGINE)
     # warning-clean, so they come in as system headers.
     target_link_libraries(offline_translation PRIVATE glate::translations_engine)
     target_compile_definitions(offline_translation PUBLIC GLATE_HAVE_TRANSLATIONS_ENGINE)
+    # The engine's headers (marian's bundled spdlog) use constructor forms that
+    # C++20 removed; GCC 13, as on Ubuntu 24.04 and core24, rejects them. The one
+    # file that includes them builds as C++17.
+    if(MSVC)
+        set_source_files_properties(TranslationEngine.cpp PROPERTIES COMPILE_OPTIONS "/std:c++17")
+    else()
+        set_source_files_properties(TranslationEngine.cpp PROPERTIES COMPILE_OPTIONS "-std=c++17")
+    endif()
 endif()

@@ -1,3 +1,5 @@
+// Built as C++17 (modules/OfflineTranslation/CMakeLists.txt): the engine's
+// headers do not compile as C++20 on GCC 13, so no C++20 features in this file.
 #include "TranslationEngine.h"
 
 #ifdef GLATE_HAVE_TRANSLATIONS_ENGINE
@@ -49,7 +51,7 @@ struct TranslationEngine::Private
         }
         const auto options = bergamot::parseOptionsFromString(engineConfig(installed), /*validate=*/false);
         auto model = std::make_shared<bergamot::TranslationModel>(options);
-        loaded.prepend(Loaded{.key = key, .model = model});
+        loaded.prepend(Loaded{key, model});
         while (loaded.size() > kLoadedModelLimit) {
             loaded.removeLast();
         }
@@ -133,9 +135,9 @@ void TranslationEngine::unloadAll() {}
 EngineResult TranslationEngine::translate(const QList<InstalledModel>& /*route*/,
                                           const QStringList& /*paragraphs*/)
 {
-    return EngineResult{.ok = false,
-                        .translations = {},
-                        .error = QStringLiteral("this build of glate has no offline engine")};
+    EngineResult result;
+    result.error = QStringLiteral("this build of glate has no offline engine");
+    return result;
 }
 
 #endif
