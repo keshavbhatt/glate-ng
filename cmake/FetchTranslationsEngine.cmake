@@ -145,8 +145,10 @@ set(CMAKE_CXX_CLANG_TIDY "${_glate_saved_tidy}")
 unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 # ssplit links its bundled PCRE2 as pcre2-8.lib, but with MSVC PCRE2 names its
-# static library pcre2-8-static.lib. Point ssplit's link list at that file.
+# static library pcre2-8-static.lib. Point ssplit's link list at that file, and
+# build ssplit with PCRE2_STATIC so it does not expect the DLL's import symbols.
 if(MSVC AND TARGET pcre2 AND TARGET ssplit)
+    target_compile_definitions(ssplit PUBLIC PCRE2_STATIC)
     foreach(_prop LINK_LIBRARIES INTERFACE_LINK_LIBRARIES)
         get_target_property(_libs ssplit ${_prop})
         if(_libs)
