@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Keshav Bhatt (Ktechpit)
+// SPDX-License-Identifier: LicenseRef-Ktechpit-Licensing-Module
+
 #include "planscomparisiondialog.h"
 #include "ui_planscomparisiondialog.h"
 

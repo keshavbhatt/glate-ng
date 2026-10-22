@@ -1,0 +1,48 @@
+version = 1
+SPDX-PackageName = "Glate"
+SPDX-PackageSupplier = "Keshav Bhatt <keshavnrj@gmail.com>"
+SPDX-PackageDownloadLocation = "https://github.com/keshavbhatt/glate-ng"
+
+# Everything is GPL-3.0-or-later except the licensing module and the third-party files below.
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2020-2026 Keshav Bhatt (Ktechpit) and contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The licensing module: account, licence, evaluation, Pro-feature and allowance code.
+[[annotations]]
+path = [
+    "modules/AccountAndLicense/**",
+    "src/GlateLicenseConfig.h",
+    "src/licenseservice.cpp",
+    "src/licenseservice.h",
+    "src/accountdialog.cpp",
+    "src/accountdialog.h",
+    "src/accountdialog.ui",
+    "src/planscomparisiondialog.cpp",
+    "src/planscomparisiondialog.h",
+    "src/planscomparisiondialog.ui"
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Keshav Bhatt (Ktechpit)"
+SPDX-License-Identifier = "LicenseRef-Ktechpit-Licensing-Module"
+
+[[annotations]]
+path = "src/QHotkey/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2016 Felix Barz"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = ["src/waitingspinnerwidget.cpp", "src/waitingspinnerwidget.h"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2012-2014 Alexander Turkin", "2014 William Hallatt", "2015 Jacob Dawid"]
+SPDX-License-Identifier = "MIT"
+
+# UI glyphs from Remix Icon (Apache-2.0 at the version used, 2020).
+[[annotations]]
+path = ["src/icons/*-line.png", "src/icons/*-fill.png"]
+precedence = "override"
+SPDX-FileCopyrightText = "Remix Design"
+SPDX-License-Identifier = "Apache-2.0"
