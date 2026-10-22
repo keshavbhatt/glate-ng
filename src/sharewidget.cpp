@@ -1,5 +1,5 @@
-#include "share.h"
-#include "ui_share.h"
+#include "sharewidget.h"
+#include "ui_sharewidget.h"
 
 #include "licenseservice.h"
 #include "utils.h"

@@ -62,8 +62,8 @@ qt_add_executable(glate
     request.h
     settings.cpp
     settings.h
-    share.cpp
-    share.h
+    sharewidget.cpp
+    sharewidget.h
     slider.cpp
     slider.h
     systemtraymanager.cpp
@@ -83,7 +83,7 @@ qt_add_executable(glate
     linebyline.ui
     mainwindow.ui
     settings.ui
-    share.ui
+    sharewidget.ui
     slider.ui
     textoptionform.ui
     icons.qrc

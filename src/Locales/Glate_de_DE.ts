@@ -857,82 +857,82 @@
 <context>
     <name>Share</name>
     <message>
-        <location filename="../share.ui" line="20"/>
+        <location filename="../sharewidget.ui" line="20"/>
         <source>Form</source>
         <translation>Formular</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="41"/>
+        <location filename="../sharewidget.ui" line="41"/>
         <source>Text to be shared:</source>
         <translation>Zu teilender Text:</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="56"/>
+        <location filename="../sharewidget.ui" line="56"/>
         <source>Audio voice:</source>
         <translation>Audiostimme:</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="102"/>
+        <location filename="../sharewidget.ui" line="102"/>
         <source>Open your mail client with the translation pre-filled</source>
         <translation>Open your mail client with the translation pre-filled</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="105"/>
+        <location filename="../sharewidget.ui" line="105"/>
         <source>Send as Email</source>
         <translation>Als E-Mail senden</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="134"/>
+        <location filename="../sharewidget.ui" line="134"/>
         <source>Upload to Paste.rs and copy a public share link to the clipboard</source>
         <translation>Upload to Paste.rs and copy a public share link to the clipboard</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="137"/>
+        <location filename="../sharewidget.ui" line="137"/>
         <source>Create Share Link</source>
         <translation>Freigabelink erstellen</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="182"/>
+        <location filename="../sharewidget.ui" line="182"/>
         <source>Synthesise TTS audio and open the audio editor/exporter</source>
         <translation>Synthesise TTS audio and open the audio editor/exporter</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="185"/>
+        <location filename="../sharewidget.ui" line="185"/>
         <source>Export as Audio</source>
         <translation>Als Audio exportieren</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="214"/>
+        <location filename="../sharewidget.ui" line="214"/>
         <source>Save the translation as a plain-text file</source>
         <translation>Save the translation as a plain-text file</translation>
     </message>
     <message>
-        <location filename="../share.ui" line="217"/>
+        <location filename="../sharewidget.ui" line="217"/>
         <source>Save as Text</source>
         <translation>Als Text speichern</translation>
     </message>
     <message>
-        <location filename="../share.cpp" line="15"/>
+        <location filename="../sharewidget.cpp" line="15"/>
         <source>Glate | Share</source>
         <translation>Glate | Teilen</translation>
     </message>
     <message>
-        <location filename="../share.cpp" line="106"/>
+        <location filename="../sharewidget.cpp" line="106"/>
         <source>Save Text File</source>
         <translation>Textdatei speichern</translation>
     </message>
     <message>
-        <location filename="../share.cpp" line="108"/>
+        <location filename="../sharewidget.cpp" line="108"/>
         <source>Text Files (*.txt)</source>
         <translation>Textdateien (*.txt)</translation>
     </message>
     <message>
-        <location filename="../share.cpp" line="204"/>
+        <location filename="../sharewidget.cpp" line="204"/>
         <source>Application</source>
         <translation>Anwendung</translation>
     </message>
     <message>
-        <location filename="../share.cpp" line="205"/>
+        <location filename="../sharewidget.cpp" line="205"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation>Datei %1 kann nicht geschrieben werden:

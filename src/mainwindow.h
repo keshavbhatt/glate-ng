@@ -14,7 +14,7 @@
 #include "linebyline.h"
 #include "request.h"
 #include "settings.h"
-#include "share.h"
+#include "sharewidget.h"
 #include "slider.h"
 #include "systemtraymanager.h"
 #include "ttsdownloader.h"

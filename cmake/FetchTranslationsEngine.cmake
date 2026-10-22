@@ -144,6 +144,19 @@ add_subdirectory("${GLATE_ENGINE_SOURCE_DIR}/inference" "${CMAKE_BINARY_DIR}/tra
 set(CMAKE_CXX_CLANG_TIDY "${_glate_saved_tidy}")
 unset(CMAKE_POLICY_VERSION_MINIMUM)
 
+# ssplit links its bundled PCRE2 as pcre2-8.lib, but with MSVC PCRE2 names its
+# static library pcre2-8-static.lib. Copy it to the name ssplit expects.
+if(MSVC AND TARGET pcre2)
+    include(ExternalProject)
+    include(GNUInstallDirs)
+    set(_glate_pcre2_lib "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    ExternalProject_Add_Step(pcre2 glate_msvc_name
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                "${_glate_pcre2_lib}/pcre2-8-static.lib" "${_glate_pcre2_lib}/pcre2-8.lib"
+        DEPENDEES install
+    )
+endif()
+
 # marian builds with -Werror (/WX), which newer compilers trip on with false
 # positives in the standard library. Warnings in third-party code are not ours to fix.
 foreach(_tgt marian bergamot-translator-source)

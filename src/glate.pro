@@ -40,7 +40,7 @@ SOURCES += \
         mainwindow.cpp \
         request.cpp \
         settings.cpp \
-        share.cpp \
+        sharewidget.cpp \
         slider.cpp \
         systemtraymanager.cpp \
         translationdownloader.cpp \
@@ -56,7 +56,7 @@ HEADERS += \
         mainwindow.h \
         request.h \
         settings.h \
-        share.h \
+        sharewidget.h \
         slider.h \
         systemtraymanager.h \
         translationdownloader.h \
@@ -70,7 +70,7 @@ FORMS += \
         linebyline.ui \
         mainwindow.ui \
         settings.ui \
-        share.ui \
+        sharewidget.ui \
         slider.ui \
         textoptionform.ui
 
