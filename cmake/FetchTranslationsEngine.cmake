@@ -7,6 +7,10 @@
 # existing checkout to build offline, as the Flatpak build must.
 #
 # Defines the target glate::translations_engine.
+#
+# The Flathub manifest lists the same engine and submodule commits as source
+# archives (GLATE_ENGINE_PREFETCHED): after changing GLATE_ENGINE_COMMIT, run
+# tools/flathub/engine_sources.py and update the manifest with its output.
 
 set(GLATE_ENGINE_REPOSITORY "https://github.com/mozilla/translations.git"
     CACHE STRING "Git repository of the translation engine")

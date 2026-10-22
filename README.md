@@ -120,7 +120,8 @@ The snap version is derived from the CMake project version during the build.
 ### Flatpak
 
 The Flathub package ([flathub/com.ktechpit.glate](https://github.com/flathub/com.ktechpit.glate))
-repackages the published snap. For a local Flatpak built from this source tree:
+builds from a release tag of this repository, with Mozilla's engine as pinned source archives
+(`tools/flathub/engine_sources.py` prints them). For a local Flatpak built from this source tree:
 
 ```bash
 ./build-flatpak.sh

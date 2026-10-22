@@ -1,6 +1,6 @@
-# Local source build (build-flatpak.sh). The Flathub package
-# (github.com/flathub/com.ktechpit.glate) repackages the published snap instead;
-# keep runtime-version in step with the Qt the snap is built against (ADR-001).
+# Local source build (build-flatpak.sh), fetching the engine over the network.
+# The Flathub package (github.com/flathub/com.ktechpit.glate) builds a release tag
+# with the engine as pinned archives instead (ADR-001); keep runtime-version in step.
 app-id: com.ktechpit.glate
 runtime: org.kde.Platform
 runtime-version: '6.11'

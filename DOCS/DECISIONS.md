@@ -17,14 +17,13 @@ Windows keeps its own CI build with the official Qt installer.
 
 **Consequences.** Developers need three snaps: `kde-qt6-core24-sdk`, `kf6-core24` and `cmake`.
 
-The Flathub package (github.com/flathub/com.ktechpit.glate) does not build from source: it
-unpacks the published snap and installs its binary on the KDE runtime. So everything in the
-snap binary, the offline engine included (statically linked, plus the runtime's own
-libpcre2-8), reaches Flathub without changes to its build. A binary built against Qt 6.11
-needs the `Qt_6.11` symbol version (`qt_version_tag`), so the Flathub manifest's
-`runtime-version` must be at least the Qt of the snap it repackages: 6.11 from the first snap
-built with this SDK. The local `com.ktechpit.glate.yml` builds from source for testing and
-uses the same runtime.
+The Flathub package (github.com/flathub/com.ktechpit.glate) builds from source on the KDE 6.11
+runtime, like omnidict's: the glate-ng git source at a tag, plus Mozilla's engine and the
+submodules it needs as pinned source archives, configured with `-DGLATE_ENGINE_PREFETCHED=ON`
+because Flathub builds have no network. Those archives must move together with
+`GLATE_ENGINE_COMMIT`; `tools/flathub/engine_sources.py` prints them for the current pin.
+(Up to 4.2 the Flathub package repackaged the snap binary.) The local
+`com.ktechpit.glate.yml` builds this source tree with network access instead, for testing.
 
 ## ADR-002: Coding standards apply to new code first (2026-10-22)
 
