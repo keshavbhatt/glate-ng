@@ -15,7 +15,7 @@ git push origin main v4.2.0
 
 - `Glate-Portable-vX.Y.Z-Win64.zip`
 - `glate_*.snap`
-- `glate.flatpak`
+- `glate-X.Y.Z.flatpak`
 - `checksums.txt`
 
 ## Local package build helpers

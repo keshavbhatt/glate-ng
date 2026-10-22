@@ -30,6 +30,12 @@ ui_*.h
 # qmake output (the top-level Makefile is ours)
 /src/Makefile*
 *build-*
+# ...except the Flatpak helper script, which is ours
+!/build-flatpak.sh
+/build-flatpak/
+/repo/
+/.flatpak-builder/
+/glate-*.flatpak
 *.qm
 *.prl
 

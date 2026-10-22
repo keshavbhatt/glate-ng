@@ -1,6 +1,9 @@
+# Local source build (build-flatpak.sh). The Flathub package
+# (github.com/flathub/com.ktechpit.glate) repackages the published snap instead;
+# keep runtime-version in step with the Qt the snap is built against (ADR-001).
 app-id: com.ktechpit.glate
 runtime: org.kde.Platform
-runtime-version: '6.8'
+runtime-version: '6.11'
 sdk: org.kde.Sdk
 command: glate
 
@@ -22,6 +25,11 @@ cleanup:
 modules:
   - name: glate
     buildsystem: cmake-ninja
+    build-options:
+      # The configure step fetches Mozilla's translation engine (ADR-003).
+      # Allowed for local builds only; Flathub builds have no network.
+      build-args:
+        - --share=network
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DCMAKE_INSTALL_PREFIX=/app

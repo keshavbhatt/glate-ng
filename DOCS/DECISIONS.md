@@ -16,8 +16,15 @@ because the SDK's library path breaks the host cmake on rolling distributions (l
 Windows keeps its own CI build with the official Qt installer.
 
 **Consequences.** Developers need three snaps: `kde-qt6-core24-sdk`, `kf6-core24` and `cmake`.
-The Flatpak manifest still names the KDE 6.8 runtime while CMake asks for Qt 6.10; that is
-outside this ADR and needs its own fix.
+
+The Flathub package (github.com/flathub/com.ktechpit.glate) does not build from source: it
+unpacks the published snap and installs its binary on the KDE runtime. So everything in the
+snap binary, the offline engine included (statically linked, plus the runtime's own
+libpcre2-8), reaches Flathub without changes to its build. A binary built against Qt 6.11
+needs the `Qt_6.11` symbol version (`qt_version_tag`), so the Flathub manifest's
+`runtime-version` must be at least the Qt of the snap it repackages: 6.11 from the first snap
+built with this SDK. The local `com.ktechpit.glate.yml` builds from source for testing and
+uses the same runtime.
 
 ## ADR-002: Coding standards apply to new code first (2026-10-22)
 
