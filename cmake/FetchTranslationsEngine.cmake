@@ -46,7 +46,12 @@ if(GLATE_ENGINE_PREFETCHED)
     if(NOT EXISTS "${GLATE_ENGINE_SOURCE_DIR}/inference/CMakeLists.txt")
         message(FATAL_ERROR "GLATE_ENGINE_PREFETCHED is ON but ${GLATE_ENGINE_SOURCE_DIR} has no engine")
     endif()
+    # Source archives carry no .git: write marian's git_revision.h and the stub
+    # its rule depends on, as the fetch below does.
     set(_glate_revision "${GLATE_ENGINE_SOURCE_DIR}/inference/marian-fork/src/common/git_revision.h")
+    if(NOT EXISTS "${GLATE_ENGINE_SOURCE_DIR}/.git/logs/HEAD")
+        file(WRITE "${GLATE_ENGINE_SOURCE_DIR}/.git/logs/HEAD" "")
+    endif()
     if(NOT EXISTS "${_glate_revision}")
         file(WRITE "${_glate_revision}" "#define GIT_REVISION \"${GLATE_ENGINE_COMMIT}\"\n")
     endif()
