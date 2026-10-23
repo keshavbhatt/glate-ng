@@ -47,9 +47,9 @@ precedence = "override"
 SPDX-FileCopyrightText = "Remix Design"
 SPDX-License-Identifier = "Apache-2.0"
 
-# The design mocks embed Lucide glyph paths in their helper script.
+# The design mocks embed the app's Remix Icon glyph paths in their helper script.
 [[annotations]]
 path = "DOCS/mocks/mock.js"
 precedence = "override"
-SPDX-FileCopyrightText = ["2026 Keshav Bhatt (Ktechpit)", "2026 Lucide Icons and Contributors"]
-SPDX-License-Identifier = "GPL-3.0-or-later AND ISC"
+SPDX-FileCopyrightText = ["2026 Keshav Bhatt (Ktechpit)", "Remix Design"]
+SPDX-License-Identifier = "GPL-3.0-or-later AND Apache-2.0"

@@ -34,7 +34,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 p { margin: 0; }
 code { font: 12px ui-monospace, monospace; }
 .muted { color: var(--muted); } .small { font-size: 12px; } .grow { flex: 1; }
-.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ic { width: 18px; height: 18px; fill: currentColor; flex: none; }
 .ic.s { width: 14px; height: 14px; }
 
 /* The main window. */

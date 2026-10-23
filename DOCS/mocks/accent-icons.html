@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Accent icons</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script></head>
+<body>
+<style>
+  /* Variant A: every icon in the accent colour. Variant B: text colour at rest, accent on hover and while active. */
+  body[data-variant=a] .window .ibtn .ic, body[data-variant=a] .window .combo .ic,
+  body[data-variant=a] .window .go .ic, body[data-variant=a] .window .menu .ic,
+  body[data-variant=a] .window .btn:not(.primary) .ic, body[data-variant=a] .window .welcome .ic { color: var(--accent); }
+  body[data-variant=a] .window .ibtn { opacity: 1; }
+  body[data-variant=b] .window .ibtn:hover .ic, body[data-variant=b] .window .ibtn.on .ic,
+  body[data-variant=b] .window .btn:not(.primary):hover .ic, body[data-variant=b] .window .menu .mi:hover .ic { color: var(--accent); }
+  body[data-variant=b] .window .welcome li .ic { color: var(--accent); }
+  /* Unchanged in both: offline green, error red, white on accent buttons, the highlighted menu row. */
+  .window .pill .ic, .window .caption .ic { color: var(--offline) !important; }
+  .window .menu .mi.hot .ic, .window .btn.primary .ic { color: var(--accent-text) !important; }
+  .window .ibtn.dim { opacity: .4; }
+  .pick { max-width: 1000px; margin: 0 auto 14px; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; font-size: 13px; }
+  .pick .sw { display: flex; gap: 6px; align-items: center; }
+  .pick .sw button { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; padding: 0; }
+  .pick .sw button.on { border-color: var(--text); }
+  .pick input[type=color] { width: 30px; height: 24px; border: 1px solid var(--border); border-radius: 6px; background: none; padding: 0; }
+  .pick .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .pick .seg button { font: inherit; background: var(--panel); color: var(--text); border: 0; padding: 5px 10px; cursor: pointer; }
+  .pick .seg button.on { background: var(--accent); color: var(--accent-text); }
+  .gap { height: 18px; }
+</style>
+<div class="pick">
+  <span class="seg"><button data-v="a" class="on">A: all icons in accent</button><button data-v="b">B: accent on hover</button></span>
+  <span class="sw">Accent:
+    <button style="background:#4A78FF" data-c="#4A78FF" class="on" title="Default blue"></button>
+    <button style="background:#1DB954" data-c="#1DB954" title="Green"></button>
+    <button style="background:#9B5DE5" data-c="#9B5DE5" title="Purple"></button>
+    <button style="background:#F28C28" data-c="#F28C28" title="Orange"></button>
+    <button style="background:#E5484D" data-c="#E5484D" title="Red"></button>
+    <button style="background:#F5F5F5" data-c="#F5F5F5" title="Near white (contrast fallback)"></button>
+    <input type="color" value="#4a78ff" title="Any colour, as in Settings">
+  </span>
+  <span class="muted small">Hover the icons; switch dark and light at the bottom right.</span>
+</div>
+
+<div class="window" data-main data-offline="1" data-caption="1"
+     data-src="Good morning! The train to the old town leaves from platform 4 at half past nine."
+     data-result="¡Buen día! El tren al casco antiguo sale del andén 4 a las nueve y media.">
+  <div class="menu" style="right:84px;top:76px">
+    <div class="mi"><svg class="ic s"><use href="#i-sparkles"/></svg>Welcome tour</div>
+    <div class="mi hot"><svg class="ic s"><use href="#i-star"/></svg>What's new in 4.5.0</div>
+    <div class="mi"><svg class="ic s"><use href="#i-keyboard"/></svg>Keyboard shortcuts<span class="grow"></span><span class="small muted">F1</span></div>
+    <div class="sep"></div>
+    <div class="mi"><svg class="ic s"><use href="#i-bug"/></svg>Report a bug...</div>
+    <div class="mi"><svg class="ic s"><use href="#i-folder"/></svg>Open log folder</div>
+  </div>
+  <span class="pin" style="left:12px;top:84px">1</span>
+  <span class="pin" style="left:calc(50% - 102px);top:44px">2</span>
+  <span class="pin" style="right:60px;top:190px">3</span>
+  <span class="pin" style="left:calc(50% + 24px);top:calc(50% + 6px)">4</span>
+</div>
+
+<div class="gap"></div>
+
+<div class="window" data-main data-src="Good morning!" data-result="¡Buen día!" style="height:560px">
+  <div class="overlay"><div class="dialog" style="width:600px">
+    <div class="dtitle">About Glate<span class="x">&#x2715;</span></div>
+    <div class="dbody" style="gap:14px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="btn"><svg class="ic s"><use href="#i-bug"/></svg>Report a bug...</span>
+        <span class="btn"><svg class="ic s"><use href="#i-code"/></svg>Source code</span>
+        <span class="btn"><svg class="ic s"><use href="#i-globe"/></svg>Website</span>
+        <span class="btn"><svg class="ic s"><use href="#i-heart"/></svg>Donate</span>
+        <span class="btn"><svg class="ic s"><use href="#i-grid"/></svg>More apps</span>
+        <span class="btn"><svg class="ic s"><use href="#i-star"/></svg>Rate</span>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--danger)"><svg class="ic" style="width:28px;height:28px"><use href="#i-alert"/></svg></span>
+        <div><b>Could not translate</b><p class="small muted" style="margin-top:4px">Error icons stay red, whatever the accent.</p></div></div>
+    </div>
+    <div class="dfoot"><span class="btn"><svg class="ic s"><use href="#i-copy"/></svg>Copy details</span><span class="grow"></span><span class="btn"><svg class="ic s"><use href="#i-mail"/></svg>Send by email</span><span class="btn primary"><svg class="ic s"><use href="#i-external"/></svg>Open GitHub issue</span></div>
+  </div></div>
+  <span class="pin" style="left:calc(50% - 290px);top:116px">5</span>
+  <span class="pin" style="right:calc(50% - 290px);bottom:120px">6</span>
+</div>
+
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Every icon follows the accent colour</b> picked in Settings, Appearance: toolbars, the language boxes, menus, buttons in dialogs, Settings, History and the welcome card. Changing the accent recolours them at once, without a restart. Variant A colours them all the time (as asked); variant B keeps them in the text colour and uses the accent on hover and for the active button. A is the recommendation if you want the accent visible everywhere; B is quieter.</li>
+  <li><b>Stays as it is:</b> the green Offline pill, dot and caption (so offline never looks like a button to press), the red error icon, and the app logo.</li>
+  <li><b>Highlighted menu rows</b> and accent buttons draw their icon in white on the accent, like their text.</li>
+  <li><b>Translate button</b> follows the accent too; the green offline dot stays green.</li>
+  <li><b>Icons become SVG</b> (the same Remix Icon shapes, now sharp at any scale). The PNGs go. The About icon becomes the thinner Remix 2.5.0 "information" glyph; every other shape stays the same.</li>
+  <li><b>Readable with any accent:</b> when the chosen colour is too close to the background (try near white in light mode, or a very dark accent in dark mode), icons darken or lighten it just enough to stay visible. Disabled icons are dimmed as today.</li>
+</ol></div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.dataset.variant = 'a';
+  const root = document.documentElement;
+  const setAccent = (c) => { root.style.setProperty('--accent', c); root.style.setProperty('--accent-hover', c); };
+  document.querySelectorAll('.pick .seg button').forEach(b => b.onclick = () => {
+    document.body.dataset.variant = b.dataset.v;
+    document.querySelectorAll('.pick .seg button').forEach(x => x.classList.toggle('on', x === b));
+  });
+  const swatches = document.querySelectorAll('.pick .sw button');
+  swatches.forEach(b => b.onclick = () => { setAccent(b.dataset.c); swatches.forEach(x => x.classList.toggle('on', x === b)); });
+  document.querySelector('.pick input[type=color]').oninput = (e) => { setAccent(e.target.value); swatches.forEach(x => x.classList.remove('on')); };
+});
+</script>
+</body></html>

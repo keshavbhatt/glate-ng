@@ -19,7 +19,7 @@
         <p class="muted small">Translate text and listen to it, online or on this computer.</p>
         <ul>
           <li>${ic('type', 1)}<span>Type or paste on the left, then press <kbd>Shift</kbd>+<kbd>Enter</kbd> or the arrow.</span></li>
-          <li>${ic('swap', 1)}<span>Pick both languages below; the middle button swaps them.</span></li>
+          <li>${ic('swap-lr', 1)}<span>Pick both languages below; the middle button swaps them.</span></li>
           <li>${ic('laptop', 1)}<span>Turn on offline mode in Settings to translate without internet (Pro).</span></li>
         </ul>
         <span class="btn">${ic('sparkles', 1)}Take the tour</span>
