@@ -54,16 +54,16 @@ QUrl rateUrl()
 QList<AboutInfo::Row> credits()
 {
     return {
-        {.name = QApplication::translate("GlateShell", "Offline translation"),
-         .text = QApplication::translate(
+        {QApplication::translate("GlateShell", "Offline translation"),
+         QApplication::translate(
              "GlateShell", "Engine and models by Mozilla (Firefox Translations), MPL-2.0. Models are "
                            "downloaded on demand from this project's mirror.")},
-        {.name = QApplication::translate("GlateShell", "Online translation"),
-         .text = QApplication::translate("GlateShell", "Google Translate web service.")},
-        {.name = QApplication::translate("GlateShell", "App name"),
-         .text = QApplication::translate("GlateShell", "Alan Pope helped choose the name.")},
-        {.name = QApplication::translate("GlateShell", "Interface translations"),
-         .text = QApplication::translate("GlateShell",
+        {QApplication::translate("GlateShell", "Online translation"),
+         QApplication::translate("GlateShell", "Google Translate web service.")},
+        {QApplication::translate("GlateShell", "App name"),
+         QApplication::translate("GlateShell", "Alan Pope helped choose the name.")},
+        {QApplication::translate("GlateShell", "Interface translations"),
+         QApplication::translate("GlateShell",
                                          "German, French, Brazilian Portuguese and Italian.")},
     };
 }
@@ -72,17 +72,17 @@ QList<AboutInfo::Row> openSource()
 {
     const QString licensing = kRepository + u"/blob/main/LICENSING.md"_s;
     return {
-        {.name = u"Glate"_s,
-         .text = QApplication::translate("GlateShell",
+        {u"Glate"_s,
+         QApplication::translate("GlateShell",
                                          "GPL-3.0-or-later; the account and licence code is "
                                          "source-available (<a href=\"%1\">LICENSING.md</a>)")
                      .arg(licensing)},
-        {.name = u"Qt %1"_s.arg(QString::fromLatin1(qVersion())), .text = u"LGPL-3.0"_s},
-        {.name = QApplication::translate("GlateShell", "Mozilla translations engine"),
-         .text = QApplication::translate("GlateShell", "MPL-2.0, with Marian, sentencepiece, intgemm, ruy "
+        {u"Qt %1"_s.arg(QString::fromLatin1(qVersion())), u"LGPL-3.0"_s},
+        {QApplication::translate("GlateShell", "Mozilla translations engine"),
+         QApplication::translate("GlateShell", "MPL-2.0, with Marian, sentencepiece, intgemm, ruy "
                                                        "and ssplit (MIT, Apache-2.0, BSD)")},
-        {.name = u"QtWaitingSpinner"_s, .text = u"MIT"_s},
-        {.name = u"Remix Icon"_s, .text = u"Apache-2.0"_s},
+        {u"QtWaitingSpinner"_s, u"MIT"_s},
+        {u"Remix Icon"_s, u"Apache-2.0"_s},
     };
 }
 
@@ -133,16 +133,16 @@ void GlateShell::showAbout()
     info.author = tr("Designed and developed by Keshav Bhatt, ktechpit.com");
     info.icon = QIcon(u":/icons/app/icon-128.png"_s);
     info.links = {
-        {.text = tr("Report a bug..."), .iconPath = u":/icons/bug-line.png"_s, .url = {}},
-        {.text = tr("Source code"), .iconPath = u":/icons/code-s-slash-line.png"_s, .url = QUrl(kRepository)},
-        {.text = tr("Website"),
-         .iconPath = u":/icons/global-line.png"_s,
-         .url = QUrl(u"https://ktechpit.com/USS/public/product.php?slug=glate"_s)},
-        {.text = tr("Donate"), .iconPath = u":/icons/heart-line.png"_s, .url = QUrl(u"https://paypal.me/keshavnrj/9"_s)},
-        {.text = tr("More apps"),
-         .iconPath = u":/icons/apps-line.png"_s,
-         .url = QUrl(u"https://snapcraft.io/publisher/keshavnrj"_s)},
-        {.text = tr("Rate"), .iconPath = u":/icons/star-line.png"_s, .url = rateUrl()},
+        {tr("Report a bug..."), u":/icons/bug-line.png"_s, {}},
+        {tr("Source code"), u":/icons/code-s-slash-line.png"_s, QUrl(kRepository)},
+        {tr("Website"),
+         u":/icons/global-line.png"_s,
+         QUrl(u"https://ktechpit.com/USS/public/product.php?slug=glate"_s)},
+        {tr("Donate"), u":/icons/heart-line.png"_s, QUrl(u"https://paypal.me/keshavnrj/9"_s)},
+        {tr("More apps"),
+         u":/icons/apps-line.png"_s,
+         QUrl(u"https://snapcraft.io/publisher/keshavnrj"_s)},
+        {tr("Rate"), u":/icons/star-line.png"_s, rateUrl()},
     };
     info.credits = credits();
     info.openSource = openSource();
@@ -173,7 +173,7 @@ void GlateShell::showBugReport(const QString& description)
         m_bugReport->close();
     auto* report =
         new BugReportDialog(diagnostics(), LogSink::recentLines(kReportLogLines),
-                            {.newIssueUrl = QUrl(kRepository + u"/issues/new"_s), .mailAddress = u"keshavnrj@gmail.com"_s},
+                            {QUrl(kRepository + u"/issues/new"_s), u"keshavnrj@gmail.com"_s},
                             m_window);
     if (!description.isEmpty())
         report->setDescription(description);
@@ -189,11 +189,11 @@ void GlateShell::showShortcuts()
     }
     m_shortcuts = new ShortcutsDialog(
         {
-            {.keys = u"Shift+Return"_s, .action = tr("Translate")},
-            {.keys = u"F1"_s, .action = tr("Keyboard shortcuts")},
-            {.keys = u"Esc"_s, .action = tr("Close a window")},
-            {.keys = u"Return"_s, .action = tr("History: load the selected translation")},
-            {.keys = u"Del"_s, .action = tr("History: remove the selected translation")},
+            {u"Shift+Return"_s, tr("Translate")},
+            {u"F1"_s, tr("Keyboard shortcuts")},
+            {u"Esc"_s, tr("Close a window")},
+            {u"Return"_s, tr("History: load the selected translation")},
+            {u"Del"_s, tr("History: remove the selected translation")},
         },
         m_window);
     present(m_shortcuts);
