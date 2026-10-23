@@ -33,6 +33,7 @@
 #include <QPainter>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include <QTabWidget>
 #include <QTimer>
 
 #include <utility>
@@ -1559,6 +1560,7 @@ void MainWindow::positionPaneOverlays() {
 //   GLATE_DEBUG_OFFLINE=0|1            offline mode on or off for this run
 //   GLATE_DEBUG_OPEN=settings|history|linebyline|offline|share|about|account|
 //                    whatsnew|bugreport|shortcuts|helpmenu|error
+//   GLATE_DEBUG_ABOUT_TAB=<n>            with OPEN=about, the tab to show
 //   GLATE_DEBUG_GRAB=<png>[,<seconds>] saves the opened screen (or the main
 //                                      window) after the delay, then quits
 
@@ -1614,8 +1616,13 @@ void MainWindow::debugRun() {
         on_lineByline_clicked();
       else if (open == QStringLiteral("share"))
         on_share_clicked();
-      else if (open == QStringLiteral("about"))
+      else if (open == QStringLiteral("about")) {
         on_about_clicked();
+        if (auto *tabs = m_shell->aboutDialog()->findChild<QTabWidget *>(
+                QStringLiteral("aboutTabs")))
+          tabs->setCurrentIndex(
+              qEnvironmentVariableIntValue("GLATE_DEBUG_ABOUT_TAB"));
+      }
       else if (open == QStringLiteral("account"))
         on_account_clicked();
       else if (open == QStringLiteral("offline"))

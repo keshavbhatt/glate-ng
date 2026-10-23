@@ -12,9 +12,12 @@
 #include <QLabel>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QTabBar>
 #include <QTabWidget>
 #include <QVBoxLayout>
+
+#include <algorithm>
 
 using namespace Qt::StringLiterals;
 
@@ -26,6 +29,18 @@ constexpr int kLinkIcon = 16;
 constexpr int kRowNameWidth = 190;
 constexpr int kWidth = 640;
 constexpr int kDiagnosticsLines = 7;
+
+// A page that scrolls vertically when its content is taller than the tab.
+QWidget* scrollPage(QWidget* content, QWidget* parent)
+{
+    auto* scroll = new QScrollArea(parent);
+    scroll->setFrameShape(QFrame::NoFrame);
+    scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scroll->setWidgetResizable(true);
+    scroll->setStyleSheet(u"QScrollArea, QScrollArea > QWidget > QWidget { background: transparent; }"_s);
+    scroll->setWidget(content);
+    return scroll;
+}
 } // namespace
 
 QWidget* makeRowList(const QList<AboutInfo::Row>& rows, QWidget* parent)
@@ -85,8 +100,8 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
 
     auto* tabs = new QTabWidget(this);
     tabs->setObjectName(u"aboutTabs"_s);
-    tabs->addTab(makeRowList(info.credits, tabs), tr("Credits"));
-    tabs->addTab(makeRowList(info.openSource, tabs), tr("Open source"));
+    tabs->addTab(scrollPage(makeRowList(info.credits, tabs), tabs), tr("Credits"));
+    tabs->addTab(scrollPage(makeRowList(info.openSource, tabs), tabs), tr("Open source"));
     tabs->addTab(buildDiagnostics(info), tr("Diagnostics"));
     body->addWidget(tabs, 1);
 
@@ -94,18 +109,24 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
     footer->addStretch(1);
     addCloseButton(this, footer);
 
-    // Each tab as tall as its own content (a tab widget sizes to its tallest
-    // page), so no empty space shows under the shorter ones.
-    const auto fitTab = [this, tabs](int current) {
-        constexpr int kPageWidth = kWidth - 40;
-        const QWidget* page = tabs->widget(current);
-        const int pageHeight =
-            page->hasHeightForWidth() ? page->heightForWidth(kPageWidth) : page->sizeHint().height();
-        tabs->setFixedHeight(tabs->tabBar()->sizeHint().height() + pageHeight + 2);
-        fitToContent(this, kWidth);
-    };
-    connect(tabs, &QTabWidget::currentChanged, this, fitTab);
-    fitTab(tabs->currentIndex());
+    // One height for every tab, so switching tabs never moves anything: the
+    // tallest page, capped; a longer list scrolls inside its page instead of
+    // being cut off.
+    ensurePolished();
+    constexpr int kPageWidth = kWidth - 40;
+    constexpr int kMaxPageHeight = 300;
+    int pageHeight = 0;
+    for (int i = 0; i < tabs->count(); ++i) {
+        const QWidget* page = tabs->widget(i);
+        const auto* scroll = qobject_cast<const QScrollArea*>(page);
+        const QWidget* content = scroll != nullptr ? scroll->widget() : page;
+        const int height =
+            content->hasHeightForWidth() ? content->heightForWidth(kPageWidth) : content->sizeHint().height();
+        pageHeight = std::max(pageHeight, height);
+    }
+    pageHeight = std::min(pageHeight, kMaxPageHeight);
+    tabs->setFixedHeight(tabs->tabBar()->sizeHint().height() + pageHeight + 4);
+    fitToContent(this, kWidth);
 }
 
 void AboutDialog::setDiagnostics(const QString& text)

@@ -10,6 +10,8 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QScrollArea>
+#include <QScrollBar>
 #include <QSignalSpy>
 #include <QTabWidget>
 #include <QTest>
@@ -77,19 +79,27 @@ private Q_SLOTS:
         QCOMPARE(whatsNew.count(), 1);
     }
 
-    void aboutFitsTheOpenTab()
+    void aboutKeepsItsSizeAcrossTabs()
     {
         AboutInfo info;
         info.appName = u"App"_s;
         info.credits = {{.name = u"Engine"_s, .text = u"MPL-2.0"_s}};
+        for (int i = 0; i < 40; ++i) {
+            info.openSource.append({.name = u"Library %1"_s.arg(i), .text = u"MIT"_s});
+        }
         info.diagnostics = u"one\ntwo\nthree"_s;
-        const AboutDialog dialog(info);
+        AboutDialog dialog(info);
+        dialog.show();
         auto* tabs = dialog.findChild<QTabWidget*>(u"aboutTabs"_s);
-        const int creditsHeight = dialog.height();
-        tabs->setCurrentIndex(2);
-        QVERIFY(dialog.height() > creditsHeight);
-        tabs->setCurrentIndex(0);
-        QCOMPARE(dialog.height(), creditsHeight);
+        const QSize size = dialog.size();
+        for (int i = 0; i < tabs->count(); ++i) {
+            tabs->setCurrentIndex(i);
+            QCOMPARE(dialog.size(), size);
+        }
+        // The long list scrolls instead of stretching the window off the screen.
+        const auto* scroll = qobject_cast<QScrollArea*>(tabs->widget(1));
+        QVERIFY(scroll != nullptr);
+        QVERIFY(scroll->verticalScrollBar()->maximum() > 0);
     }
 
     void bugReportDetailsFollowTheLogBox()
