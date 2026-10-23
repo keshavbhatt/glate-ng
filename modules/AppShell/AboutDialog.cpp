@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QTabBar>
 #include <QTabWidget>
 #include <QVBoxLayout>
 
@@ -84,7 +85,6 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
 
     auto* tabs = new QTabWidget(this);
     tabs->setObjectName(u"aboutTabs"_s);
-    tabs->setDocumentMode(true);
     tabs->addTab(makeRowList(info.credits, tabs), tr("Credits"));
     tabs->addTab(makeRowList(info.openSource, tabs), tr("Open source"));
     tabs->addTab(buildDiagnostics(info), tr("Diagnostics"));
@@ -93,7 +93,19 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
     QBoxLayout* footer = addFooter(this);
     footer->addStretch(1);
     addCloseButton(this, footer);
-    fitToContent(this, kWidth);
+
+    // Each tab as tall as its own content (a tab widget sizes to its tallest
+    // page), so no empty space shows under the shorter ones.
+    const auto fitTab = [this, tabs](int current) {
+        constexpr int kPageWidth = kWidth - 40;
+        const QWidget* page = tabs->widget(current);
+        const int pageHeight =
+            page->hasHeightForWidth() ? page->heightForWidth(kPageWidth) : page->sizeHint().height();
+        tabs->setFixedHeight(tabs->tabBar()->sizeHint().height() + pageHeight + 2);
+        fitToContent(this, kWidth);
+    };
+    connect(tabs, &QTabWidget::currentChanged, this, fitTab);
+    fitTab(tabs->currentIndex());
 }
 
 void AboutDialog::setDiagnostics(const QString& text)

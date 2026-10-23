@@ -49,6 +49,11 @@ Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
   connect(ui->voiceGenderGlobal, &QComboBox::currentIndexChanged, this,
           [=](int index) { settings.setValue("voiceGender", index); });
 
+  // The radios' holder would otherwise paint the window colour over the group box.
+  ui->closeBehaviorWidget->setAttribute(Qt::WA_TranslucentBackground);
+  ui->closeBehaviorWidget->setStyleSheet(
+      QStringLiteral("#closeBehaviorWidget { background: transparent; }"));
+
   // The two radios are mutually exclusive; the tray radio's state is the single
   // source of truth for the "closeToTray" flag (checked = minimize, unchecked =
   // quit), so one connection covers both selections.

@@ -115,22 +115,24 @@ QFrame[frameShape="5"] {   /* VLine */
 
 /* ====================  BUTTONS  ========================================== */
 
+/* As .btn in DOCS/mocks/mock.css: 6 px corners, a hairline border, normal weight.
+   (A radius over half the height made Qt draw square corners.)                */
 QPushButton {
-    background-color: #e9ebef;
-    color: #1a1d23;
-    border: none;
-    border-radius: 16px;
-    padding: 7px 18px;
-    font-weight: 600;
+    background-color: #ffffff;
+    color: #1B1C1F;
+    border: 1px solid #D9DBE0;
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-weight: normal;
 }
 
 QPushButton:hover {
-    background-color: #dee1e6;
+    background-color: #E7E8EB;
     color: #0e1014;
 }
 
 QPushButton:pressed {
-    background-color: #d2d6dc;
+    background-color: #dcdee2;
 }
 
 QPushButton:checked {
@@ -144,7 +146,8 @@ QPushButton:checked:hover {
 }
 
 QPushButton:disabled {
-    background-color: #dfe2e7;   /* visibly muted button, not flat against the bg */
+    background-color: #f0f1f3;   /* visibly muted button, not flat against the bg */
+    border-color: #e3e5e9;
     color: #a7adb6;
 }
 
@@ -167,9 +170,9 @@ QToolButton::menu-indicator { image: none; }
 QLineEdit {
     background-color: #ffffff;
     color: #1a1d23;
-    border: 1px solid #dcdfe6;
-    border-radius: 16px;       /* match the buttons' pill radius */
-    padding: 6px 14px;         /* 6px + 1px border = the button's 7px -> equal height */
+    border: 1px solid #D9DBE0;
+    border-radius: 6px;        /* as .input in DOCS/mocks/mock.css, like the buttons */
+    padding: 5px 10px;
     selection-background-color: #1a1d23;
     selection-color: #ffffff;
 }
@@ -516,22 +519,22 @@ QTableCornerButton::section { background-color: #f5f6f8; border: none; }
 /* ====================  TAB WIDGET  ====================================== */
 QTabWidget::pane {
     border: none;
-    border-top: 1px solid #e3e6ea;
+    border-top: 1px solid #D9DBE0;
     top: -1px;
     background: transparent;
 }
 QTabBar { qproperty-drawBase: 0; background: transparent; }
 QTabBar::tab {
     background: transparent;
-    color: #5b6472;
-    padding: 10px 16px;
-    margin-right: 4px;
+    color: #6B7280;
+    padding: 8px 12px;
+    margin-right: 2px;
     border: none;
     border-bottom: 2px solid transparent;
-    font-weight: 600;
+    font-weight: normal;
 }
 QTabBar::tab:hover    { color: #1a1d23; }
-QTabBar::tab:selected { color: #1a1d23; border-bottom: 2px solid #1a1d23; }
+QTabBar::tab:selected { color: #1a1d23; border-bottom: 2px solid #1a1d23; font-weight: 600; }
 QTabBar::tab:disabled { color: #b0b6bf; }
 
 

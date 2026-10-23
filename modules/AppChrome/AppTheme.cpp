@@ -104,7 +104,16 @@ private:
     QRectF box = QRectF(opt->rect).adjusted(1.0, 1.0, -1.0, -1.0);
     const qreal radius = radio ? box.width() / 2.0 : 3.0;
 
-    QColor border = enabled ? pal.color(QPalette::Dark) : pal.color(QPalette::Mid);
+    // The ring from the text colour, so it reads on any window colour (the
+    // palette's Dark is near black on the dark skins).
+    const auto ring = [&pal](qreal share) {
+      const QColor t = pal.color(QPalette::Active, QPalette::WindowText);
+      const QColor b = pal.color(QPalette::Active, QPalette::Base);
+      return QColor::fromRgbF(float(t.redF() * share + b.redF() * (1 - share)),
+                              float(t.greenF() * share + b.greenF() * (1 - share)),
+                              float(t.blueF() * share + b.blueF() * (1 - share)));
+    };
+    QColor border = enabled ? ring(0.42) : ring(0.2);
     if (hover)
       border = pal.color(QPalette::Highlight);
     QColor fill = (on || tri) ? pal.color(QPalette::Highlight)
@@ -396,11 +405,11 @@ QString accentOverrideQss(const QColor &accent) {
       (light ? accent.darker(118) : accent.darker(112)).name();
   const QString a = accent.name();
   return QString::fromLatin1(R"(
-    QPushButton:checked { background-color: %1; color: %2; }
-    QPushButton:checked:hover { background-color: %3; color: %2; }
-    QPushButton[accent="true"] { background-color: %1; color: %2; }
-    QPushButton[accent="true"]:hover { background-color: %3; color: %2; }
-    QPushButton[accent="true"]:pressed { background-color: %4; color: %2; }
+    QPushButton:checked { background-color: %1; border-color: %1; color: %2; }
+    QPushButton:checked:hover { background-color: %3; border-color: %3; color: %2; }
+    QPushButton[accent="true"] { background-color: %1; border-color: %1; color: %2; }
+    QPushButton[accent="true"]:hover { background-color: %3; border-color: %3; color: %2; }
+    QPushButton[accent="true"]:pressed { background-color: %4; border-color: %4; color: %2; }
     QComboBox QAbstractItemView::item:selected { background-color: %1; color: %2; }
     QTabBar::tab:selected { border-bottom: 2px solid %1; }
     QProgressBar::chunk { background-color: %1; }

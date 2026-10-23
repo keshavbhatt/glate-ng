@@ -77,6 +77,21 @@ private Q_SLOTS:
         QCOMPARE(whatsNew.count(), 1);
     }
 
+    void aboutFitsTheOpenTab()
+    {
+        AboutInfo info;
+        info.appName = u"App"_s;
+        info.credits = {{.name = u"Engine"_s, .text = u"MPL-2.0"_s}};
+        info.diagnostics = u"one\ntwo\nthree"_s;
+        const AboutDialog dialog(info);
+        auto* tabs = dialog.findChild<QTabWidget*>(u"aboutTabs"_s);
+        const int creditsHeight = dialog.height();
+        tabs->setCurrentIndex(2);
+        QVERIFY(dialog.height() > creditsHeight);
+        tabs->setCurrentIndex(0);
+        QCOMPARE(dialog.height(), creditsHeight);
+    }
+
     void bugReportDetailsFollowTheLogBox()
     {
         BugReportDialog dialog(

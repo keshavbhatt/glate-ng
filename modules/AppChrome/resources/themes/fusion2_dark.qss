@@ -113,22 +113,25 @@ QFrame[frameShape="5"] {   /* VLine */
 
 /* ====================  BUTTONS  ========================================== */
 
+/* As .btn in DOCS/mocks/mock.css: 6 px corners, a hairline border, normal weight.
+   (A radius over half the height made Qt draw square corners.)                */
 QPushButton {
-    background-color: #26262c;
-    color: #d6d6da;
-    border: none;
-    border-radius: 16px;
-    padding: 7px 18px;
-    font-weight: 600;
+    background-color: #242424;
+    color: #E8E8E8;
+    border: 1px solid #2C2C2C;
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-weight: normal;
 }
 
 QPushButton:hover {
-    background-color: #32323a;
+    background-color: #2A2A2A;
+    border-color: #3a3a3a;
     color: #F5F5F5;
 }
 
 QPushButton:pressed {
-    background-color: #141418;
+    background-color: #1c1c1c;
 }
 
 QPushButton:checked {
@@ -142,7 +145,8 @@ QPushButton:checked:hover {
 }
 
 QPushButton:disabled {
-    background-color: #2b2b32;   /* visibly muted button, not flat against the bg */
+    background-color: #1e1e1e;   /* visibly muted button, not flat against the bg */
+    border-color: #262626;
     color: #6c6c74;
 }
 
@@ -163,16 +167,16 @@ QToolButton::menu-indicator { image: none; }
 
 /* ====================  LINE EDIT (search / inputs)  ====================== */
 QLineEdit {
-    background-color: #2a2a2a;
+    background-color: #151515;
     color: #F5F5F5;
-    border: 1px solid transparent;
-    border-radius: 16px;       /* match the buttons' pill radius */
-    padding: 6px 14px;         /* 6px + 1px border = the button's 7px -> equal height */
+    border: 1px solid #2C2C2C;
+    border-radius: 6px;        /* as .input in DOCS/mocks/mock.css, like the buttons */
+    padding: 5px 10px;
     selection-background-color: #FFFFFF;
     selection-color: #000000;
 }
-QLineEdit:hover  { background-color: #3e3e3e; }
-QLineEdit:focus  { background-color: #2a2a2a; border: 1px solid rgba(255,255,255,0.18); }
+QLineEdit:hover  { border: 1px solid #3a3a3a; }
+QLineEdit:focus  { border: 1px solid rgba(255,255,255,0.28); }
 QLineEdit:disabled {
     background-color: #1a1a1a;
     color: #535353;
@@ -512,22 +516,22 @@ QTableCornerButton::section { background-color: #121212; border: none; }
 /* ====================  TAB WIDGET  ====================================== */
 QTabWidget::pane {
     border: none;
-    border-top: 1px solid #282828;
+    border-top: 1px solid #2C2C2C;
     top: -1px;
     background: transparent;
 }
 QTabBar { qproperty-drawBase: 0; background: transparent; }
 QTabBar::tab {
     background: transparent;
-    color: #b3b3b3;
-    padding: 10px 16px;
-    margin-right: 4px;
+    color: #9A9A9A;
+    padding: 8px 12px;
+    margin-right: 2px;
     border: none;
     border-bottom: 2px solid transparent;
-    font-weight: 600;
+    font-weight: normal;
 }
-QTabBar::tab:hover    { color: #F5F5F5; }
-QTabBar::tab:selected { color: #F5F5F5; border-bottom: 2px solid #FFFFFF; }
+QTabBar::tab:hover    { color: #E8E8E8; }
+QTabBar::tab:selected { color: #E8E8E8; border-bottom: 2px solid #FFFFFF; font-weight: 600; }
 QTabBar::tab:disabled { color: #535353; }
 
 
