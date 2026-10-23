@@ -39,7 +39,6 @@ files carry an SPDX header.
 
 | Path | Licence | Origin |
 |---|---|---|
-| `src/QHotkey/` | BSD-3-Clause | QHotkey by Felix Barz |
 | `src/waitingspinnerwidget.*` | MIT | QtWaitingSpinner by Alexander Turkin, William Hallatt, Jacob Dawid |
 | `src/icons/*-line.png`, `src/icons/*-fill.png` | Apache-2.0 | Remix Icon |
 

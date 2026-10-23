@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 #include <QColor>
-#include <QHotkey>
+#include <GlobalShortcut.h>
 #include <QSettings>
 #include <QWidget>
 
@@ -20,11 +20,11 @@ class Settings : public QWidget {
   Q_OBJECT
 
 public:
-  explicit Settings(QWidget *parent = nullptr, QHotkey *hotKey = nullptr,
+  explicit Settings(QWidget *parent = nullptr,
+                    glate::shortcut::GlobalShortcut *shortcut = nullptr,
                     ThemeController *theme = nullptr);
   ~Settings();
 signals:
-  void translationRequest(QString selected);
   void themeToggled();
   // Offline translation (Pro): the checkbox changed, or "Manage languages" was clicked.
   void offlineModeChanged(bool enabled);
@@ -42,15 +42,15 @@ public slots:
   bool quickResultCheckBoxChecked();
   bool closeToTrayEnabled() const;
 private slots:
-  void get_selected_word_fromX11();
-  void set_x11_selection();
-  void show_requested_text();
   void setShortcut(const QKeySequence &sequence);
 
   void readSettings();
   void on_dark_toggled(bool checked);
 
   void on_light_toggled(bool checked);
+
+protected:
+  void changeEvent(QEvent *event) override;
 
 private:
   // Builds the "Appearance" section (theme/skin/accent/CSD) and wires it to the
@@ -60,12 +60,16 @@ private:
   void promptRestartRequiredDialog();
   // Builds the "Offline translation" section under Appearance.
   void buildOfflineSection();
+  // The Quick Translate row: a Change button and a line under the key field
+  // that follow the global shortcut's state (DOCS/mocks/settings-shortcut.html).
+  void buildShortcutRow();
+  void updateShortcutRow();
 
   Ui::Settings *ui;
   QSettings settings;
-  QHotkey *nativeHotkey = nullptr;
-  bool m_hotkeySupported = true;
-  QString x11_selected;
+  glate::shortcut::GlobalShortcut *m_shortcut = nullptr;
+  QPushButton *m_shortcutButton = nullptr;
+  QLabel *m_shortcutHint = nullptr;
 
   // Appearance controls (built in code, AppChrome-driven).
   ThemeController *m_theme = nullptr;

@@ -29,12 +29,6 @@ SPDX-FileCopyrightText = "2026 Keshav Bhatt (Ktechpit)"
 SPDX-License-Identifier = "LicenseRef-Ktechpit-Licensing-Module"
 
 [[annotations]]
-path = "src/QHotkey/**"
-precedence = "override"
-SPDX-FileCopyrightText = "2016 Felix Barz"
-SPDX-License-Identifier = "BSD-3-Clause"
-
-[[annotations]]
 path = ["src/waitingspinnerwidget.cpp", "src/waitingspinnerwidget.h"]
 precedence = "override"
 SPDX-FileCopyrightText = ["2012-2014 Alexander Turkin", "2014 William Hallatt", "2015 Jacob Dawid"]

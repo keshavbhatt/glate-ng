@@ -7,6 +7,7 @@
 #include <QLocalSocket>
 #include <QSettings>
 #include <QString>
+#include <QTimer>
 #include <QTranslator>
 
 #include "glateshell.h"
@@ -53,6 +54,11 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // "--quick-translate": translate the selected text, for a desktop shortcut on
+  // desktops where the app cannot add one itself (no shortcut portal).
+  const bool quickTranslate =
+      QCoreApplication::arguments().contains(QStringLiteral("--quick-translate"));
+
   // ── Single-instance guard ─────────────────────────────────────────────────
   // Try to contact an already-running instance first.
   {
@@ -60,8 +66,11 @@ int main(int argc, char *argv[]) {
     probe.connectToServer(kInstanceKey);
     if (probe.waitForConnected(500)) {
       // Another instance is running, ask it to raise itself and exit.
-      qCInfo(glate::shell::lcApp) << "another instance is running; asking it to raise itself";
-      probe.write("raise");
+      qCInfo(glate::shell::lcApp) << "another instance is running; passing the request on";
+      // "<command>\n<activation token>": the token lets the running window
+      // come to the front on Wayland.
+      probe.write((quickTranslate ? QByteArray("quick") : QByteArray("raise")) +
+                  '\n' + qgetenv("XDG_ACTIVATION_TOKEN"));
       probe.flush();
       probe.waitForBytesWritten(500);
       return 0;
@@ -72,7 +81,9 @@ int main(int argc, char *argv[]) {
   // left over from a previous crash) and start listening.
   QLocalServer::removeServer(kInstanceKey);
   QLocalServer instanceServer;
-  instanceServer.listen(kInstanceKey);
+  if (!instanceServer.listen(kInstanceKey))
+    qCWarning(glate::shell::lcApp)
+        << "single instance: cannot listen, error" << instanceServer.serverError();
 
   // Only the running instance writes the log file.
   glate::shell::LogSink::setLogFile(GlateShell::logFilePath());
@@ -109,16 +120,37 @@ int main(int argc, char *argv[]) {
   // When a second instance connects, bring this window to the front.
   QObject::connect(&instanceServer, &QLocalServer::newConnection, &w,
                    [&instanceServer, &w]() {
-    if (QLocalSocket *conn = instanceServer.nextPendingConnection()) {
-      conn->deleteLater();
-    }
-    w.showNormal();
-    w.raise();
-    w.activateWindow();
+    QLocalSocket *conn = instanceServer.nextPendingConnection();
+    if (conn == nullptr)
+      return;
+    QObject::connect(conn, &QLocalSocket::disconnected, conn,
+                     &QObject::deleteLater);
+    const auto handle = [conn, &w]() {
+      const QByteArray message = conn->readAll();
+      const QList<QByteArray> parts = message.split('\n');
+      const QByteArray command = parts.value(0).trimmed();
+      const QByteArray token = parts.value(1).trimmed();
+      if (command == "quick") {
+        w.quickTranslate(token);
+        return;
+      }
+      if (!token.isEmpty())
+        qputenv("XDG_ACTIVATION_TOKEN", token);
+      w.showNormal();
+      w.raise();
+      w.activateWindow();
+    };
+    if (conn->bytesAvailable() > 0)
+      handle();
+    else
+      QObject::connect(conn, &QLocalSocket::readyRead, &w, handle,
+                       Qt::SingleShotConnection);
   });
 
   w.show();
   w.debugRun();
+  if (quickTranslate)
+    QTimer::singleShot(0, &w, [&w]() { w.quickTranslate(qgetenv("XDG_ACTIVATION_TOKEN")); });
 
   return a.exec();
 }

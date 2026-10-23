@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Quick Translate shortcut</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script>
+<style>
+  .states { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 18px; max-width: 1000px; margin: 0 auto; }
+  .state h3 { font-size: 13px; margin: 0 0 16px; color: var(--muted); font-weight: 600; }
+  .group { position: relative; display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 18px 16px 14px; font-size: 13px; }
+  .group > .gt { position: absolute; top: -9px; left: 12px; padding: 0 6px; background: var(--bg); font-weight: 600; }
+  .row { display: flex; align-items: center; gap: 8px; min-height: 34px; }
+  .row .btn { flex: none; }
+  .row .lbl { width: 150px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+  .switch { width: 34px; height: 18px; border-radius: 9px; background: var(--accent); position: relative; flex: none; }
+  .switch::after { content: ""; position: absolute; right: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+  .switch.off { background: var(--border); } .switch.off::after { left: 2px; right: auto; }
+  .kf { flex: 1; height: 30px; display: flex; align-items: center; justify-content: flex-start; padding: 0 10px; border-radius: var(--r-ctl); background: var(--input); border: 1px solid var(--border); }
+  .kf.key { font-weight: 600; }
+  .hint { margin: -2px 0 4px 160px; line-height: 1.45; font-size: 12px; }
+  .hint.bad { display: flex; gap: 6px; align-items: flex-start; }
+  .hint .ic { margin-top: 1px; }
+  .hint.bad { color: var(--danger); }
+  .hint code { white-space: nowrap;  font: 12px ui-monospace, monospace; background: var(--hover); padding: 1px 5px; border-radius: 4px; }
+  .rest { opacity: .55; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); padding: 24px 16px 120px; }
+</style></head>
+<body>
+<h1 style="font-size:18px;max-width:1000px;margin:0 auto 4px">Settings: Quick Translate shortcut</h1>
+<p class="muted small" style="max-width:1000px;margin:0 auto 18px">The App Settings group in Settings, in each state the shortcut can be in. Only the Quick Translate row and the line under it change; Voice and On close stay as they are.</p>
+<div class="states">
+
+  <div class="state"><h3>1. X11 or Windows: Glate holds the keys</h3>
+    <div class="group"><span class="gt">App Settings</span>
+      <div class="row"><span class="lbl"><span class="switch"></span>Quick Translate</span><span class="kf key">Ctrl+Shift+Space</span></div>
+      <div class="hint muted">Select text in any app, then press the keys.</div>
+      <div class="row rest"><span class="lbl">Voice</span><span class="kf">Female (Default)</span></div>
+    </div></div>
+
+  <div class="state"><h3>2. X11 or Windows: another app has the keys</h3>
+    <div class="group"><span class="gt">App Settings</span>
+      <div class="row"><span class="lbl"><span class="switch"></span>Quick Translate</span><span class="kf key">Ctrl+Shift+Space</span></div>
+      <div class="hint bad"><svg class="ic s"><use href="#i-alert"/></svg>Another app uses these keys. Press other keys in the field.</div>
+      <div class="row rest"><span class="lbl">Voice</span><span class="kf">Female (Default)</span></div>
+    </div></div>
+
+  <div class="state"><h3>3. Wayland: the desktop holds the key (KDE Plasma, GNOME 48+)</h3>
+    <div class="group"><span class="gt">App Settings</span>
+      <div class="row"><span class="lbl"><span class="switch"></span>Quick Translate</span><span class="kf key">Ctrl+Shift+Space</span><span class="btn">Change...</span></div>
+      <div class="hint muted">Your desktop manages this shortcut. Select text in any app, then press the keys.</div>
+      <div class="row rest"><span class="lbl">Voice</span><span class="kf">Female (Default)</span></div>
+    </div></div>
+
+  <div class="state"><h3>4. Wayland: accepted, but no key chosen yet (KDE)</h3>
+    <div class="group"><span class="gt">App Settings</span>
+      <div class="row"><span class="lbl"><span class="switch"></span>Quick Translate</span><span class="kf muted">No key yet</span><span class="btn primary">Choose keys...</span></div>
+      <div class="hint muted">Your desktop asks you to choose the keys for Quick Translate.</div>
+      <div class="row rest"><span class="lbl">Voice</span><span class="kf">Female (Default)</span></div>
+    </div></div>
+
+  <div class="state"><h3>5. Wayland without a shortcut service (sway, GNOME 46/47)</h3>
+    <div class="group"><span class="gt">App Settings</span>
+      <div class="row"><span class="lbl"><span class="switch"></span>Quick Translate</span><span class="kf muted">Set in your desktop</span></div>
+      <div class="hint muted">This desktop does not let apps add shortcuts. Add a custom shortcut in its keyboard settings that runs:<br><code>glate --quick-translate</code></div>
+      <div class="row rest"><span class="lbl">Voice</span><span class="kf">Female (Default)</span></div>
+    </div></div>
+
+  <div class="state"><h3>6. Wayland: the desktop refused it</h3>
+    <div class="group"><span class="gt">App Settings</span>
+      <div class="row"><span class="lbl"><span class="switch"></span>Quick Translate</span><span class="kf muted">Not allowed</span><span class="btn">Try again</span></div>
+      <div class="hint bad"><svg class="ic s"><use href="#i-alert"/></svg>The desktop did not allow the shortcut.</div>
+      <div class="row rest"><span class="lbl">Voice</span><span class="kf">Female (Default)</span></div>
+    </div></div>
+
+</div>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Wayland gets Quick Translate.</b> Today the switch is greyed out there ("unavailable"). The key now goes through the desktop's shortcut service (the xdg-desktop-portal, as in Omnidict and Paraphrase), which works in the snap and the Flatpak too.</li>
+  <li><b>On Wayland the desktop owns the key.</b> The key field shows what the desktop bound and is read only; <b>Change...</b> opens the desktop's own shortcut dialog. The first time, the desktop asks once to allow the shortcut, suggesting Glate's key.</li>
+  <li><b>X11 and Windows</b> keep today's key field. A line under it says when another app already has the keys.</li>
+  <li>Where the desktop has no shortcut service, a custom desktop shortcut can run <code>glate --quick-translate</code>, which translates the selected text in the running Glate.</li>
+  <li>On Wayland the selected text is read once Glate's window is in front (the desktop only gives it to the active window); if nothing is selected, the clipboard is used. The xclip program is no longer needed.</li>
+</ol></div>
+</body></html>

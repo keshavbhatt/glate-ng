@@ -57,6 +57,11 @@ public:
   // nothing when none is set.
   void debugRun();
 
+  // Quick Translate: brings the window to the front and translates the
+  // selected text (or the clipboard). From the global shortcut, or from
+  // "glate --quick-translate" through the running instance.
+  void quickTranslate(const QByteArray &activationToken);
+
 protected slots:
   void changeEvent(QEvent *e) override;
   void resizeEvent(QResizeEvent *event) override;
@@ -92,6 +97,7 @@ private slots:
   QString getTransLang() const;
   QString getSourceLang() const;
   void init_settings();
+  void translateSelection();
   void showError(const QString &message);
   void showError(const QString &heading, const QString &explanation,
                  const QString &detail);
@@ -151,7 +157,7 @@ private:
   QClipboard *m_clipboard = nullptr;
   Settings *m_settingsWidget = nullptr;
   History *m_historyWidget = nullptr;
-  QHotkey *m_nativeHotkey = nullptr;
+  glate::shortcut::GlobalShortcut *m_globalShortcut = nullptr;
   QWidget *m_textOptionWidget = nullptr;
   Slider *m_slider = nullptr;
   SystemTrayManager *m_trayManager = nullptr;

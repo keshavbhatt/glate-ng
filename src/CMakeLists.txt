@@ -9,21 +9,6 @@ set(CMAKE_AUTOUIC ON)
 
 qt_standard_project_setup()
 
-# QHotkey sources
-set(QHOTKEY_SOURCES
-    QHotkey/qhotkey.cpp
-    QHotkey/qhotkey.h
-    QHotkey/qhotkey_p.h
-)
-
-if(APPLE)
-    list(APPEND QHOTKEY_SOURCES QHotkey/qhotkey_mac.cpp)
-elseif(WIN32)
-    list(APPEND QHOTKEY_SOURCES QHotkey/qhotkey_win.cpp)
-elseif(UNIX)
-    list(APPEND QHOTKEY_SOURCES QHotkey/qhotkey_x11.cpp)
-endif()
-
 # Windows: embed application icon and version info via resource file
 set(PLATFORM_SOURCES "")
 if(WIN32)
@@ -75,7 +60,6 @@ qt_add_executable(glate
     waitingspinnerwidget.cpp
     waitingspinnerwidget.h
     GlateLicenseConfig.h
-    ${QHOTKEY_SOURCES}
     ${PLATFORM_SOURCES}
     error.ui
     history.ui
@@ -112,7 +96,6 @@ endif()
 
 target_include_directories(glate PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/QHotkey
     # AccountAndLicense module headers (account_license PUBLIC already exposes this,
     # but list explicitly for IDE tooling)
     ${CMAKE_SOURCE_DIR}/modules/AccountAndLicense
@@ -134,6 +117,7 @@ endif()
 target_link_libraries(glate PRIVATE
     offline_translation
     app_shell
+    global_shortcut
     account_license
     app_chrome
     Qt6::Core
@@ -143,13 +127,6 @@ target_link_libraries(glate PRIVATE
     Qt6::Multimedia
 )
 
-if(UNIX AND NOT APPLE)
-    target_link_libraries(glate PRIVATE X11::X11 X11::xcb)
-elseif(APPLE)
-    target_link_libraries(glate PRIVATE "-framework Carbon")
-elseif(WIN32)
-    target_link_libraries(glate PRIVATE user32)
-endif()
 
 # -------------------------
 # Windows: windeployqt

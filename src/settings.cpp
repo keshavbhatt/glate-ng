@@ -11,6 +11,7 @@
 #include <AppTheme.h>
 #include <ThemeController.h>
 #include <WindowChrome.h>
+#include <ShellStyle.h>
 
 #include <QCheckBox>
 #include <QColorDialog>
@@ -20,17 +21,21 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QProcess>
+#include <QPushButton>
+#include <QStyle>
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QVBoxLayout>
 
-Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
+Settings::Settings(QWidget *parent, glate::shortcut::GlobalShortcut *shortcut,
+                   ThemeController *theme)
     : QWidget(parent), ui(new Ui::Settings), m_theme(theme) {
   ui->setupUi(this);
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
-  this->nativeHotkey = hotKey;
+  m_shortcut = shortcut;
 
   setWindowTitle(tr("Glate | Settings"));
   buildAppearanceSection();
@@ -41,9 +46,7 @@ Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
   for (const VoiceOption &v : utils::availableVoices())
     ui->voiceGenderGlobal->addItem(v.displayName);
 
-  const QString platform = QGuiApplication::platformName().toLower();
-  m_hotkeySupported = !platform.contains("wayland");
-
+  buildShortcutRow();
   readSettings();
 
   connect(ui->voiceGenderGlobal, &QComboBox::currentIndexChanged, this,
@@ -69,30 +72,14 @@ Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
     settings.setValue("closeToTray", false);
   }
 
-  if (m_hotkeySupported && this->nativeHotkey != nullptr) {
-    connect(this->nativeHotkey, &QHotkey::activated, this,
-            &Settings::get_selected_word_fromX11);
-
-    connect(ui->quickResultCheckBox, &QCheckBox::toggled, this->nativeHotkey,
-            &QHotkey::setRegistered);
-
-    connect(ui->keySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this,
-            &Settings::setShortcut);
-  }
-
-  if (!m_hotkeySupported) {
-    const QString unsupportedTooltip =
-        tr("Global shortcuts are unavailable on native Wayland sessions.");
-    ui->quickResultCheckBox->setChecked(false);
-    ui->quickResultCheckBox->setEnabled(false);
-    ui->quickResultCheckBox->setText(tr("Quick Translate (unavailable)"));
-    ui->quickResultCheckBox->setToolTip(unsupportedTooltip);
-    ui->keySequenceEdit->setEnabled(false);
-    ui->keySequenceEdit->setToolTip(unsupportedTooltip);
-    settings.setValue("quicktrans", false);
-    if (this->nativeHotkey != nullptr)
-      this->nativeHotkey->setRegistered(false);
-  }
+  connect(ui->quickResultCheckBox, &QCheckBox::toggled, this, [this](bool on) {
+    settings.setValue("quicktrans", on);
+    if (m_shortcut != nullptr)
+      m_shortcut->setEnabled(on);
+    updateShortcutRow();
+  });
+  connect(ui->keySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this,
+          &Settings::setShortcut);
 
   ui->dark->setChecked(settings.value("theme", "dark").toString() == "dark");
   ui->light->setChecked(settings.value("theme").toString() == "light");
@@ -102,42 +89,29 @@ Settings::Settings(QWidget *parent, QHotkey *hotKey, ThemeController *theme)
 Settings::~Settings() { delete ui; }
 
 void Settings::setShortcut(const QKeySequence &sequence) {
-  if (!m_hotkeySupported || this->nativeHotkey == nullptr)
-    return;
-  this->nativeHotkey->setShortcut(sequence,
-                                  ui->quickResultCheckBox->isChecked());
-  // save quick trans shortcut instanty
   settings.setValue("quicktrans_shortcut", sequence);
+  if (m_shortcut != nullptr)
+    m_shortcut->setKeys(sequence);
 }
 
 void Settings::readSettings() {
 
-  // quick trans settings
-  if (settings.value("quicktrans").isValid()) {
-    ui->quickResultCheckBox->setChecked(settings.value("quicktrans").toBool());
-  } else if (settings.value("quicktrans").isValid()) {
-    ui->quickResultCheckBox->setChecked(true);
-  } else {
-    ui->quickResultCheckBox->setChecked(false);
+  // Quick Translate: on by default, Ctrl+Shift+Space.
+  QKeySequence keys(settings.value("quicktrans_shortcut").toString());
+  if (keys.isEmpty())
+    keys = QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Space);
+  const bool quick = settings.value("quicktrans", true).toBool();
+  {
+    const QSignalBlocker blockEdit(ui->keySequenceEdit);
+    const QSignalBlocker blockBox(ui->quickResultCheckBox);
+    ui->keySequenceEdit->setKeySequence(keys);
+    ui->quickResultCheckBox->setChecked(quick);
   }
-  // quick trans key sequence
-  if (settings.value("quicktrans_shortcut").isValid()) {
-    auto k =
-        QKeySequence(settings.value("quicktrans_shortcut").toString());
-    ui->keySequenceEdit->setKeySequence(k);
-    if (m_hotkeySupported && this->nativeHotkey != nullptr) {
-      this->nativeHotkey->setShortcut(k.toString(),
-                                      settings.value("quicktrans").toBool());
-    }
-  } else {
-    // default value if value not founds
-    QKeySequence k = QKeySequence::fromString(tr("Ctrl+Shift+Space"));
-    ui->keySequenceEdit->setKeySequence(k);
-    if (m_hotkeySupported && this->nativeHotkey != nullptr) {
-      this->nativeHotkey->setShortcut(k.toString(), true);
-      ui->quickResultCheckBox->setChecked(true);
-    }
+  if (m_shortcut != nullptr) {
+    m_shortcut->setKeys(keys);
+    m_shortcut->setEnabled(quick);
   }
+  updateShortcutRow();
 
   // global TTS voice preference
   ui->voiceGenderGlobal->setCurrentIndex(
@@ -148,27 +122,6 @@ void Settings::readSettings() {
   ui->closeTrayRadio->setChecked(closeToTray);
   ui->closeQuitRadio->setChecked(!closeToTray);
 }
-
-void Settings::get_selected_word_fromX11() {
-  auto xsel = new QProcess(this);
-  xsel->setObjectName("xclip");
-  xsel->start("xclip", QStringList() << "-o"
-                                     << "-sel");
-  connect(xsel, SIGNAL(finished(int)), this, SLOT(set_x11_selection()));
-}
-
-void Settings::set_x11_selection() {
-  auto xselection = this->findChild<QObject *>("xclip");
-  if (xselection) {
-    x11_selected = ((QProcess *)(xselection))->readAllStandardOutput();
-    if (!x11_selected.trimmed().isEmpty())
-      show_requested_text();
-
-    xselection->deleteLater();
-  }
-}
-
-void Settings::show_requested_text() { emit translationRequest(x11_selected); }
 
 bool Settings::quickResultCheckBoxChecked() {
   return ui->quickResultCheckBox->isChecked();
@@ -359,6 +312,147 @@ void Settings::buildAppearanceSection() {
             settings.setValue(kKeyCsd, on);
             promptRestartRequiredDialog();
           });
+}
+
+void Settings::buildShortcutRow() {
+  // The key field moves into a column with the Change button beside it and a
+  // line under it, in the grid cell it had.
+  auto *grid = qobject_cast<QGridLayout *>(ui->gridLayout);
+  auto *cell = new QWidget(this);
+  // Like the On close radios: no window colour over the group box.
+  cell->setObjectName(QStringLiteral("shortcutCell"));
+  cell->setAttribute(Qt::WA_TranslucentBackground);
+  cell->setStyleSheet(QStringLiteral(
+      "#shortcutCell, #shortcutHint { background: transparent; }"));
+  auto *column = new QVBoxLayout(cell);
+  column->setContentsMargins(0, 0, 0, 0);
+  column->setSpacing(4);
+  auto *row = new QHBoxLayout;
+  row->setSpacing(8);
+  grid->removeWidget(ui->keySequenceEdit);
+  row->addWidget(ui->keySequenceEdit, 1);
+  m_shortcutButton = new QPushButton(cell);
+  m_shortcutButton->setObjectName(QStringLiteral("shortcutButton"));
+  row->addWidget(m_shortcutButton);
+  column->addLayout(row);
+  m_shortcutHint = new QLabel(cell);
+  m_shortcutHint->setObjectName(QStringLiteral("shortcutHint"));
+  m_shortcutHint->setWordWrap(true);
+  m_shortcutHint->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  glate::shell::setRelativeFont(m_shortcutHint, 0.9);
+  column->addWidget(m_shortcutHint);
+  grid->addWidget(cell, 0, 1);
+  // The switch lines up with the key field, not with the middle of the cell.
+  grid->setAlignment(ui->quickResultCheckBox, Qt::AlignTop);
+  ui->quickResultCheckBox->setMinimumHeight(
+      ui->keySequenceEdit->sizeHint().height());
+  ui->quickResultCheckBox->setToolTip(
+      tr("Translate the text selected in any app with a keyboard shortcut"));
+
+  connect(m_shortcutButton, &QPushButton::clicked, this, [this] {
+    if (m_shortcut == nullptr)
+      return;
+    if (m_shortcut->canConfigure())
+      m_shortcut->configure();
+    else
+      m_shortcut->retry();
+  });
+  if (m_shortcut != nullptr)
+    connect(m_shortcut, &glate::shortcut::GlobalShortcut::stateChanged, this,
+            &Settings::updateShortcutRow);
+}
+
+void Settings::updateShortcutRow() {
+  using glate::shortcut::GlobalShortcut;
+  const bool on = ui->quickResultCheckBox->isChecked();
+  const GlobalShortcut::State state =
+      m_shortcut != nullptr && on ? m_shortcut->state()
+                                  : GlobalShortcut::State::Off;
+  const bool portal = m_shortcut != nullptr &&
+                      m_shortcut->method() == GlobalShortcut::Method::Portal;
+  const bool none = m_shortcut == nullptr ||
+                    m_shortcut->method() == GlobalShortcut::Method::None;
+  const QString app = QApplication::applicationName();
+
+  QString hint;
+  QString placeholder = tr("Press shortcut");
+  bool bad = false;
+  QString button;
+  bool primary = false;
+  switch (state) {
+  case GlobalShortcut::State::Off:
+    break;
+  case GlobalShortcut::State::Checking:
+    hint = tr("Asking your desktop for the shortcut...");
+    break;
+  case GlobalShortcut::State::Active:
+    hint = portal ? tr("Your desktop manages this shortcut. Select text in any "
+                       "app, then press the keys.")
+                  : tr("Select text in any app, then press the keys.");
+    if (m_shortcut->canConfigure())
+      button = tr("Change...");
+    break;
+  case GlobalShortcut::State::Taken:
+    hint = tr("Another app uses these keys. Press other keys in the field.");
+    bad = true;
+    break;
+  case GlobalShortcut::State::NoKey:
+    hint = tr("Your desktop asks you to choose the keys for Quick Translate.");
+    placeholder = tr("No key yet");
+    if (m_shortcut->canConfigure()) {
+      button = tr("Choose keys...");
+      primary = true;
+    }
+    break;
+  case GlobalShortcut::State::Declined:
+    hint = tr("The desktop did not allow the shortcut.");
+    placeholder = tr("Not allowed");
+    bad = true;
+    button = tr("Try again");
+    break;
+  case GlobalShortcut::State::Unavailable: {
+    QString command = QStringLiteral("glate --quick-translate");
+    if (qEnvironmentVariableIsSet("FLATPAK_ID"))
+      command = QStringLiteral("flatpak run com.ktechpit.glate --quick-translate");
+    hint = tr("This desktop does not let apps add shortcuts. Add a custom "
+              "shortcut in its keyboard settings that runs:%1")
+               .arg(QStringLiteral("<br><code>%1</code>").arg(command));
+    placeholder = tr("Set in your desktop");
+    break;
+  }
+  }
+
+  // On the portal the desktop owns the key: the field shows what it bound.
+  const bool desktopKey = portal || none;
+  ui->keySequenceEdit->setEnabled(on && !desktopKey);
+  if (desktopKey) {
+    const QSignalBlocker block(ui->keySequenceEdit);
+    const QString trigger = m_shortcut != nullptr ? m_shortcut->trigger() : QString();
+    ui->keySequenceEdit->setKeySequence(QKeySequence(trigger));
+    ui->keySequenceEdit->setToolTip(
+        trigger.isEmpty() ? QString()
+                          : tr("Set in your desktop's shortcut settings"));
+  }
+  if (auto *field = ui->keySequenceEdit->findChild<QLineEdit *>())
+    field->setPlaceholderText(placeholder);
+  m_shortcutButton->setVisible(!button.isEmpty());
+  m_shortcutButton->setText(button);
+  m_shortcutButton->setProperty("accent", primary);
+  m_shortcutButton->style()->unpolish(m_shortcutButton);
+  m_shortcutButton->style()->polish(m_shortcutButton);
+  m_shortcutHint->setVisible(!hint.isEmpty());
+  m_shortcutHint->setText(hint);
+  m_shortcutHint->setProperty("bad", bad);
+  const QColor colour = bad ? glate::shell::dangerColor(this)
+                            : glate::shell::mutedColor(this);
+  m_shortcutHint->setStyleSheet(
+      QStringLiteral("color: %1;").arg(colour.name()));
+}
+
+void Settings::changeEvent(QEvent *event) {
+  QWidget::changeEvent(event);
+  if (event->type() == QEvent::PaletteChange && m_shortcutHint != nullptr)
+    updateShortcutRow();
 }
 
 void Settings::buildOfflineSection() {

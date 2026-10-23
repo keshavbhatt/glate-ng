@@ -11,9 +11,10 @@ BUILD_DIR ?= build-sdk
 
 # Code held to the omnidict standards. Legacy src/ and the older modules are
 # left as they are until they are cleaned up (ADR-002).
-STRICT_DIRS := tests $(wildcard modules/OfflineTranslation modules/AppShell)
+STRICT_DIRS := tests $(wildcard modules/OfflineTranslation modules/AppShell modules/GlobalShortcut)
 CXX_SOURCES := $(shell find $(STRICT_DIRS) -name '*.cpp' -o -name '*.h')
-TIDY_SOURCES := $(shell find $(STRICT_DIRS) -name '*.cpp')
+# Other platforms' files are not in this build's compile database.
+TIDY_SOURCES := $(filter-out %_win.cpp %_none.cpp,$(shell find $(STRICT_DIRS) -name '*.cpp'))
 
 .PHONY: all build test lint format clean screenshots
 

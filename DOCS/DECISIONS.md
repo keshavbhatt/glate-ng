@@ -139,3 +139,32 @@ first (`DOCS/mocks/`). Differences from omnidict:
   query (`redactUrlQueries`), and the home directory is replaced with `~`.
 - An existing install without a recorded version (no `shell/whatsNewSeenVersion`, but a
   `firstRun` key) counts as an update and sees What's new once.
+
+## ADR-009: Global shortcut module; Wayland through the desktop portal, QHotkey removed (2026-10-23)
+
+**Context.** Quick Translate used the vendored QHotkey: an X11 key grab, so on Wayland the
+option was greyed out, and the selected text came from the `xclip` program, which the snap
+does not ship. The owner asked for Wayland support as in Omnidict (ADR-019 there) and
+Paraphrase.
+
+**Decision.** A strict `modules/GlobalShortcut` (namespace `glate::shortcut`) replaces QHotkey:
+
+- X11 (not Xwayland): the app grabs the keys with xcb, as QHotkey did. Windows:
+  `RegisterHotKey`. The key is the one set in Settings (default Ctrl+Shift+Space).
+- Wayland, and X11 through Xwayland: the xdg-desktop-portal `GlobalShortcuts` portal,
+  through Qt DBus (adapted from Omnidict's client, on a D-Bus connection of its own that
+  registers the app id first). The desktop owns the key: the Settings key is only suggested
+  on the first bind, the field shows the key the desktop bound, and "Change..." opens the
+  desktop's own dialog. KDE Plasma 5.27+, GNOME 48+ and Hyprland have the portal; it works
+  from the snap (`desktop` plug) and the Flatpak with no extra permission.
+- Without a portal (sway, GNOME 46 and 47) Settings explains a custom desktop shortcut
+  running `glate --quick-translate`, which the running instance handles, with the launcher's
+  activation token passed on.
+- The text comes from Qt's clipboard: the selection (X11, Wayland), else the clipboard
+  (Windows, or copy then shortcut). On Wayland it is read once the window is active, since
+  the compositor only offers it to the focused window. `xclip` is no longer used.
+
+**Consequences.** Qt DBus joins the Linux build (`THIRD_PARTY.md`). QHotkey (BSD-3-Clause)
+leaves the tree, its licence entries and the About window. macOS has no global shortcut.
+Tests run the portal flow against a fake portal on a private D-Bus daemon
+(`tests/fake_portal.h`), never the session's; the real desktop dialogs are checked by hand.

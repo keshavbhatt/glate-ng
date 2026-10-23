@@ -58,3 +58,11 @@ target_compile_definitions(tst_app_shell PRIVATE
     GLATE_METAINFO_PATH="${PROJECT_SOURCE_DIR}/src/com.ktechpit.glate.metainfo.xml"
     GLATE_VERSION="${PROJECT_VERSION}")
 glate_add_test(tst_shell_dialogs tst_shell_dialogs.cpp app_shell GUI)
+
+# modules/GlobalShortcut; the portal tests run against a fake portal on a
+# private D-Bus daemon (fake_portal.h), never the session's.
+glate_add_test(tst_global_shortcut tst_global_shortcut.cpp global_shortcut GUI)
+if(UNIX AND NOT APPLE)
+    target_link_libraries(tst_global_shortcut PRIVATE Qt6::DBus)
+    target_compile_definitions(tst_global_shortcut PRIVATE GLATE_SHORTCUT_PORTAL)
+endif()

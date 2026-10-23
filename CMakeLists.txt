@@ -25,9 +25,10 @@ set(GLATE_QT_MIN_VERSION "6.10" CACHE STRING "Minimum required Qt6 version")
 find_package(Qt6 ${GLATE_QT_MIN_VERSION} REQUIRED COMPONENTS
     Core Gui Widgets Network Multimedia LinguistTools)
 
-# QHotkey's X11 backend. Found here, as imported targets, so the SDK include
-# workaround below covers them too.
+# The global shortcut's X11 key grab and desktop portal (modules/GlobalShortcut).
+# Found here, as imported targets, so the SDK include workaround below covers them too.
 if(UNIX AND NOT APPLE)
+    find_package(Qt6 ${GLATE_QT_MIN_VERSION} REQUIRED COMPONENTS DBus)
     find_package(X11 REQUIRED COMPONENTS xcb)
 endif()
 
@@ -53,6 +54,7 @@ add_subdirectory(modules/OfflineTranslation)
 
 # App shell: logging, release notes, About, What's new, bug report (ADR-008)
 add_subdirectory(modules/AppShell)
+add_subdirectory(modules/GlobalShortcut)
 
 add_subdirectory(src)
 

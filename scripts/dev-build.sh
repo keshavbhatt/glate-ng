@@ -43,7 +43,7 @@ glate_prepare_runtime_farm "$BUILD"
 mkdir -p "$BUILD/sdk-pcre2"
 ln -sf "$SDK/usr/include/pcre2.h" "$BUILD/sdk-pcre2/pcre2.h"
 
-# X11 and xcb come from the SDK too (QHotkey), so a host compiler without
+# X11 and xcb come from the SDK too (the global shortcut), so a host compiler without
 # multiarch paths does not pick up the host's copies.
 "$GLATE_CMAKE" -S "$DIR" -B "$BUILD" -G Ninja \
     -DCMAKE_BUILD_TYPE="${GLATE_BUILD_TYPE:-RelWithDebInfo}" \

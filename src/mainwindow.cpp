@@ -35,6 +35,9 @@
 #include <QMessageBox>
 #include <QTabWidget>
 #include <QTimer>
+#include <QClipboard>
+
+#include <memory>
 
 #include <utility>
 
@@ -455,32 +458,71 @@ void MainWindow::changeEvent(QEvent *e) {
 }
 
 void MainWindow::init_settings() {
-  m_nativeHotkey = new QHotkey(this);
-  m_settingsWidget = new Settings(this, m_nativeHotkey, m_theme);
+  m_globalShortcut = new glate::shortcut::GlobalShortcut(
+      QStringLiteral("com.ktechpit.glate"), QStringLiteral("quick-translate"),
+      tr("Quick Translate: translate the selected text"), this);
+  connect(m_globalShortcut, &glate::shortcut::GlobalShortcut::activated, this,
+          &MainWindow::quickTranslate);
+  m_settingsWidget = new Settings(this, m_globalShortcut, m_theme);
   m_settingsWidget->setWindowTitle(QApplication::applicationName() +
                                    " | Settings");
   m_settingsWidget->setWindowFlag(Qt::Dialog);
   m_settingsWidget->setWindowModality(Qt::NonModal);
-  connect(m_settingsWidget, &Settings::translationRequest, this,
-          [=](const QString selected) {
-            ui->src1->setText(selected);
-            ui->lang1->setCurrentIndex(0);
-            m_translate->click();
-            this->setWindowState((this->windowState() & ~Qt::WindowMinimized) |
-                                 Qt::WindowActive);
-            this->show();
-          });
   // Theme is now driven by the Settings → Appearance section directly through
   // the ThemeController (the old dark/light radios are superseded), so there's
   // nothing to handle on themeToggled here.
-  const QString platform = QGuiApplication::platformName().toLower();
-  const bool hotkeyUnsupported = platform.contains("wayland");
-  if (!hotkeyUnsupported && m_settingsWidget->quickResultCheckBoxChecked() &&
-      m_nativeHotkey->isRegistered() == false) {
-    showError("Unable to register Global Hotkey.\nIs another instance of " +
-              QApplication::applicationName() +
-              "running ?\nIf yes close it and restart the application.");
+}
+
+void MainWindow::quickTranslate(const QByteArray &activationToken) {
+  qCInfo(glate::shell::lcApp) << "quick translate";
+  if (!activationToken.isEmpty()) {
+    // Qt reads it once when the window asks to be activated (Wayland xdg-activation).
+    qputenv("XDG_ACTIVATION_TOKEN", activationToken);
   }
+  setWindowState((windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
+  show();
+  raise();
+  activateWindow();
+  // On Wayland the selection is only offered to the active window: wait for
+  // that, but not forever. X11 and Windows have it at once.
+  const bool wayland = QGuiApplication::platformName().startsWith("wayland");
+  if (!wayland || isActiveWindow()) {
+    translateSelection();
+    return;
+  }
+  auto *wait = new QTimer(this);
+  wait->setSingleShot(true);
+  auto done = std::make_shared<bool>(false);
+  const auto run = [this, wait, done] {
+    if (*done)
+      return;
+    *done = true;
+    wait->deleteLater();
+    translateSelection();
+  };
+  connect(wait, &QTimer::timeout, this, run);
+  connect(qApp, &QGuiApplication::applicationStateChanged, wait,
+          [run](Qt::ApplicationState state) {
+            if (state == Qt::ApplicationActive)
+              QTimer::singleShot(50, run);
+          });
+  wait->start(600);
+}
+
+void MainWindow::translateSelection() {
+  // The selected text (X11, Wayland); else the clipboard (Windows, or nothing
+  // selected: copy, then the shortcut).
+  const QClipboard *clipboard = QGuiApplication::clipboard();
+  QString text;
+  if (clipboard->supportsSelection())
+    text = clipboard->text(QClipboard::Selection);
+  if (text.trimmed().isEmpty())
+    text = clipboard->text(QClipboard::Clipboard);
+  if (text.trimmed().isEmpty())
+    return;
+  ui->src1->setText(text);
+  ui->lang1->setCurrentIndex(0);
+  m_translate->click();
 }
 
 void MainWindow::textSelectionChanged(QTextEdit *editor) {
@@ -567,14 +609,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
   m_settings.setValue("geometry", saveGeometry());
   m_settings.setValue("windowState", saveState());
-
-  // save quick trans shortcut
-  m_settings.setValue("quicktrans_shortcut",
-                      m_settingsWidget->keySequenceEditKeySequence());
-
-  // save quicktrans settings
-  m_settings.setValue("quicktrans",
-                      m_settingsWidget->quickResultCheckBoxChecked());
 
   // Use live UI state for this close action, then persist it.
   const bool closeToTray =

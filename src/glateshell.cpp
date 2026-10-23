@@ -81,7 +81,6 @@ QList<AboutInfo::Row> openSource()
         {.name = QApplication::translate("GlateShell", "Mozilla translations engine"),
          .text = QApplication::translate("GlateShell", "MPL-2.0, with Marian, sentencepiece, intgemm, ruy "
                                                        "and ssplit (MIT, Apache-2.0, BSD)")},
-        {.name = u"QHotkey"_s, .text = u"BSD-3-Clause"_s},
         {.name = u"QtWaitingSpinner"_s, .text = u"MIT"_s},
         {.name = u"Remix Icon"_s, .text = u"Apache-2.0"_s},
     };
