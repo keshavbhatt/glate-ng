@@ -10,7 +10,6 @@
 #include <QDBusPendingReply>
 #include <QDBusVariant>
 
-#include <algorithm>
 #include <utility>
 
 using namespace Qt::StringLiterals;
@@ -180,25 +179,10 @@ void PortalShortcuts::createSession()
             return;
         }
         m_session = results.value(u"session_handle"_s).toString();
-        listShortcuts();
+        // Bind on every start, even when the desktop lists the shortcut from an earlier run:
+        // KDE (xdg-desktop-portal-kde 6.7.4+) only fires keys bound in the current session.
+        bindShortcut();
     });
-}
-
-void PortalShortcuts::listShortcuts()
-{
-    request(u"ListShortcuts"_s, {QVariant::fromValue(QDBusObjectPath(m_session))}, {},
-            [this](uint response, const QVariantMap& results) {
-                const QList<PortalShortcut> shortcuts = toShortcuts(results.value(u"shortcuts"_s));
-                const bool bound =
-                    response == 0 && std::ranges::any_of(shortcuts, [this](const PortalShortcut& shortcut) {
-                        return shortcut.id == m_shortcutId;
-                    });
-                if (bound) {
-                    takeTrigger(shortcuts);
-                    return;
-                }
-                bindShortcut();
-            });
 }
 
 void PortalShortcuts::bindShortcut()

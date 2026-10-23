@@ -112,6 +112,22 @@ private Q_SLOTS:
         QCOMPARE(fake->refusedRegistrations(), 0);
     }
 
+    void aSavedShortcutIsBoundAgain()
+    {
+        auto fake = makePortal();
+        if (!fake) {
+            QSKIP("no private D-Bus daemon for the fake portal");
+        }
+        fake->setTrigger(u"Ctrl+Shift+Space"_s);
+        fake->setSaved(true); // an earlier run bound it
+        PortalShortcuts portal(u"com.ktechpit.glate"_s, u"quick-translate"_s, u"Quick Translate"_s);
+        const QSignalSpy activated(&portal, &PortalShortcuts::activated);
+        portal.start();
+        QTRY_COMPARE(portal.state(), PortalShortcuts::State::Active);
+        QVERIFY(fake->press());
+        QTRY_COMPARE(activated.count(), 1);
+    }
+
     void noKeyUntilTheUserChoosesOne()
     {
         auto fake = makePortal();
