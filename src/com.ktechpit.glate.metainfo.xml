@@ -123,6 +123,7 @@
       <description>
         <p>A clearer app around the translator.</p>
         <ul>
+          <li>Quick Translate now works on Wayland too: select text anywhere and press Ctrl+Shift+Space (your desktop may ask once to allow the shortcut).</li>
           <li>See at a glance when offline mode is on, and which results were translated on your computer.</li>
           <li>A new About window with credits, licences and diagnostics.</li>
           <li>Report a bug from the Help menu, with the details filled in for you.</li>
