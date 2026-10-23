@@ -4,27 +4,31 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later AND LicenseRef-proprietary=https://github.com/keshavbhatt/glate-ng/blob/main/LICENSES/LicenseRef-Ktechpit-Licensing-Module.txt</project_license>
   <name>Glate</name>
-  <summary>Translate text and generate speech audio on Linux desktop</summary>
+  <summary>Offline translator, text to speech</summary>
 
   <developer id="com.ktechpit">
     <name>Keshav Bhatt</name>
   </developer>
 
   <description>
-    <p>Glate is a fast desktop translator with built-in text-to-speech for everyday translation workflows.</p>
-    <p>It supports translation across 100+ languages, per-line translation view, voice playback, history tracking, and sharing translated text or speech output.</p>
-    <p>Offline mode translates on your own computer with Mozilla's Firefox translation models: download a language once and translate without internet, and your text never leaves your device.</p>
+    <p>Glate is a fast desktop translator with built-in text to speech. Translate text between 100+ languages online through Google Translate, or use offline translation on your own computer, then listen to the result read aloud.</p>
+    <p>Offline mode uses Mozilla's Firefox translation models: download a language once and translate without internet, privately, because your text never leaves your device. No model ships with the app, so you only download the languages you need.</p>
+    <p>Features:</p>
     <ul>
-      <li>Translate between 100+ languages instantly</li>
-      <li>Offline translation for nearly 60 languages, with models downloaded on demand (Pro)</li>
-      <li>Line-by-line translation view for structured content and review</li>
-      <li>Text-to-speech playback with selectable voice/gender plus audio export tools</li>
-      <li>Translation history with search, quick load, copy, and remove actions</li>
-      <li>Share translations via text save, e-mail, and public paste link generation</li>
+      <li>Translate text between 100+ languages, with automatic language detection</li>
+      <li>Offline translation for nearly 60 languages with Mozilla's Firefox translation models, downloaded on demand (Pro)</li>
+      <li>An offline indicator shows when offline mode is on and which results were translated on your computer</li>
+      <li>Text to speech: read the text or its translation aloud, or only the part you select, with a choice of voice</li>
+      <li>Export speech to MP3, WAV, FLAC or AAC audio, with bitrate, sample rate and volume options</li>
+      <li>Line-by-line translation view to check long text sentence by sentence, with copy and read aloud for each line</li>
+      <li>Searchable translation history: load, copy or remove earlier translations</li>
+      <li>Share a translation by email or a paste link, or save it as a text file</li>
+      <li>Quick translate: select text in any app and translate it with a global keyboard shortcut</li>
+      <li>Stays in the system tray, with a choice between quitting and minimizing to the tray on close</li>
+      <li>Light and dark appearance that follows the system, Fusion and Fusion 2 themes, and your own accent colour</li>
+      <li>A short welcome for new users, keyboard shortcuts and What's new in the Help menu</li>
       <li>Report a bug from the app, with the system details filled in for you</li>
-      <li>Global quick-translate hotkey support on X11/XWayland</li>
-      <li>Available in English, German, French, Brazilian Portuguese and Italian</li>
-      <li>System-following Light/Dark appearance with Fusion and Fusion 2 theme choices</li>
+      <li>Interface in English, German, French, Brazilian Portuguese and Italian</li>
     </ul>
   </description>
 
@@ -83,14 +87,35 @@
     <category>Utility</category>
   </categories>
 
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+
   <keywords>
-    <keyword>translate</keyword>
     <keyword>translator</keyword>
-    <keyword>speech</keyword>
+    <keyword>translate</keyword>
     <keyword>tts</keyword>
-    <keyword>language</keyword>
     <keyword>translation</keyword>
-    <keyword>dialect</keyword>
+    <keyword>offline translator</keyword>
+    <keyword>offline translation</keyword>
+    <keyword>text to speech</keyword>
+    <keyword>speech</keyword>
+    <keyword>read aloud</keyword>
+    <keyword>google translate</keyword>
+    <keyword>language</keyword>
+    <keyword>languages</keyword>
+    <keyword>multilingual</keyword>
+    <keyword>private</keyword>
+    <keyword>firefox translations</keyword>
+    <keyword xml:lang="de">Übersetzer</keyword>
+    <keyword xml:lang="es">traductor</keyword>
+    <keyword xml:lang="fr">traducteur</keyword>
+    <keyword xml:lang="it">traduttore</keyword>
+    <keyword xml:lang="pt_BR">tradutor</keyword>
+    <keyword xml:lang="ru">переводчик</keyword>
+    <keyword xml:lang="ja">翻訳</keyword>
+    <keyword xml:lang="zh_CN">翻译</keyword>
   </keywords>
 
   <releases>

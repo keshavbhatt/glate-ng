@@ -1,13 +1,13 @@
 [Desktop Entry]
 Version=1.0
-GenericName=Translator and Text to Speech
+GenericName=Translator
 Name=Glate
 Type=Application
-Comment=Google translator and text to speech for Linux desktop
+Comment=Offline translator, text to speech
 Icon=com.ktechpit.glate
-Keywords=Translator;Translation;Google;TTS;Speech;
+Keywords=Translator;Translate;Translation;Offline;TTS;Speech;Voice;Language;Google;Multilingual;
 Exec=glate
-Categories=Office;Education;Utility;Qt;
+Categories=Utility;Qt;
 Terminal=false
 Name[en_US]=Glate
 StartupNotify=true
