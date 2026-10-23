@@ -479,13 +479,18 @@ void MainWindow::quickTranslate(const QByteArray &activationToken) {
     // Qt reads it once when the window asks to be activated (Wayland xdg-activation).
     qputenv("XDG_ACTIVATION_TOKEN", activationToken);
   }
+  const bool wayland = QGuiApplication::platformName().startsWith("wayland");
+  // Without a token the compositor refuses to activate a window that is
+  // already shown (KDE only marks it as asking for attention), but it gives
+  // focus to a window that appears: show it anew.
+  if (wayland && activationToken.isEmpty() && isVisible() && !isActiveWindow())
+    hide();
   setWindowState((windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
   show();
   raise();
   activateWindow();
   // On Wayland the selection is only offered to the active window: wait for
   // that, but not forever. X11 and Windows have it at once.
-  const bool wayland = QGuiApplication::platformName().startsWith("wayland");
   if (!wayland || isActiveWindow()) {
     translateSelection();
     return;
@@ -518,8 +523,12 @@ void MainWindow::translateSelection() {
     text = clipboard->text(QClipboard::Selection);
   if (text.trimmed().isEmpty())
     text = clipboard->text(QClipboard::Clipboard);
-  if (text.trimmed().isEmpty())
+  if (text.trimmed().isEmpty()) {
+    qCInfo(glate::shell::lcApp)
+        << "quick translate: no selected text"
+        << (isActiveWindow() ? "(window active)" : "(window not active)");
     return;
+  }
   ui->src1->setText(text);
   ui->lang1->setCurrentIndex(0);
   m_translate->click();
