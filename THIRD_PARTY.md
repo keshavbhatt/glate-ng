@@ -4,7 +4,7 @@ No new third-party dependency is added without an ADR in `DOCS/DECISIONS.md` and
 
 | Component | Version | Licence | How it is obtained | Used by |
 |---|---|---|---|---|
-| Qt | 6.11 (Linux snap), 6.10 (Windows) | LGPL-3.0 | `kde-qt6-core24-sdk` snap (dev build), `kde-neon-6` extension (snap), official installer (Windows CI) | app |
+| Qt | 6.11 (Linux snap), 6.10 (Windows) | LGPL-3.0 | `kde-qt6-core24-sdk` snap (dev build), `kde-neon-6` extension (snap), official installer (Windows, by hand) | app |
 | Qt DBus | with Qt (Linux only) | LGPL-3.0 | as Qt | `modules/GlobalShortcut` (desktop portal, ADR-009) |
 | QtWaitingSpinner | vendored as `src/waitingspinnerwidget.*` | MIT | copied into the tree | app (busy spinner) |
 | Remix Icon | 2020 snapshot, 2.5.0 and 4.6.0 (`sparkling-line`), `src/icons/*-line.png`, `*-fill.png`, `text.png` | Apache-2.0 | copied into the tree | app (toolbar glyphs) |

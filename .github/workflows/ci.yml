@@ -1,6 +1,6 @@
 # Builds against the KDE Qt snap SDK the snap ships with (DOCS/DECISIONS.md ADR-001),
 # runs the tests, and lints the code held to the strict standards (ADR-002).
-# Windows builds stay in windows-build.yml.
+# There is no Windows build in CI (owner, 2026-10-23).
 name: ci
 
 on:

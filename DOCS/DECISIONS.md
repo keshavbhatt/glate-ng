@@ -13,7 +13,8 @@ hides breakage that only shows up in the snap.
 runs against `kf6-core24`, as in omnidict. `cmake/SnapSdkWorkaround.cmake` keeps the SDK's
 generic `/usr/include` from shadowing the host libc headers. The scripts prefer the cmake snap
 because the SDK's library path breaks the host cmake on rolling distributions (libarchive).
-Windows keeps its own CI build with the official Qt installer.
+Windows has no CI build (owner, 2026-10-23); the code still builds there with the official Qt
+installer, by hand.
 
 **Consequences.** Developers need three snaps: `kde-qt6-core24-sdk`, `kf6-core24` and `cmake`.
 
@@ -112,7 +113,8 @@ arm64 on every push to `main` that touches the app and publishes it to `edge` wi
 version `X.Y.Z+git<hash>`; a `vX.Y.Z` tag publishes `X.Y.Z` straight to `stable` (owner,
 2026-10-22: edge is the testing channel, so a tag is the decision to ship; omnidict stops at
 candidate). The tag must equal `project(VERSION)`, checked by both workflows.
-The tag workflow (`release.yml`) makes the GitHub release with the Windows portable build;
+The tag workflow (`release.yml`) makes the GitHub release (no Windows build since
+2026-10-23, owner: CI minutes are limited);
 the snap and the Flatpak no longer go there (owner, 2026-10-22: Flathub already publishes
 the Flatpak). Flathub follows tags through the manifest's `x-checker-data`. Publishing is gated by the `SNAPCRAFT_STORE_CREDENTIALS` secret
 and the `PUBLISH_TO_STORE` repository variable. The steps are in `.github/RELEASE.md`.

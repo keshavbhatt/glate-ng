@@ -56,8 +56,7 @@ Every change on `main` is published to the `edge` channel and every release to `
 
 ### Windows
 
-A portable build (`Glate-Portable-<version>-Win64.zip`) is attached to every
-[release](https://github.com/keshavbhatt/glate-ng/releases).
+There is no prebuilt Windows download; Glate builds on Windows from source (see below).
 
 ## Offline translation
 
@@ -142,13 +141,15 @@ cmake --build build-release -j
 cpack --config build-release/src/CPackConfig.cmake
 ```
 
-Windows packaging output is generated through NSIS/ZIP via CPack. Tagged releases are built by
-`.github/workflows/release.yml` (see `.github/RELEASE.md`).
+Windows packaging output is generated through NSIS/ZIP via CPack.
 
-## Global hotkey on Wayland
+## Quick Translate shortcut
 
-Global hotkeys are not available on native Wayland sessions due to compositor security restrictions.
-If you need system-wide quick-translate hotkeys, run Glate on an X11 session (or via XWayland where supported).
+Select text in any app and press the Quick Translate shortcut (Ctrl+Shift+Space by default) to
+translate it. On X11 and Windows Glate grabs the key itself. On Wayland the desktop owns global
+keys: Glate asks for the shortcut through the desktop's GlobalShortcuts service (KDE Plasma,
+GNOME 48 and later, Hyprland), which may ask once to allow it. On a desktop without that service,
+add a custom shortcut in its settings that runs `glate --quick-translate`.
 
 ## Contributing
 
