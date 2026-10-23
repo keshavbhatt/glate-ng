@@ -22,6 +22,10 @@ namespace glate::shell {
 
 namespace {
 constexpr int kTitleMax = 100;
+constexpr int kWidth = 580;
+constexpr int kDescriptionHeight = 110;
+constexpr int kDetailsHeight = 110;
+constexpr int kChevron = 14;
 } // namespace
 
 BugReportDialog::BugReportDialog(QString diagnostics, QStringList logLines, Targets targets, QWidget* parent)
@@ -39,12 +43,14 @@ BugReportDialog::BugReportDialog(QString diagnostics, QStringList logLines, Targ
     buildForm(setUpDialog(this, tr("Report a bug")));
     buildFooter(addFooter(this));
     connect(m_disclosure, &QToolButton::toggled, this, [this](bool open) {
-        m_disclosure->setArrowType(open ? Qt::DownArrow : Qt::RightArrow);
+        restyleDisclosure();
         m_detailsView->setVisible(open);
+        fitToContent(this, kWidth);
     });
     connect(m_includeLog, &QCheckBox::toggled, this, &BugReportDialog::refreshDetails);
     refreshDetails();
-    resize(580, 560);
+    m_disclosure->setChecked(true);
+    fitToContent(this, kWidth);
 }
 
 void BugReportDialog::buildForm(QBoxLayout* body)
@@ -53,6 +59,7 @@ void BugReportDialog::buildForm(QBoxLayout* body)
                                 "GitHub issue or an email for you to review and send."),
                              this);
     intro->setWordWrap(true);
+    setRelativeFont(intro, 0.9);
     makeMuted(intro);
     body->addWidget(intro);
 
@@ -63,7 +70,8 @@ void BugReportDialog::buildForm(QBoxLayout* body)
     body->addWidget(new QLabel(tr("What happened?"), this));
     m_description->setObjectName(u"bugDescription"_s);
     m_description->setTabChangesFocus(true);
-    body->addWidget(m_description, 1);
+    m_description->setFixedHeight(kDescriptionHeight);
+    body->addWidget(m_description);
 
     m_includeLog->setText(
         tr("Include the last %n lines of the log", nullptr, static_cast<int>(m_logLines.size())));
@@ -72,17 +80,22 @@ void BugReportDialog::buildForm(QBoxLayout* body)
     m_includeLog->setVisible(!m_logLines.isEmpty());
     body->addWidget(m_includeLog);
 
+    m_disclosure->setObjectName(u"detailsToggle"_s);
     m_disclosure->setText(tr("Details that will be included"));
     m_disclosure->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_disclosure->setArrowType(Qt::RightArrow);
+    m_disclosure->setIconSize(QSize(kChevron, kChevron));
     m_disclosure->setCheckable(true);
     m_disclosure->setAutoRaise(true);
-    body->addWidget(m_disclosure);
+    m_disclosure->setCursor(Qt::PointingHandCursor);
+    setRelativeFont(m_disclosure, 0.9);
+    restyleDisclosure();
+    body->addWidget(m_disclosure, 0, Qt::AlignLeft);
     m_detailsView->setObjectName(u"detailsView"_s);
     m_detailsView->setReadOnly(true);
     m_detailsView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    m_detailsView->setFixedHeight(kDetailsHeight);
     m_detailsView->setVisible(false);
-    body->addWidget(m_detailsView, 1);
+    body->addWidget(m_detailsView);
 }
 
 void BugReportDialog::buildFooter(QBoxLayout* footer)
@@ -137,6 +150,18 @@ void BugReportDialog::openMail()
 {
     copyDetails();
     QDesktopServices::openUrl(mailUrl(m_targets.mailAddress, report()));
+}
+
+void BugReportDialog::restyleDisclosure()
+{
+    // A link-like toggle in the accent colour with a chevron, as in the mock.
+    const QColor accent = palette().color(QPalette::Highlight);
+    const QString chevron =
+        m_disclosure->isChecked() ? u":/icons/arrow-down-s-line.png"_s : u":/icons/arrow-right-s-line.png"_s;
+    m_disclosure->setIcon(tintedIcon(chevron, accent));
+    m_disclosure->setStyleSheet(
+        u"#detailsToggle { color: %1; background: transparent; border: none; padding: 2px 0; }"_s.arg(
+            accent.name()));
 }
 
 void BugReportDialog::refreshDetails()

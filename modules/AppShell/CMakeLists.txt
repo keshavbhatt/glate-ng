@@ -11,6 +11,8 @@ qt_add_library(app_shell STATIC
     Changelog.h
     Diagnostics.cpp
     Diagnostics.h
+    FlowLayout.cpp
+    FlowLayout.h
     LogSink.cpp
     LogSink.h
     Logging.cpp

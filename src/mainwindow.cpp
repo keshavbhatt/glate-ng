@@ -1152,7 +1152,9 @@ QString MainWindow::getLangCode(const QString &langName) const {
 }
 
 void MainWindow::on_help_clicked() {
-  m_helpMenu->popup(ui->help->mapToGlobal(QPoint(0, ui->help->height())));
+  // Right-aligned under the button, as in the mock.
+  const int x = ui->help->width() - m_helpMenu->sizeHint().width();
+  m_helpMenu->popup(ui->help->mapToGlobal(QPoint(x, ui->help->height() + 4)));
 }
 
 void MainWindow::showTour() {
@@ -1403,7 +1405,7 @@ void MainWindow::initShell() {
 
   // The "Offline" pill takes the top bar's centre, where an empty logo label sat.
   m_offlinePill = new glate::shell::StatusPill(
-      tr("Offline"), QStringLiteral(":/icons/computer-line.png"), this);
+      tr("Offline"), QStringLiteral(":/icons/macbook-line.png"), this);
   m_offlinePill->setObjectName(QStringLiteral("offlinePill"));
   m_offlinePill->setToolTip(tr("Offline mode is on: translations happen on this "
                                "computer. Click to manage languages."));
@@ -1423,15 +1425,16 @@ void MainWindow::initShell() {
   m_welcome = new glate::shell::WelcomeCard(
       tr("Welcome to Glate"),
       tr("Translate text and listen to it, online or on this computer."),
-      {{QStringLiteral(":/icons/file-text-line.png"),
-        tr("Type or paste on the left, then press <b>Shift</b>+<b>Enter</b> or "
+      {{QStringLiteral(":/icons/text.png"),
+        tr("Type or paste on the left, then press <kbd>Shift</kbd> + <kbd>Enter</kbd> or "
            "the arrow.")},
-       {QStringLiteral(":/icons/swap-box-line.png"),
+       {QStringLiteral(":/icons/arrow-left-right-line.png"),
         tr("Pick both languages below; the middle button swaps them.")},
-       {QStringLiteral(":/icons/computer-line.png"),
+       {QStringLiteral(":/icons/macbook-line.png"),
         tr("Turn on offline mode in Settings to translate without internet "
            "(Pro).")}},
-      tr("Take the tour"), ui->src2->viewport());
+      tr("Take the tour"), QStringLiteral(":/icons/sparkling-line.png"),
+      ui->src2->viewport());
   m_resultPlaceholder = ui->src2->placeholderText();
   connect(m_welcome, &glate::shell::WelcomeCard::buttonClicked, this,
           [this]() { showTour(); });
@@ -1507,7 +1510,7 @@ void MainWindow::updateOfflineCaption() {
     const QColor muted = glate::shell::mutedColor(this);
     const QColor green = glate::shell::offlineColor(this);
     const QPixmap icon = glate::shell::tintedIcon(
-        QStringLiteral(":/icons/computer-line.png"), green).pixmap(14, 14);
+        QStringLiteral(":/icons/macbook-line.png"), green).pixmap(14, 14);
     QByteArray png;
     QBuffer buffer(&png);
     buffer.open(QIODevice::WriteOnly);

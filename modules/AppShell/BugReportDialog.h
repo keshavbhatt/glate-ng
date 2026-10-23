@@ -48,6 +48,7 @@ private:
     void openIssue();
     void openMail();
     void refreshDetails();
+    void restyleDisclosure();
 
     QString m_diagnostics;
     QStringList m_logLines;

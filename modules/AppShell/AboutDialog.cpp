@@ -1,5 +1,6 @@
 #include "AboutDialog.h"
 
+#include "FlowLayout.h"
 #include "ShellStyle.h"
 
 #include <QApplication>
@@ -7,12 +8,10 @@
 #include <QDesktopServices>
 #include <QFontDatabase>
 #include <QFrame>
-#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPlainTextEdit>
 #include <QPushButton>
-#include <QScrollArea>
 #include <QTabWidget>
 #include <QVBoxLayout>
 
@@ -23,34 +22,55 @@ namespace glate::shell {
 namespace {
 constexpr int kHeroIcon = 72;
 constexpr int kLinkIcon = 16;
+constexpr int kRowNameWidth = 190;
+constexpr int kWidth = 640;
+constexpr int kDiagnosticsLines = 7;
 } // namespace
 
 QWidget* makeRowList(const QList<AboutInfo::Row>& rows, QWidget* parent)
 {
-    auto* scroll = new QScrollArea(parent);
-    scroll->setWidgetResizable(true);
-    scroll->setFrameShape(QFrame::StyledPanel);
-    auto* inner = new QWidget(scroll);
-    auto* grid = new QGridLayout(inner);
-    grid->setContentsMargins(12, 10, 12, 10);
-    grid->setHorizontalSpacing(16);
-    grid->setVerticalSpacing(10);
-    int row = 0;
+    // A bordered list with a line between rows, as in the mock.
+    // The tab pages share the tallest page's height: the list sits at the top of its page.
+    auto* page = new QWidget(parent);
+    auto* pageColumn = new QVBoxLayout(page);
+    pageColumn->setContentsMargins(0, 12, 0, 0);
+    auto* frame = new QFrame(page);
+    frame->setObjectName(u"aboutRows"_s);
+    frame->setAttribute(Qt::WA_StyledBackground, true);
+    const QColor line = borderColor();
+    frame->setStyleSheet(u"#aboutRows { border: 1px solid %1; border-radius: 8px; background: transparent; }"
+                         "#aboutRows QFrame#rowLine { background: %1; border: none; }"_s.arg(line.name()));
+    auto* column = new QVBoxLayout(frame);
+    column->setContentsMargins(1, 1, 1, 1);
+    column->setSpacing(0);
+    bool first = true;
     for (const AboutInfo::Row& item : rows) {
-        auto* name = new QLabel(u"<b>%1</b>"_s.arg(item.name.toHtmlEscaped()), inner);
+        if (!first) {
+            auto* rule = new QFrame(frame);
+            rule->setObjectName(u"rowLine"_s);
+            rule->setFixedHeight(1);
+            rule->setAttribute(Qt::WA_StyledBackground, true);
+            column->addWidget(rule);
+        }
+        first = false;
+        auto* row = new QHBoxLayout;
+        row->setContentsMargins(12, 8, 12, 8);
+        row->setSpacing(12);
+        auto* name = new QLabel(u"<b>%1</b>"_s.arg(item.name.toHtmlEscaped()), frame);
         name->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-        auto* text = new QLabel(item.text, inner);
+        name->setFixedWidth(kRowNameWidth);
+        auto* text = new QLabel(item.text, frame);
         text->setWordWrap(true);
+        text->setAlignment(Qt::AlignTop | Qt::AlignLeft);
         text->setTextInteractionFlags(Qt::TextBrowserInteraction);
         text->setOpenExternalLinks(true);
-        grid->addWidget(name, row, 0);
-        grid->addWidget(text, row, 1);
-        ++row;
+        row->addWidget(name);
+        row->addWidget(text, 1);
+        column->addLayout(row);
     }
-    grid->setColumnStretch(1, 1);
-    grid->setRowStretch(row, 1);
-    scroll->setWidget(inner);
-    return scroll;
+    pageColumn->addWidget(frame);
+    pageColumn->addStretch(1);
+    return page;
 }
 
 AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
@@ -64,6 +84,7 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
 
     auto* tabs = new QTabWidget(this);
     tabs->setObjectName(u"aboutTabs"_s);
+    tabs->setDocumentMode(true);
     tabs->addTab(makeRowList(info.credits, tabs), tr("Credits"));
     tabs->addTab(makeRowList(info.openSource, tabs), tr("Open source"));
     tabs->addTab(buildDiagnostics(info), tr("Diagnostics"));
@@ -72,7 +93,7 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
     QBoxLayout* footer = addFooter(this);
     footer->addStretch(1);
     addCloseButton(this, footer);
-    resize(660, 600);
+    fitToContent(this, kWidth);
 }
 
 void AboutDialog::setDiagnostics(const QString& text)
@@ -88,17 +109,15 @@ QWidget* AboutDialog::buildHeader(const AboutInfo& info)
     row->setSpacing(16);
     auto* icon = new QLabel(header);
     icon->setPixmap(info.icon.pixmap(kHeroIcon, kHeroIcon));
-    row->addWidget(icon, 0, Qt::AlignTop);
+    row->addWidget(icon, 0, Qt::AlignVCenter);
 
     auto* text = new QVBoxLayout;
     text->setSpacing(2);
     auto* name = new QLabel(info.appName, header);
-    QFont big = name->font();
-    big.setPointSizeF(big.pointSizeF() * 1.45);
-    big.setBold(true);
-    name->setFont(big);
+    setRelativeFont(name, 1.45, true);
     auto* tagline = new QLabel(info.tagline, header);
     tagline->setWordWrap(true);
+    setRelativeFont(tagline, 1.07);
     makeMuted(tagline);
 
     auto* versionRow = new QHBoxLayout;
@@ -106,14 +125,18 @@ QWidget* AboutDialog::buildHeader(const AboutInfo& info)
     auto* version = new QLabel(tr("Version %1").arg(info.version), header);
     version->setObjectName(u"aboutVersion"_s);
     version->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    auto* whatsNew = new QLabel(u"<a href=\"#\">%1</a>"_s.arg(tr("What's new")), header);
+    auto* whatsNew =
+        new QLabel(u"<a href=\"#\" style=\"text-decoration:none\">%1</a>"_s.arg(tr("What's new")), header);
     whatsNew->setObjectName(u"aboutWhatsNew"_s);
     connect(whatsNew, &QLabel::linkActivated, this, &AboutDialog::whatsNewRequested);
+    setRelativeFont(version, 0.9);
+    setRelativeFont(whatsNew, 0.9);
     versionRow->addWidget(version);
     versionRow->addWidget(whatsNew);
     versionRow->addStretch(1);
 
     auto* author = new QLabel(info.author, header);
+    setRelativeFont(author, 0.9);
     makeMuted(author);
     text->addWidget(name);
     text->addWidget(tagline);
@@ -126,11 +149,7 @@ QWidget* AboutDialog::buildHeader(const AboutInfo& info)
 QWidget* AboutDialog::buildLinks(const AboutInfo& info)
 {
     auto* links = new QWidget(this);
-    auto* grid = new QGridLayout(links);
-    grid->setContentsMargins(0, 0, 0, 0);
-    grid->setSpacing(6);
-    constexpr int kColumns = 3;
-    int index = 0;
+    auto* flow = new FlowLayout(links, 6);
     for (const AboutInfo::Link& link : info.links) {
         auto* button = new QPushButton(QIcon(link.iconPath), link.text, links);
         button->setIconSize(QSize(kLinkIcon, kLinkIcon));
@@ -142,8 +161,7 @@ QWidget* AboutDialog::buildLinks(const AboutInfo& info)
             const QUrl url = link.url;
             connect(button, &QPushButton::clicked, this, [url] { QDesktopServices::openUrl(url); });
         }
-        grid->addWidget(button, index / kColumns, index % kColumns);
-        ++index;
+        flow->addWidget(button);
     }
     return links;
 }
@@ -152,12 +170,14 @@ QWidget* AboutDialog::buildDiagnostics(const AboutInfo& info)
 {
     auto* page = new QWidget(this);
     auto* column = new QVBoxLayout(page);
-    column->setContentsMargins(8, 8, 8, 8);
+    column->setContentsMargins(0, 12, 0, 0);
     m_diagnostics = new QPlainTextEdit(info.diagnostics, page);
     m_diagnostics->setObjectName(u"aboutDiagnostics"_s);
     m_diagnostics->setReadOnly(true);
     m_diagnostics->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-    column->addWidget(m_diagnostics, 1);
+    m_diagnostics->setLineWrapMode(QPlainTextEdit::NoWrap);
+    m_diagnostics->setFixedHeight((m_diagnostics->fontMetrics().lineSpacing() * kDiagnosticsLines) + 24);
+    column->addWidget(m_diagnostics);
 
     auto* buttons = new QHBoxLayout;
     auto* copy = new QPushButton(QIcon(u":/icons/file-copy-line.png"_s), tr("Copy"), page);
@@ -165,7 +185,7 @@ QWidget* AboutDialog::buildDiagnostics(const AboutInfo& info)
             [this] { QApplication::clipboard()->setText(m_diagnostics->toPlainText()); });
     buttons->addWidget(copy);
     if (!info.logDirectory.isEmpty()) {
-        auto* folder = new QPushButton(QIcon(u":/icons/folder-open-line.png"_s), tr("Open log folder"), page);
+        auto* folder = new QPushButton(QIcon(u":/icons/folder-line.png"_s), tr("Open log folder"), page);
         const QUrl url = QUrl::fromLocalFile(info.logDirectory);
         connect(folder, &QPushButton::clicked, this, [url] { QDesktopServices::openUrl(url); });
         buttons->addWidget(folder);

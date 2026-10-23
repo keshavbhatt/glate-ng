@@ -135,7 +135,7 @@ void GlateShell::showAbout()
     info.icon = QIcon(u":/icons/app/icon-128.png"_s);
     info.links = {
         {.text = tr("Report a bug..."), .iconPath = u":/icons/bug-line.png"_s, .url = {}},
-        {.text = tr("Source code"), .iconPath = u":/icons/github-line.png"_s, .url = QUrl(kRepository)},
+        {.text = tr("Source code"), .iconPath = u":/icons/code-s-slash-line.png"_s, .url = QUrl(kRepository)},
         {.text = tr("Website"),
          .iconPath = u":/icons/global-line.png"_s,
          .url = QUrl(u"https://ktechpit.com/USS/public/product.php?slug=glate"_s)},
@@ -219,8 +219,9 @@ void GlateShell::showWhatsNewIfUpdated()
 QMenu* GlateShell::createHelpMenu(QWidget* parent, const std::function<void()>& tour)
 {
     auto* menu = new QMenu(parent);
-    menu->addAction(QIcon(u":/icons/lightbulb-line.png"_s), tr("Welcome tour"), this, tour);
-    menu->addAction(QIcon(u":/icons/gift-line.png"_s),
+    menu->setMinimumWidth(230);
+    menu->addAction(QIcon(u":/icons/sparkling-line.png"_s), tr("Welcome tour"), this, tour);
+    menu->addAction(QIcon(u":/icons/star-line.png"_s),
                     tr("What's new in %1").arg(QApplication::applicationVersion()), this,
                     &GlateShell::showWhatsNew);
     QAction* keys =
@@ -228,7 +229,7 @@ QMenu* GlateShell::createHelpMenu(QWidget* parent, const std::function<void()>& 
     keys->setShortcut(QKeySequence(u"F1"_s));
     menu->addSeparator();
     menu->addAction(QIcon(u":/icons/bug-line.png"_s), tr("Report a bug..."), this, [this]() { showBugReport(); });
-    menu->addAction(QIcon(u":/icons/folder-open-line.png"_s), tr("Open log folder"), this, []() {
+    menu->addAction(QIcon(u":/icons/folder-line.png"_s), tr("Open log folder"), this, []() {
         QDir().mkpath(logDirectory());
         QDesktopServices::openUrl(QUrl::fromLocalFile(logDirectory()));
     });

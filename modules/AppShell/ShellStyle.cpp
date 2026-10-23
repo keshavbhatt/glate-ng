@@ -3,8 +3,10 @@
 #include <QApplication>
 #include <QBoxLayout>
 #include <QDialog>
+#include <QEvent>
 #include <QFrame>
 #include <QLabel>
+#include <QLayout>
 #include <QPainter>
 #include <QPixmap>
 #include <QPushButton>
@@ -30,17 +32,104 @@ QIcon tintedIcon(const QString& resourcePath, const QColor& color, int size)
     return {tinted};
 }
 
-QColor mutedColor(const QWidget* widget)
+namespace {
+
+// The text colour share of the way from the window colour, from the application
+// palette: a muted widget's own palette already holds the muted colour.
+QColor textTowardWindow(float share)
 {
-    const QPalette palette = widget != nullptr ? widget->palette() : QApplication::palette();
-    return palette.color(QPalette::Disabled, QPalette::Text);
+    const QPalette palette = QApplication::palette();
+    const QColor text = palette.color(QPalette::Active, QPalette::WindowText);
+    const QColor window = palette.color(QPalette::Active, QPalette::Window);
+    const auto mix = [share](float from, float to) { return (from * share) + (to * (1.0F - share)); };
+    return QColor::fromRgbF(mix(text.redF(), window.redF()), mix(text.greenF(), window.greenF()),
+                            mix(text.blueF(), window.blueF()));
 }
+
+} // namespace
+
+QColor mutedColor(const QWidget* /*widget*/)
+{
+    constexpr float kMuted = 0.6F;
+    return textTowardWindow(kMuted);
+}
+
+QColor borderColor()
+{
+    constexpr float kBorder = 0.12F;
+    return textTowardWindow(kBorder);
+}
+
+namespace {
+
+// The app style sheet sets every widget's text colour, which wins over a palette;
+// a widget style sheet wins over the app one. Kept in step with theme changes.
+class MutedLabel : public QObject
+{
+public:
+    explicit MutedLabel(QLabel* label)
+        : QObject(label)
+        , m_label(label)
+    {
+        label->installEventFilter(this);
+        apply();
+    }
+
+    bool eventFilter(QObject* watched, QEvent* event) override
+    {
+        if (watched == m_label &&
+            (event->type() == QEvent::ApplicationPaletteChange || event->type() == QEvent::PaletteChange ||
+             event->type() == QEvent::StyleChange)) {
+            apply();
+        }
+        return QObject::eventFilter(watched, event);
+    }
+
+private:
+    void apply()
+    {
+        const QString sheet = u"QLabel { color: %1; }"_s.arg(mutedColor(m_label).name());
+        if (m_label->styleSheet() != sheet) {
+            m_label->setStyleSheet(sheet);
+        }
+    }
+
+    QLabel* m_label;
+};
+
+} // namespace
 
 void makeMuted(QLabel* label)
 {
-    QPalette palette = label->palette();
-    palette.setColor(QPalette::WindowText, mutedColor(label));
-    label->setPalette(palette);
+    if (label->findChild<QObject*>(u"mutedLabel"_s, Qt::FindDirectChildrenOnly) != nullptr) {
+        return;
+    }
+    auto* muted = new MutedLabel(label);
+    muted->setObjectName(u"mutedLabel"_s);
+}
+
+void setRelativeFont(QWidget* widget, double scale, bool bold)
+{
+    QFont font = widget->font();
+    font.setPointSizeF(font.pointSizeF() * scale);
+    font.setBold(bold);
+    widget->setFont(font);
+}
+
+void fitToContent(QDialog* dialog, int width)
+{
+    dialog->setMinimumWidth(width);
+    dialog->layout()->activate();
+    const int height = dialog->layout()->hasHeightForWidth() ? dialog->layout()->totalHeightForWidth(width)
+                                                             : dialog->sizeHint().height();
+    dialog->resize(width, height);
+}
+
+QColor dangerColor(const QWidget* widget)
+{
+    const QPalette palette = widget != nullptr ? widget->palette() : QApplication::palette();
+    const bool dark = palette.color(QPalette::Window).lightness() < 128;
+    return dark ? QColor(0xff, 0x6b, 0x6b) : QColor(0xc0, 0x1c, 0x28);
 }
 
 QBoxLayout* setUpDialog(QDialog* dialog, const QString& title)

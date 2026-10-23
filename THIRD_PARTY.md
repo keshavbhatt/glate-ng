@@ -7,7 +7,7 @@ No new third-party dependency is added without an ADR in `DOCS/DECISIONS.md` and
 | Qt | 6.11 (Linux snap), 6.10 (Windows) | LGPL-3.0 | `kde-qt6-core24-sdk` snap (dev build), `kde-neon-6` extension (snap), official installer (Windows CI) | app |
 | QHotkey | vendored in `src/QHotkey` | BSD-3-Clause | copied into the tree | app (global shortcut) |
 | QtWaitingSpinner | vendored as `src/waitingspinnerwidget.*` | MIT | copied into the tree | app (busy spinner) |
-| Remix Icon | 2020 snapshot and 2.5.0, `src/icons/*-line.png`, `*-fill.png` | Apache-2.0 | copied into the tree | app (toolbar glyphs) |
+| Remix Icon | 2020 snapshot, 2.5.0 and 4.6.0 (`sparkling-line`), `src/icons/*-line.png`, `*-fill.png`, `text.png` | Apache-2.0 | copied into the tree | app (toolbar glyphs) |
 | X11, xcb | as shipped by the SDK / core24 | MIT | SDK snap (build), staged packages (snap) | QHotkey |
 | Mozilla translations inference engine | pinned commit in `cmake/FetchTranslationsEngine.cmake` | MPL-2.0 | fetched at configure time, built from source (ADR-003) | `modules/OfflineTranslation` |
 | marian (Mozilla fork) | in the engine tree | MIT | fetched with the engine | engine |

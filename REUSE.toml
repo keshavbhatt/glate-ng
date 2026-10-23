@@ -40,9 +40,9 @@ precedence = "override"
 SPDX-FileCopyrightText = ["2012-2014 Alexander Turkin", "2014 William Hallatt", "2015 Jacob Dawid"]
 SPDX-License-Identifier = "MIT"
 
-# UI glyphs from Remix Icon (Apache-2.0 at the versions used: a 2020 snapshot and 2.5.0).
+# UI glyphs from Remix Icon (Apache-2.0 at the versions used: a 2020 snapshot, 2.5.0 and 4.6.0 for sparkling-line).
 [[annotations]]
-path = ["src/icons/*-line.png", "src/icons/*-fill.png"]
+path = ["src/icons/*-line.png", "src/icons/*-fill.png", "src/icons/text.png"]
 precedence = "override"
 SPDX-FileCopyrightText = "Remix Design"
 SPDX-License-Identifier = "Apache-2.0"

@@ -29,6 +29,7 @@ public:
 
 private:
     void showIndex(int index);
+    void fitNotes();
 
     QList<Release> m_releases;
     QComboBox* m_picker = nullptr;

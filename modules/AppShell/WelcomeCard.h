@@ -20,11 +20,11 @@ public:
     struct Tip
     {
         QString iconPath;
-        QString text; // rich text allowed (<kbd> is drawn as bold)
+        QString text; // rich text allowed; <kbd>Key</kbd> is drawn as a key cap
     };
 
     WelcomeCard(const QString& title, const QString& subtitle, const QList<Tip>& tips,
-                const QString& buttonText, QWidget* parent = nullptr);
+                const QString& buttonText, const QString& buttonIconPath = {}, QWidget* parent = nullptr);
     ~WelcomeCard() override = default;
 
 Q_SIGNALS:
@@ -40,6 +40,7 @@ private:
     QList<Tip> m_tips;
     QWidget* m_inner = nullptr;
     QList<QLabel*> m_tipIcons;
+    QList<QLabel*> m_tipTexts;
     QPushButton* m_button = nullptr;
 };
 

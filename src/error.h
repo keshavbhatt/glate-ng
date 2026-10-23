@@ -25,12 +25,19 @@ public slots:
 signals:
   void reportRequested(const QString &detail);
 
+protected:
+  void changeEvent(QEvent *event) override;
+
 private slots:
   void on_ok_clicked();
 
 private:
   Ui::Error *ui;
   QPushButton *m_report = nullptr;
+  void restyle();
+
+  QString m_heading;
+  QString m_explanation;
   QString m_detail;
 };
 
