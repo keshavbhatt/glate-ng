@@ -6,7 +6,7 @@ No new third-party dependency is added without an ADR in `DOCS/DECISIONS.md` and
 |---|---|---|---|---|
 | Qt | 6.11 (Linux snap), 6.10 (Windows) | LGPL-3.0 | `kde-qt6-core24-sdk` snap (dev build), `kde-neon-6` extension (snap), official installer (Windows, by hand) | app |
 | Qt DBus | with Qt (Linux only) | LGPL-3.0 | as Qt | `modules/GlobalShortcut` (desktop portal, ADR-009) |
-| KtechpitApps | `v1.0.0` tag | MIT | `git subtree` of github.com/keshavbhatt/ktechpit-apps in `modules/KtechpitApps` (ADR-010) | app (About: more apps from Ktechpit) |
+| KtechpitApps | `v1.0.1` tag | MIT | `git subtree` of github.com/keshavbhatt/ktechpit-apps in `modules/KtechpitApps` (ADR-010) | app (About: more apps from Ktechpit) |
 | QtWaitingSpinner | vendored as `src/waitingspinnerwidget.*` | MIT | copied into the tree | app (busy spinner) |
 | Lucide icons | rewrite kit snapshot, as in Omnidict | ISC (Feather-derived ones also MIT) | copied with the kit's `icons/pull.sh` into `src/icons/ui/`, notice in `LICENSE` there (ADR-011) | app (UI glyphs) |
 | Qt Svg | with Qt | LGPL-3.0 | as Qt | `modules/AppShell` (draws the glyphs, ADR-011) |
