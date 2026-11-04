@@ -66,7 +66,6 @@ qt_add_executable(glate
     history_item.ui
     linebyline.ui
     mainwindow.ui
-    settings.ui
     sharewidget.ui
     slider.ui
     textoptionform.ui

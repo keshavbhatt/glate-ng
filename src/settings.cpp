@@ -1,156 +1,405 @@
 #include "settings.h"
 
 #include "licenseservice.h"
-#include "ui_settings.h"
 #include "utils.h"
 
-#include <QGuiApplication>
-#include <QShortcut>
-#include <QSystemTrayIcon>
-
 #include <AppTheme.h>
+#include <ShellStyle.h>
 #include <ThemeController.h>
 #include <WindowChrome.h>
-#include <ShellStyle.h>
 
+#include <QApplication>
+#include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QCoreApplication>
-#include <QFormLayout>
-#include <QGroupBox>
+#include <QEvent>
+#include <QFrame>
 #include <QHBoxLayout>
+#include <QKeySequenceEdit>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
-#include <QStyle>
-#include <QPushButton>
+#include <QScrollArea>
+#include <QShortcut>
 #include <QSignalBlocker>
+#include <QStyle>
+#include <QSystemTrayIcon>
 #include <QVBoxLayout>
+
+namespace {
+// Fusion 2 is the only theme; main.cpp moves the old appearance/mode here.
+constexpr auto kKeyMode = "theme/mode";        // system | light | dark
+constexpr auto kKeyCsd = "appearance/csd";     // bool
+constexpr auto kKeyUiLanguage = "ui_language"; // system | locale code
+
+const QStringList kModes = {QStringLiteral("system"), QStringLiteral("light"),
+                            QStringLiteral("dark")};
+
+bool isDark(const QWidget *widget) {
+  return widget->palette().color(QPalette::Window).lightness() < 128;
+}
+} // namespace
 
 Settings::Settings(QWidget *parent, glate::shortcut::GlobalShortcut *shortcut,
                    ThemeController *theme)
-    : QWidget(parent), ui(new Ui::Settings), m_theme(theme) {
-  ui->setupUi(this);
-  { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
-  m_shortcut = shortcut;
-
+    : QWidget(parent), m_shortcut(shortcut), m_theme(theme) {
   setWindowTitle(tr("Glate | Settings"));
-  buildAppearanceSection();
-  buildOfflineSection();
+  setMinimumWidth(460);
+  resize(540, 660);
+  auto *esc = new QShortcut(Qt::Key_Escape, this);
+  connect(esc, &QShortcut::activated, this, [this] { close(); });
 
-  // Populate voice combo from central voice list
-  ui->voiceGenderGlobal->clear();
-  for (const VoiceOption &v : utils::availableVoices())
-    ui->voiceGenderGlobal->addItem(v.displayName);
+  // The page scrolls when the window is shorter than it.
+  auto *scroll = new QScrollArea(this);
+  scroll->setFrameShape(QFrame::NoFrame);
+  scroll->setWidgetResizable(true);
+  scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  auto *pageWidget = new QWidget(scroll);
+  pageWidget->setObjectName(QStringLiteral("settingsPage"));
+  auto *page = new QVBoxLayout(pageWidget);
+  page->setContentsMargins(20, 16, 20, 20);
+  page->setSpacing(6);
+  buildTranslation(page);
+  buildQuickTranslate(page);
+  buildAppearance(page);
+  buildGeneral(page);
+  page->addStretch(1);
+  scroll->setWidget(pageWidget);
 
-  buildShortcutRow();
-  readSettings();
+  auto *outer = new QVBoxLayout(this);
+  outer->setContentsMargins(0, 0, 0, 0);
+  outer->addWidget(scroll);
 
-  connect(ui->voiceGenderGlobal, &QComboBox::currentIndexChanged, this,
-          [=](int index) { settings.setValue("voiceGender", index); });
+  applyStyles();
+  updateShortcutRow();
+}
 
-  // The radios' holder would otherwise paint the window colour over the group box.
-  ui->closeBehaviorWidget->setAttribute(Qt::WA_TranslucentBackground);
-  ui->closeBehaviorWidget->setStyleSheet(
-      QStringLiteral("#closeBehaviorWidget { background: transparent; }"));
+// ── Building blocks ─────────────────────────────────────────────────────────
 
-  // The two radios are mutually exclusive; the tray radio's state is the single
-  // source of truth for the "closeToTray" flag (checked = minimize, unchecked =
-  // quit), so one connection covers both selections.
-  connect(ui->closeTrayRadio, &QRadioButton::toggled, this, [=](bool checked) {
-    settings.setValue("closeToTray", checked);
+QVBoxLayout *Settings::addSection(QVBoxLayout *page, const QString &title) {
+  auto *heading = new QLabel(title.toUpper(), this);
+  glate::shell::setRelativeFont(heading, 0.85, true);
+  glate::shell::makeMuted(heading);
+  heading->setContentsMargins(2, page->count() == 0 ? 0 : 14, 0, 4);
+  page->addWidget(heading);
+
+  auto *card = new QFrame(this);
+  card->setObjectName(QStringLiteral("settingsCard"));
+  m_cards.append(card);
+  auto *rows = new QVBoxLayout(card);
+  rows->setContentsMargins(0, 0, 0, 0);
+  rows->setSpacing(0);
+  page->addWidget(card);
+  return rows;
+}
+
+QWidget *Settings::addRow(QVBoxLayout *card, const QString &title,
+                          const QString &hint, QWidget *control,
+                          QLabel **hintOut) {
+  auto *row = new QWidget(this);
+  row->setObjectName(QStringLiteral("settingsRow"));
+  // A line above every row but the first of its card.
+  if (card->count() > 0)
+    row->setProperty("separated", true);
+  auto *layout = new QHBoxLayout(row);
+  layout->setContentsMargins(14, 10, 14, 10);
+  layout->setSpacing(12);
+
+  auto *text = new QVBoxLayout;
+  text->setSpacing(2);
+  auto *titleLabel = new QLabel(title, row);
+  titleLabel->setWordWrap(true);
+  text->addWidget(titleLabel);
+  QLabel *hintLabel = nullptr;
+  if (!hint.isEmpty() || hintOut != nullptr) {
+    hintLabel = new QLabel(hint, row);
+    hintLabel->setWordWrap(true);
+    glate::shell::setRelativeFont(hintLabel, 0.9);
+    glate::shell::makeMuted(hintLabel);
+    text->addWidget(hintLabel);
+  }
+  layout->addLayout(text, 1);
+  if (control != nullptr)
+    layout->addWidget(control, 0, Qt::AlignVCenter);
+  card->addWidget(row);
+  if (hintOut != nullptr)
+    *hintOut = hintLabel;
+  return row;
+}
+
+QWidget *Settings::segmented(const QStringList &labels, QButtonGroup *group) {
+  auto *holder = new QWidget(this);
+  holder->setObjectName(QStringLiteral("segmented"));
+  m_segments.append(holder);
+  auto *layout = new QHBoxLayout(holder);
+  layout->setContentsMargins(0, 0, 0, 0);
+  layout->setSpacing(0);
+  for (int i = 0; i < labels.size(); ++i) {
+    auto *button = new QPushButton(labels.at(i), holder);
+    button->setCheckable(true);
+    button->setCursor(Qt::PointingHandCursor);
+    button->setProperty("segment", i == 0                   ? "first"
+                                   : i == labels.size() - 1 ? "last"
+                                                            : "middle");
+    group->addButton(button, i);
+    layout->addWidget(button);
+  }
+  group->setExclusive(true);
+  return holder;
+}
+
+// ── Sections ────────────────────────────────────────────────────────────────
+
+void Settings::buildTranslation(QVBoxLayout *page) {
+  QVBoxLayout *card = addSection(page, tr("Translation"));
+
+  // Translate offline, with a PRO tag after the title.
+  m_offlineCheckBox = new QCheckBox(this);
+  m_offlineCheckBox->setToolTip(tr("Pro feature"));
+  QWidget *offlineRow = addRow(
+      card, tr("Translate offline"),
+      tr("On this computer, with downloaded languages. Your text never "
+         "leaves your device."),
+      m_offlineCheckBox);
+  auto *textColumn =
+      qobject_cast<QVBoxLayout *>(offlineRow->layout()->itemAt(0)->layout());
+  if (textColumn != nullptr) {
+    QWidget *title = textColumn->itemAt(0)->widget();
+    textColumn->removeWidget(title);
+    auto *titleLine = new QHBoxLayout;
+    titleLine->setSpacing(6);
+    auto *badge = new QLabel(tr("PRO"), offlineRow);
+    glate::shell::setRelativeFont(badge, 0.75, true);
+    m_badges.append(badge);
+    titleLine->addWidget(title);
+    titleLine->addWidget(badge);
+    titleLine->addStretch(1);
+    textColumn->insertLayout(0, titleLine);
+  }
+  m_offlineCheckBox->setChecked(settings.value(kKeyOfflineMode, false).toBool());
+  connect(m_offlineCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+    if (checked &&
+        !LicenseService::instance()->checkAccess(tr("Offline translation"))) {
+      const QSignalBlocker block(m_offlineCheckBox);
+      m_offlineCheckBox->setChecked(false);
+      return;
+    }
+    settings.setValue(kKeyOfflineMode, checked);
+    emit offlineModeChanged(checked);
   });
 
-  if (!QSystemTrayIcon::isSystemTrayAvailable()) {
-    ui->closeQuitRadio->setChecked(true);
-    ui->closeTrayRadio->setEnabled(false);
-    ui->closeTrayRadio->setToolTip(
-        tr("System tray is not available in this session."));
-    settings.setValue("closeToTray", false);
+  auto *manage = new QPushButton(tr("Manage languages..."), this);
+  connect(manage, &QPushButton::clicked, this,
+          &Settings::offlineLanguagesRequested);
+  QWidget *languagesRow =
+      addRow(card, tr("Offline languages"), QString(), manage, &m_offlineSummary);
+  m_offlineSummary->hide();
+  m_offlineRows = {offlineRow, languagesRow};
+
+  m_voiceCombo = new QComboBox(this);
+  m_voiceCombo->setFixedWidth(200);
+  for (const VoiceOption &voice : utils::availableVoices())
+    m_voiceCombo->addItem(voice.displayName);
+  m_voiceCombo->setCurrentIndex(settings.value("voiceGender", 0).toInt());
+  connect(m_voiceCombo, &QComboBox::currentIndexChanged, this,
+          [this](int index) { settings.setValue("voiceGender", index); });
+  addRow(card, tr("Reading voice"), tr("Used when Glate reads text aloud."),
+         m_voiceCombo);
+}
+
+void Settings::buildQuickTranslate(QVBoxLayout *page) {
+  QVBoxLayout *card = addSection(page, tr("Quick Translate"));
+
+  m_quickCheckBox = new QCheckBox(this);
+  addRow(card, tr("Translate selected text from any app"),
+         tr("Select text anywhere, then press the keys."), m_quickCheckBox);
+
+  auto *keys = new QWidget(this);
+  keys->setObjectName(QStringLiteral("settingsControl"));
+  auto *keysLayout = new QHBoxLayout(keys);
+  keysLayout->setContentsMargins(0, 0, 0, 0);
+  keysLayout->setSpacing(8);
+  m_keyEdit = new QKeySequenceEdit(keys);
+  m_keyEdit->setMinimumWidth(150);
+  m_shortcutButton = new QPushButton(keys);
+  keysLayout->addWidget(m_keyEdit);
+  keysLayout->addWidget(m_shortcutButton);
+  addRow(card, tr("Keys"), QString(), keys);
+
+  // The state line runs the full width under the keys.
+  m_shortcutHint = new QLabel(this);
+  m_shortcutHint->setObjectName(QStringLiteral("settingsRow"));
+  m_shortcutHint->setWordWrap(true);
+  m_shortcutHint->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  m_shortcutHint->setContentsMargins(14, 0, 14, 10);
+  glate::shell::setRelativeFont(m_shortcutHint, 0.9);
+  card->addWidget(m_shortcutHint);
+
+  // Quick Translate: on by default, Ctrl+Shift+Space.
+  QKeySequence keySequence(settings.value("quicktrans_shortcut").toString());
+  if (keySequence.isEmpty())
+    keySequence = QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Space);
+  const bool quick = settings.value("quicktrans", true).toBool();
+  m_keyEdit->setKeySequence(keySequence);
+  m_quickCheckBox->setChecked(quick);
+  if (m_shortcut != nullptr) {
+    m_shortcut->setKeys(keySequence);
+    m_shortcut->setEnabled(quick);
+    connect(m_shortcut, &glate::shortcut::GlobalShortcut::stateChanged, this,
+            &Settings::updateShortcutRow);
   }
 
-  connect(ui->quickResultCheckBox, &QCheckBox::toggled, this, [this](bool on) {
+  connect(m_quickCheckBox, &QCheckBox::toggled, this, [this](bool on) {
     settings.setValue("quicktrans", on);
     if (m_shortcut != nullptr)
       m_shortcut->setEnabled(on);
     updateShortcutRow();
   });
-  connect(ui->keySequenceEdit, &QKeySequenceEdit::keySequenceChanged, this,
+  connect(m_keyEdit, &QKeySequenceEdit::keySequenceChanged, this,
           &Settings::setShortcut);
-
-  ui->dark->setChecked(settings.value("theme", "dark").toString() == "dark");
-  ui->light->setChecked(settings.value("theme").toString() == "light");
-
+  connect(m_shortcutButton, &QPushButton::clicked, this, [this] {
+    if (m_shortcut == nullptr)
+      return;
+    if (m_shortcut->canConfigure())
+      m_shortcut->configure();
+    else
+      m_shortcut->retry();
+  });
 }
 
-Settings::~Settings() { delete ui; }
+void Settings::buildAppearance(QVBoxLayout *page) {
+  QVBoxLayout *card = addSection(page, tr("Appearance"));
 
-void Settings::setShortcut(const QKeySequence &sequence) {
-  settings.setValue("quicktrans_shortcut", sequence);
-  if (m_shortcut != nullptr)
-    m_shortcut->setKeys(sequence);
+  m_modeGroup = new QButtonGroup(this);
+  QWidget *modes =
+      segmented({tr("System"), tr("Light"), tr("Dark")}, m_modeGroup);
+  const int mode =
+      kModes.indexOf(settings.value(kKeyMode, "system").toString());
+  m_modeGroup->button(qMax(0, mode))->setChecked(true);
+  connect(m_modeGroup, &QButtonGroup::idClicked, this, [this](int id) {
+    const QString value = kModes.value(id, QStringLiteral("system"));
+    settings.setValue(kKeyMode, value);
+    if (m_theme != nullptr)
+      m_theme->setMode(AppTheme::modeFromString(value));
+  });
+  addRow(card, tr("Theme"), QString(), modes);
+
+  m_csdCheckBox = new QCheckBox(this);
+  m_csdCheckBox->setChecked(
+      settings.value(kKeyCsd, WindowChrome::defaultEnabled()).toBool());
+  connect(m_csdCheckBox, &QCheckBox::toggled, this, [this](bool on) {
+    settings.setValue(kKeyCsd, on);
+    promptRestartRequiredDialog();
+  });
+  addRow(card, tr("Use Glate's own title bar"), tr("Applies after a restart."),
+         m_csdCheckBox);
 }
 
-void Settings::readSettings() {
+void Settings::buildGeneral(QVBoxLayout *page) {
+  QVBoxLayout *card = addSection(page, tr("General"));
 
-  // Quick Translate: on by default, Ctrl+Shift+Space.
-  QKeySequence keys(settings.value("quicktrans_shortcut").toString());
-  if (keys.isEmpty())
-    keys = QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Space);
-  const bool quick = settings.value("quicktrans", true).toBool();
-  {
-    const QSignalBlocker blockEdit(ui->keySequenceEdit);
-    const QSignalBlocker blockBox(ui->quickResultCheckBox);
-    ui->keySequenceEdit->setKeySequence(keys);
-    ui->quickResultCheckBox->setChecked(quick);
+  m_languageCombo = new QComboBox(this);
+  m_languageCombo->setFixedWidth(200);
+  m_languageCombo->addItem(tr("Follow system"), QStringLiteral("system"));
+  m_languageCombo->addItem(QStringLiteral("English"), QStringLiteral("en_IN"));
+  m_languageCombo->addItem(QStringLiteral("Deutsch"), QStringLiteral("de_DE"));
+  m_languageCombo->addItem(QStringLiteral("Français"), QStringLiteral("fr_FR"));
+  m_languageCombo->addItem(QStringLiteral("Português (Brasil)"),
+                           QStringLiteral("pt_BR"));
+  m_languageCombo->addItem(QStringLiteral("Italiano"), QStringLiteral("it_IT"));
+  m_languageCombo->setCurrentIndex(qMax(
+      0, m_languageCombo->findData(
+             settings.value(kKeyUiLanguage, "system").toString())));
+  connect(m_languageCombo, &QComboBox::currentIndexChanged, this, [this](int) {
+    settings.setValue(kKeyUiLanguage, m_languageCombo->currentData().toString());
+    promptRestartRequiredDialog();
+  });
+  addRow(card, tr("Language"), tr("Applies after a restart."), m_languageCombo);
+
+  // Closing the window: quit, or keep running in the tray. The tray button's
+  // state is the "closeToTray" flag.
+  m_closeGroup = new QButtonGroup(this);
+  QWidget *close = segmented({tr("Quits Glate"), tr("Keeps it in the tray")},
+                             m_closeGroup);
+  QAbstractButton *tray = m_closeGroup->button(1);
+  const bool trayAvailable = QSystemTrayIcon::isSystemTrayAvailable();
+  const bool closeToTray =
+      trayAvailable && settings.value("closeToTray", true).toBool();
+  m_closeGroup->button(closeToTray ? 1 : 0)->setChecked(true);
+  if (!trayAvailable) {
+    tray->setEnabled(false);
+    tray->setToolTip(tr("System tray is not available in this session."));
+    settings.setValue("closeToTray", false);
   }
-  if (m_shortcut != nullptr) {
-    m_shortcut->setKeys(keys);
-    m_shortcut->setEnabled(quick);
+  connect(m_closeGroup, &QButtonGroup::idClicked, this,
+          [this](int id) { settings.setValue("closeToTray", id == 1); });
+  addRow(card, tr("Closing the window"),
+         tr("Keep Glate in the system tray so Quick Translate keeps working."),
+         close);
+}
+
+// ── Styling ─────────────────────────────────────────────────────────────────
+
+// Colours come from the palette, so light and dark both follow the theme.
+void Settings::applyStyles() {
+  const bool dark = isDark(this);
+  const QColor card = dark ? QColor(0x1c, 0x1c, 0x1c) : QColor(0xff, 0xff, 0xff);
+  const QColor border = glate::shell::borderColor();
+  const QColor accent = palette().color(QPalette::Highlight);
+  const QColor accentText = palette().color(QPalette::HighlightedText);
+
+  const QString cardStyle =
+      QStringLiteral(
+          "#settingsCard { background: %1; border: 1px solid %2; "
+          "border-radius: 10px; }"
+          "#settingsRow, #settingsControl { background: transparent; }"
+          "#settingsRow[separated=\"true\"] { border-top: 1px solid %2; }")
+          .arg(card.name(), border.name());
+  for (QFrame *frame : std::as_const(m_cards))
+    frame->setStyleSheet(cardStyle);
+
+  const QString segmentStyle =
+      QStringLiteral(
+          "#segmented { background: transparent; }"
+          "#segmented QPushButton { border-radius: 0; padding: 5px 14px; }"
+          "#segmented QPushButton[segment=\"middle\"],"
+          "#segmented QPushButton[segment=\"last\"] { border-left: none; }"
+          "#segmented QPushButton[segment=\"first\"] {"
+          " border-top-left-radius: 6px; border-bottom-left-radius: 6px; }"
+          "#segmented QPushButton[segment=\"last\"] {"
+          " border-top-right-radius: 6px; border-bottom-right-radius: 6px; }"
+          "#segmented QPushButton:checked, #segmented QPushButton:checked:hover {"
+          " background: %1; color: %2; border-color: %1; }")
+          .arg(accent.name(), accentText.name());
+  for (QWidget *segment : std::as_const(m_segments))
+    segment->setStyleSheet(segmentStyle);
+
+  QColor soft = accent;
+  soft.setAlpha(dark ? 60 : 40);
+  const QString badgeStyle =
+      QStringLiteral("background: rgba(%1, %2, %3, %4); color: %5; "
+                     "border-radius: 6px; padding: 1px 6px;")
+          .arg(soft.red())
+          .arg(soft.green())
+          .arg(soft.blue())
+          .arg(soft.alpha())
+          .arg(dark ? accent.lighter(130).name() : accent.name());
+  for (QLabel *badge : std::as_const(m_badges))
+    badge->setStyleSheet(badgeStyle);
+}
+
+void Settings::changeEvent(QEvent *event) {
+  QWidget::changeEvent(event);
+  if (event->type() == QEvent::PaletteChange && m_shortcutHint != nullptr) {
+    applyStyles();
+    updateShortcutRow();
   }
-  updateShortcutRow();
-
-  // global TTS voice preference
-  ui->voiceGenderGlobal->setCurrentIndex(
-      settings.value("voiceGender", 0).toInt());
-
-  // close-to-tray behaviour
-  const bool closeToTray = settings.value("closeToTray", true).toBool();
-  ui->closeTrayRadio->setChecked(closeToTray);
-  ui->closeQuitRadio->setChecked(!closeToTray);
 }
 
-bool Settings::quickResultCheckBoxChecked() {
-  return ui->quickResultCheckBox->isChecked();
-}
-
-bool Settings::closeToTrayEnabled() const {
-  return ui->closeTrayRadio->isChecked();
-}
-
-QKeySequence Settings::keySequenceEditKeySequence() {
-  return ui->keySequenceEdit->keySequence();
-}
-
-void Settings::on_dark_toggled(bool checked) {
-  settings.setValue("theme", checked ? "dark" : "light");
-  emit themeToggled();
-}
-
-void Settings::on_light_toggled(bool checked) {
-  settings.setValue("theme", checked ? "light" : "dark");
-  emit themeToggled();
-}
-
-namespace {
-// Appearance settings keys (kept in sync with main.cpp / mainwindow.cpp).
-// Fusion 2 is the only theme; main.cpp moves the old appearance/mode here.
-constexpr auto kKeyMode = "theme/mode";          // system | light | dark
-constexpr auto kKeyCsd = "appearance/csd";       // bool
-constexpr auto kKeyUiLanguage = "ui_language";   // system | locale code
-} // namespace
+// ── Behaviour ───────────────────────────────────────────────────────────────
 
 void Settings::promptRestartRequiredDialog() {
   if (m_restartPromptOpen)
@@ -175,133 +424,19 @@ void Settings::promptRestartRequiredDialog() {
   qApp->quit();
 }
 
-void Settings::buildAppearanceSection() {
-  // The old dark/light radios (and their "Theme" label) are superseded by this
-  // richer section — hide them rather than delete (they live in the .ui form).
-  if (ui->dark)
-    ui->dark->hide();
-  if (ui->light)
-    ui->light->hide();
-  if (auto *lbl = findChild<QLabel *>("label"))
-    lbl->hide(); // the "Theme" label next to the old radios
-
-  auto *box = new QGroupBox(tr("Appearance"), this);
-  auto *form = new QFormLayout(box);
-  form->setContentsMargins(12, 8, 12, 12);
-  form->setSpacing(10);
-  form->setLabelAlignment(Qt::AlignLeft);
-  form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
-
-  // Appearance — light/dark, or follow the OS scheme live.
-  m_modeCombo = new QComboBox(box);
-  m_modeCombo->addItem(tr("Follow system"), QStringLiteral("system"));
-  m_modeCombo->addItem(tr("Light"), QStringLiteral("light"));
-  m_modeCombo->addItem(tr("Dark"), QStringLiteral("dark"));
-  form->addRow(tr("Appearance:"), m_modeCombo);
-
-  // UI language (applies on next launch).
-  m_languageCombo = new QComboBox(box);
-  m_languageCombo->addItem(tr("Follow system"), QStringLiteral("system"));
-  m_languageCombo->addItem(QStringLiteral("English"), QStringLiteral("en_IN"));
-  m_languageCombo->addItem(QStringLiteral("Deutsch"), QStringLiteral("de_DE"));
-  m_languageCombo->addItem(QStringLiteral("Français"), QStringLiteral("fr_FR"));
-  m_languageCombo->addItem(QStringLiteral("Português (Brasil)"), QStringLiteral("pt_BR"));
-  m_languageCombo->addItem(QStringLiteral("Italiano"), QStringLiteral("it_IT"));
-  m_languageCombo->setToolTip(
-      tr("Interface language. Change takes effect after restart."));
-  form->addRow(tr("Language:"), m_languageCombo);
-
-  // Client-side decoration (applies on restart).
-  m_csdCheckBox =
-      new QCheckBox(tr("Use the app's own title bar (custom decorations)"), box);
-  m_csdCheckBox->setToolTip(tr("Replaces the system title bar with the app's "
-                               "own. Takes effect after restart."));
-  form->addRow(QString(), m_csdCheckBox);
-
-  // Insert the section at the top of the settings layout.
-  if (auto *outer = qobject_cast<QVBoxLayout *>(layout()))
-    outer->insertWidget(0, box);
-
-  // ── Load current values ─────────────────────────────────────────────────
-  const QString mode = settings.value(kKeyMode, "system").toString();
-  const QString uiLanguage = settings.value(kKeyUiLanguage, "system").toString();
-  m_modeCombo->setCurrentIndex(qMax(0, m_modeCombo->findData(mode)));
-  m_languageCombo->setCurrentIndex(qMax(0, m_languageCombo->findData(uiLanguage)));
-  m_csdCheckBox->setChecked(
-      settings.value(kKeyCsd, WindowChrome::defaultEnabled()).toBool());
-
-  // ── Apply + persist on change (live, no restart) ─────────────────────────
-  auto applyTheme = [this]() {
-    settings.setValue(kKeyMode, m_modeCombo->currentData().toString());
-    if (m_theme)
-      m_theme->setMode(
-          AppTheme::modeFromString(m_modeCombo->currentData().toString()));
-  };
-
-  connect(m_modeCombo, &QComboBox::currentIndexChanged, this,
-          [applyTheme](int) { applyTheme(); });
-  connect(m_languageCombo, &QComboBox::currentIndexChanged, this, [this](int) {
-    settings.setValue(kKeyUiLanguage, m_languageCombo->currentData().toString());
-    promptRestartRequiredDialog();
-  });
-  connect(m_csdCheckBox, &QCheckBox::toggled, this,
-          [this](bool on) {
-            settings.setValue(kKeyCsd, on);
-            promptRestartRequiredDialog();
-          });
+bool Settings::closeToTrayEnabled() const {
+  return m_closeGroup->checkedId() == 1;
 }
 
-void Settings::buildShortcutRow() {
-  // The key field moves into a column with the Change button beside it and a
-  // line under it, in the grid cell it had.
-  auto *grid = qobject_cast<QGridLayout *>(ui->gridLayout);
-  auto *cell = new QWidget(this);
-  // Like the On close radios: no window colour over the group box.
-  cell->setObjectName(QStringLiteral("shortcutCell"));
-  cell->setAttribute(Qt::WA_TranslucentBackground);
-  cell->setStyleSheet(QStringLiteral(
-      "#shortcutCell, #shortcutHint { background: transparent; }"));
-  auto *column = new QVBoxLayout(cell);
-  column->setContentsMargins(0, 0, 0, 0);
-  column->setSpacing(4);
-  auto *row = new QHBoxLayout;
-  row->setSpacing(8);
-  grid->removeWidget(ui->keySequenceEdit);
-  row->addWidget(ui->keySequenceEdit, 1);
-  m_shortcutButton = new QPushButton(cell);
-  m_shortcutButton->setObjectName(QStringLiteral("shortcutButton"));
-  row->addWidget(m_shortcutButton);
-  column->addLayout(row);
-  m_shortcutHint = new QLabel(cell);
-  m_shortcutHint->setObjectName(QStringLiteral("shortcutHint"));
-  m_shortcutHint->setWordWrap(true);
-  m_shortcutHint->setTextInteractionFlags(Qt::TextSelectableByMouse);
-  glate::shell::setRelativeFont(m_shortcutHint, 0.9);
-  column->addWidget(m_shortcutHint);
-  grid->addWidget(cell, 0, 1);
-  // The switch lines up with the key field, not with the middle of the cell.
-  grid->setAlignment(ui->quickResultCheckBox, Qt::AlignTop);
-  ui->quickResultCheckBox->setMinimumHeight(
-      ui->keySequenceEdit->sizeHint().height());
-  ui->quickResultCheckBox->setToolTip(
-      tr("Translate the text selected in any app with a keyboard shortcut"));
-
-  connect(m_shortcutButton, &QPushButton::clicked, this, [this] {
-    if (m_shortcut == nullptr)
-      return;
-    if (m_shortcut->canConfigure())
-      m_shortcut->configure();
-    else
-      m_shortcut->retry();
-  });
+void Settings::setShortcut(const QKeySequence &sequence) {
+  settings.setValue("quicktrans_shortcut", sequence);
   if (m_shortcut != nullptr)
-    connect(m_shortcut, &glate::shortcut::GlobalShortcut::stateChanged, this,
-            &Settings::updateShortcutRow);
+    m_shortcut->setKeys(sequence);
 }
 
 void Settings::updateShortcutRow() {
   using glate::shortcut::GlobalShortcut;
-  const bool on = ui->quickResultCheckBox->isChecked();
+  const bool on = m_quickCheckBox->isChecked();
   const GlobalShortcut::State state =
       m_shortcut != nullptr && on ? m_shortcut->state()
                                   : GlobalShortcut::State::Off;
@@ -309,7 +444,6 @@ void Settings::updateShortcutRow() {
                       m_shortcut->method() == GlobalShortcut::Method::Portal;
   const bool none = m_shortcut == nullptr ||
                     m_shortcut->method() == GlobalShortcut::Method::None;
-  const QString app = QApplication::applicationName();
 
   QString hint;
   QString placeholder = tr("Press shortcut");
@@ -323,9 +457,9 @@ void Settings::updateShortcutRow() {
     hint = tr("Asking your desktop for the shortcut...");
     break;
   case GlobalShortcut::State::Active:
-    hint = portal ? tr("Your desktop manages this shortcut. Select text in any "
-                       "app, then press the keys.")
-                  : tr("Select text in any app, then press the keys.");
+    // The row above already says how to use it.
+    if (portal)
+      hint = tr("Your desktop manages these keys.");
     if (m_shortcut->canConfigure())
       button = tr("Change...");
     break;
@@ -361,16 +495,17 @@ void Settings::updateShortcutRow() {
 
   // On the portal the desktop owns the key: the field shows what it bound.
   const bool desktopKey = portal || none;
-  ui->keySequenceEdit->setEnabled(on && !desktopKey);
+  m_keyEdit->setEnabled(on && !desktopKey);
   if (desktopKey) {
-    const QSignalBlocker block(ui->keySequenceEdit);
-    const QString trigger = m_shortcut != nullptr ? m_shortcut->trigger() : QString();
-    ui->keySequenceEdit->setKeySequence(QKeySequence(trigger));
-    ui->keySequenceEdit->setToolTip(
-        trigger.isEmpty() ? QString()
-                          : tr("Set in your desktop's shortcut settings"));
+    const QSignalBlocker block(m_keyEdit);
+    const QString trigger =
+        m_shortcut != nullptr ? m_shortcut->trigger() : QString();
+    m_keyEdit->setKeySequence(QKeySequence(trigger));
+    m_keyEdit->setToolTip(trigger.isEmpty()
+                              ? QString()
+                              : tr("Set in your desktop's shortcut settings"));
   }
-  if (auto *field = ui->keySequenceEdit->findChild<QLineEdit *>())
+  if (auto *field = m_keyEdit->findChild<QLineEdit *>())
     field->setPlaceholderText(placeholder);
   m_shortcutButton->setVisible(!button.isEmpty());
   m_shortcutButton->setText(button);
@@ -379,74 +514,29 @@ void Settings::updateShortcutRow() {
   m_shortcutButton->style()->polish(m_shortcutButton);
   m_shortcutHint->setVisible(!hint.isEmpty());
   m_shortcutHint->setText(hint);
-  m_shortcutHint->setProperty("bad", bad);
   const QColor colour = bad ? glate::shell::dangerColor(this)
                             : glate::shell::mutedColor(this);
   m_shortcutHint->setStyleSheet(
-      QStringLiteral("color: %1;").arg(colour.name()));
+      QStringLiteral("#settingsRow { color: %1; background: transparent; }")
+          .arg(colour.name()));
 }
 
-void Settings::changeEvent(QEvent *event) {
-  QWidget::changeEvent(event);
-  if (event->type() == QEvent::PaletteChange && m_shortcutHint != nullptr)
-    updateShortcutRow();
-}
-
-void Settings::buildOfflineSection() {
-  auto *box = new QGroupBox(tr("Offline translation"), this);
-  m_offlineBox = box;
-  auto *column = new QVBoxLayout(box);
-  column->setContentsMargins(12, 8, 12, 12);
-  column->setSpacing(8);
-
-  m_offlineCheckBox = new QCheckBox(tr("Translate offline"), box);
-  m_offlineCheckBox->setToolTip(
-      tr("Translate on this computer with downloaded languages. "
-         "Your text never leaves your device. Pro feature."));
-  column->addWidget(m_offlineCheckBox);
-
-  auto *row = new QHBoxLayout;
-  m_offlineSummary = new QLabel(box);
-  m_offlineSummary->setEnabled(false);
-  auto *manage = new QPushButton(tr("Manage languages..."), box);
-  manage->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-  row->addWidget(m_offlineSummary, 1);
-  row->addWidget(manage);
-  column->addLayout(row);
-
-  // Directly under Appearance.
-  if (auto *outer = qobject_cast<QVBoxLayout *>(layout()))
-    outer->insertWidget(1, box);
-
-  m_offlineCheckBox->setChecked(settings.value(kKeyOfflineMode, false).toBool());
-
-  connect(m_offlineCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
-    if (checked && !LicenseService::instance()->checkAccess(tr("Offline translation"))) {
-      QSignalBlocker block(m_offlineCheckBox);
-      m_offlineCheckBox->setChecked(false);
-      return;
-    }
-    settings.setValue(kKeyOfflineMode, checked);
-    emit offlineModeChanged(checked);
-  });
-  connect(manage, &QPushButton::clicked, this,
-          &Settings::offlineLanguagesRequested);
-}
+// ── Offline, from MainWindow ────────────────────────────────────────────────
 
 void Settings::setOfflineAvailable(bool available) {
-  if (m_offlineBox)
-    m_offlineBox->setVisible(available);
+  for (QWidget *row : std::as_const(m_offlineRows))
+    row->setVisible(available);
 }
 
 void Settings::setOfflineSummary(const QString &summary) {
-  if (m_offlineSummary)
+  if (m_offlineSummary != nullptr) {
     m_offlineSummary->setText(summary);
+    m_offlineSummary->setVisible(!summary.isEmpty());
+  }
 }
 
 void Settings::setOfflineModeChecked(bool checked) {
-  if (!m_offlineCheckBox)
-    return;
-  QSignalBlocker block(m_offlineCheckBox);
+  const QSignalBlocker block(m_offlineCheckBox);
   m_offlineCheckBox->setChecked(checked);
   settings.setValue(kKeyOfflineMode, checked);
 }

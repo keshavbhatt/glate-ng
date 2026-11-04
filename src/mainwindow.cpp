@@ -470,9 +470,6 @@ void MainWindow::init_settings() {
                                    " | Settings");
   m_settingsWidget->setWindowFlag(Qt::Dialog);
   m_settingsWidget->setWindowModality(Qt::NonModal);
-  // Theme is now driven by the Settings → Appearance section directly through
-  // the ThemeController (the old dark/light radios are superseded), so there's
-  // nothing to handle on themeToggled here.
 }
 
 void MainWindow::quickTranslate(const QByteArray &activationToken) {
