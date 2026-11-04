@@ -683,3 +683,11 @@ QPushButton[iconOnly="true"]:hover    { background: rgba(0,0,0,0.06); }
 QPushButton[iconOnly="true"]:pressed  { background: rgba(0,0,0,0.10); }
 QPushButton[iconOnly="true"]:checked  { background: rgba(0,0,0,0.12); }
 QPushButton[iconOnly="true"]:disabled { background: transparent; }
+
+/* "More apps from Ktechpit" cards (modules/KtechpitApps): a panel with a hairline. */
+QFrame#ktechpitAppCard {
+    background-color: #FFFFFF;
+    border: 1px solid #DEE1E7;
+    border-radius: 12px;
+}
+QFrame#ktechpitAppCard:hover { border-color: #C5CAD3; }
