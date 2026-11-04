@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Offline fallback when Google limits requests</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script></head>
+<body>
+<h2 style="max-width:960px;margin:16px auto 8px">Option A (approved 2026-11-04): translate on this device right away</h2>
+<div class="window" data-main data-caption="1" data-caption-text="Google is limiting requests, so this was translated on this device, English to Spanish" data-src="Good morning! The train to the old town leaves from platform 4 at half past nine." data-result="¡Buen día! El tren que va al casco antiguo sale del andén 4 a las nueve y media.">
+  <span class="pin" style="right:24px;bottom:120px">1</span>
+</div>
+
+<h2 style="max-width:960px;margin:32px auto 8px">Option B: ask first (not chosen)</h2>
+<div class="window" data-main data-src="Good morning! The train to the old town leaves from platform 4 at half past nine." data-result="">
+  <div class="overlay"><div class="dialog" style="width:460px">
+    <div class="dtitle">Glate | Error<span class="x">&#x2715;</span></div>
+    <div class="dbody">
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--danger)"><svg class="ic" style="width:28px;height:28px"><use href="#i-alert"/></svg></span>
+      <div><b>Could not translate</b><p class="small muted" style="margin-top:4px">Google is limiting requests from this computer for now. English to Spanish is installed on this device, so you can translate it here instead.</p></div></div>
+      <div class="mono" style="font-size:11px;white-space:pre-wrap">Error transferring https://host/translate_a/single?... - server replied with status code 429</div>
+    </div>
+    <div class="dfoot"><span class="btn"><svg class="ic s"><use href="#i-bug"/></svg>Report a bug...</span><span class="grow"></span><span class="btn">Cancel</span><span class="btn primary"><svg class="ic s"><use href="#i-laptop"/></svg>Translate on this device</span></div>
+  </div></div>
+  <span class="pin" style="left:calc(50% + 120px);bottom:150px">2</span>
+</div>
+
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Option A.</b> When Google answers 429 and the language pair is installed for offline use, Glate translates on this device straight away, with no dialog. The usual offline caption under the result says why: "Google is limiting requests, so this was translated on this device, English to Spanish". Offline mode in Settings stays off, so the next translation tries Google again. History marks the entry as offline, like any offline result.</li>
+  <li><b>Option B.</b> The 429 error gets a "Translate on this device" button. Nothing happens until the user clicks it.</li>
+  <li><b>When there is no fallback</b> (both options): the source is Auto Detect (offline needs a known source language), the pair is not installed, or the user has no Pro licence. Then the 429 error approved on 2026-11-04 shows unchanged. Free users see no hint about offline translation (Pro) in that error.</li>
+  <li><b>No waiting period.</b> Google's 429 carries no Retry-After header, so there is no wait time to show. Glate keeps sending a request only when the user asks for one.</li>
+</ol></div>
+</body></html>

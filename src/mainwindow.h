@@ -108,6 +108,8 @@ private slots:
   void refreshOfflineIndicator();
   void updateOfflineCaption();
   void updateTranslateToolTip();
+  void showRateLimitError(const QString &detail);
+  bool fallBackOffline(const QString &detail);
   void updateWelcomeCard();
   void positionPaneOverlays();
   void textSelectionChanged(QTextEdit *editor);
@@ -197,6 +199,10 @@ private:
   QMenu                     *m_helpMenu       = nullptr;
   bool                       m_nextResultOffline = false; // set before processTranslation()
   bool                       m_resultOffline  = false;    // what src2 shows now
+  bool                       m_nextResultFallback = false; // offline because Google limited requests
+  bool                       m_resultFallback = false;
+  QString                    m_onlineText;     // text of the last online request
+  QString                    m_fallbackDetail; // set while an offline fallback runs
   QString                    m_resultPair;                // "English to Spanish"
   QString                    m_pendingOfflineText;        // waits for the licence status
   QString                    m_resultPlaceholder;         // src2's, hidden under the welcome card

@@ -37,6 +37,13 @@ void Request::get(const QUrl &url) {
           });
 
   QNetworkRequest request(url);
+  // Says who is asking, the same way the speech downloader does.
+  const QString appVersion = QCoreApplication::applicationVersion().isEmpty()
+                                 ? QStringLiteral("unknown")
+                                 : QCoreApplication::applicationVersion();
+  request.setHeader(
+      QNetworkRequest::UserAgentHeader,
+      QStringLiteral("Mozilla/5.0 (X11; Linux x86_64) Glate/%1").arg(appVersion));
   m_netwManager->get(request);
   emit requestStarted();
 }

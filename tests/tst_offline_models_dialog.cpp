@@ -92,7 +92,8 @@ private Q_SLOTS:
         const int german = rowOf(table, QStringLiteral("German"));
         QCOMPARE(dialog.directionsFor(QStringLiteral("de")),
                  (QStringList{QStringLiteral("de-en"), QStringLiteral("en-de")}));
-        auto* button = qobject_cast<QPushButton*>(table->cellWidget(german, 3));
+        auto* button = table->cellWidget(german, 3)->findChild<QPushButton*>();
+        QVERIFY(button != nullptr);
         QCOMPARE(button->text(), QStringLiteral("Download"));
 
         const QSignalSpy installed(&manager, &ModelManager::installed);

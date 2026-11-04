@@ -1,7 +1,7 @@
 // Draws Glate's main window into <div class="window" data-*>, so each mock only writes what
 // is new. data-src / data-result: pane text ("" shows the placeholder); data-offline="1":
 // offline mode on (pill and translate-button dot); data-caption="1": the "Translated on
-// this device" caption; data-welcome="1": the first-run card in the result pane.
+// this device" caption (data-caption-text replaces its text); data-welcome="1": the first-run card in the result pane.
 // Nothing here ships in the app.
 (function () {
   const ic = (n, s) => `<svg class="ic${s ? ' s' : ''}"><use href="#i-${n}"/></svg>`;
@@ -25,7 +25,7 @@
         <span class="btn">${ic('sparkles', 1)}Take the tour</span>
       </div></div>` : '';
     const caption = d.caption === '1'
-      ? `<div class="caption">${ic('laptop', 1)}Translated on this device, English to Spanish</div>` : '';
+      ? `<div class="caption">${ic('laptop', 1)}${d.captionText ?? 'Translated on this device, English to Spanish'}</div>` : '';
     w.innerHTML = `
       <div class="titlebar"><div class="lights"><i></i><i></i><i></i></div><span class="appicon"></span><div class="title">Glate</div><div class="wc"><span>&#x2212;</span><span>&#x25A1;</span><span>&#x2715;</span></div></div>
       <div class="bar top">

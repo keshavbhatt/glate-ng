@@ -443,6 +443,7 @@ void MainWindow::init_history() {
               ui->src1->setText(src1);
               ui->src2->setText(src2);
               m_resultOffline = historyItemMeta.value(4) == QLatin1String("offline");
+              m_resultFallback = false;
               m_resultPair = tr("%1 to %2").arg(from, to);
               updateOfflineCaption();
               ui->lang1->setCurrentText(from);
@@ -714,6 +715,7 @@ MainWindow::~MainWindow() {
 void MainWindow::translate_clicked() {
   // clear processor vars
   m_currentTranslationData.clear();
+  m_fallbackDetail.clear(); // a fallback still running belongs to the last text
   ui->src2->clear();
 
   if (m_request != nullptr) {
@@ -742,15 +744,16 @@ void MainWindow::translate_clicked() {
       m_loader->stop();
       const QString detail = glate::shell::redactUrlQueries(errorString);
       qCWarning(glate::shell::lcNetwork).noquote() << "translation failed:" << detail;
-      // 429: Google throttles this address for a while; the connection is fine.
-      const QString explanation =
-          httpStatus == 429
-              ? tr("Google is limiting requests from this computer for now. "
-                   "Wait a few minutes and try again, or switch to offline "
-                   "translation in Settings.")
-              : tr("The translation service did not answer. Check your "
-                   "connection and try again.");
-      showError(tr("Could not translate"), explanation, detail);
+      if (httpStatus == 429 && fallBackOffline(detail))
+        return;
+      if (httpStatus == 429) {
+        showRateLimitError(detail);
+        return;
+      }
+      showError(tr("Could not translate"),
+                tr("The translation service did not answer. Check your "
+                   "connection and try again."),
+                detail);
     });
 
     const QString src1 = ui->src1->toPlainText();
@@ -783,6 +786,7 @@ void MainWindow::translate_clicked() {
     if (urlStr.isEmpty()) {
       showError("Invalid Input.");
     } else {
+      m_onlineText = src1;
       m_request->get(QUrl(urlStr));
       m_translationId = utils::generateRandomId(20);
     }
@@ -838,7 +842,9 @@ void MainWindow::processTranslation(const QString &reply) {
   // scroll to top
   ui->src2->verticalScrollBar()->triggerAction(QScrollBar::SliderToMinimum);
   m_resultOffline = m_nextResultOffline;
+  m_resultFallback = m_resultOffline && m_nextResultFallback;
   m_nextResultOffline = false;
+  m_nextResultFallback = false;
   m_resultPair = tr("%1 to %2").arg(getLangName(getSourceLang()),
                                      getLangName(getTransLang()));
   updateOfflineCaption();
@@ -911,6 +917,7 @@ void MainWindow::on_clear_clicked() {
   m_translationId.clear();
   m_lineByLine->clearData();
   m_offlineRequest = 0; // drop a result still on its way
+  m_fallbackDetail.clear();
 }
 
 void MainWindow::on_paste_clicked() const {
@@ -1331,6 +1338,7 @@ void MainWindow::initOffline() {
             m_translationId = utils::generateRandomId(20);
             saveByTransId(m_translationId, reply);
             m_nextResultOffline = true;
+            m_nextResultFallback = !std::exchange(m_fallbackDetail, QString()).isNull();
             processTranslation(reply);
             m_settings.setValue("lastTranslation", m_translationId);
           });
@@ -1341,6 +1349,11 @@ void MainWindow::initOffline() {
             m_offlineRequest = 0;
             m_loader->stop();
             qCWarning(glate::shell::lcOffline).noquote() << "translation failed:" << message;
+            const QString fallbackDetail = std::exchange(m_fallbackDetail, QString());
+            if (!fallbackDetail.isNull()) {
+              showRateLimitError(fallbackDetail);
+              return;
+            }
             showError(tr("Could not translate offline"), QString(), message);
           });
 
@@ -1350,6 +1363,39 @@ void MainWindow::initOffline() {
 bool MainWindow::offlineModeEnabled() const {
   return glate::offline::TranslationEngine::isAvailable() &&
          m_settings.value(Settings::kKeyOfflineMode, false).toBool();
+}
+
+// 429: Google throttles this address for a while; the connection is fine.
+void MainWindow::showRateLimitError(const QString &detail) {
+  showError(tr("Could not translate"),
+            tr("Google is limiting requests from this computer for now. "
+               "Wait a few minutes and try again, or switch to offline "
+               "translation in Settings."),
+            detail);
+}
+
+// When Google limits requests, translate the same text on this device if that
+// needs no question: Pro, a chosen source language and the pair installed.
+// Offline mode stays off, so the next translation tries Google again.
+bool MainWindow::fallBackOffline(const QString &detail) {
+  using glate::offline::TranslationPlan;
+  if (!glate::offline::TranslationEngine::isAvailable() || !m_licenseKnown ||
+      !m_hasPremiumAccess || m_onlineText.trimmed().isEmpty())
+    return false;
+  const QString from = getSourceLang();
+  const QString to = getTransLang();
+  if (m_offline->plan(from, to).status != TranslationPlan::Status::Ready)
+    return false;
+  qCInfo(glate::shell::lcOffline) << "rate limited online; translating" << from
+                                  << "->" << to << "on this device";
+  // Set first: if the engine refuses, its failed() follows and shows the
+  // rate-limit error from this detail.
+  m_fallbackDetail = detail;
+  m_loader->start();
+  m_offlineRequest = m_offline->translate(from, to, m_onlineText);
+  if (m_offlineRequest == 0)
+    m_loader->stop();
+  return true;
 }
 
 void MainWindow::translateOffline(const QString &text) {
@@ -1508,8 +1554,10 @@ void MainWindow::initShell() {
   ui->src2->viewport()->installEventFilter(this);
   connect(ui->src1, &QTextEdit::textChanged, this, [this]() { updateWelcomeCard(); });
   connect(ui->src2, &QTextEdit::textChanged, this, [this]() {
-    if (ui->src2->document()->isEmpty())
+    if (ui->src2->document()->isEmpty()) {
       m_resultOffline = false;
+      m_resultFallback = false;
+    }
     updateOfflineCaption();
     updateWelcomeCard();
   });
@@ -1584,7 +1632,12 @@ void MainWindow::updateOfflineCaption() {
         QStringLiteral("<img src=\"data:image/png;base64,%1\" width=14 height=14> "
                        "<span style=\"color:%2\">%3</span>")
             .arg(QString::fromLatin1(png.toBase64()), muted.name(),
-                 tr("Translated on this device, %1").arg(m_resultPair).toHtmlEscaped()));
+                 (m_resultFallback
+                      ? tr("Google is limiting requests, so this was translated "
+                           "on this device, %1")
+                      : tr("Translated on this device, %1"))
+                     .arg(m_resultPair)
+                     .toHtmlEscaped()));
   }
   m_offlineCaption->setVisible(show);
   positionPaneOverlays();
