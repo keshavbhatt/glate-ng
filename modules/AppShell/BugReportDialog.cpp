@@ -1,5 +1,6 @@
 #include "BugReportDialog.h"
 
+#include "ShellIcons.h"
 #include "ShellStyle.h"
 
 #include <QApplication>
@@ -100,15 +101,18 @@ void BugReportDialog::buildForm(QBoxLayout* body)
 
 void BugReportDialog::buildFooter(QBoxLayout* footer)
 {
-    auto* copy = new QPushButton(QIcon(u":/icons/file-copy-line.png"_s), tr("Copy details"), this);
+    auto* copy = new QPushButton(tr("Copy details"), this);
+    icons::bind(copy, u"copy"_s);
     connect(copy, &QPushButton::clicked, this, &BugReportDialog::copyDetails);
     footer->addWidget(copy);
     footer->addStretch(1);
-    auto* mail = new QPushButton(QIcon(u":/icons/mail-line.png"_s), tr("Send by email"), this);
+    auto* mail = new QPushButton(tr("Send by email"), this);
+    icons::bind(mail, u"mail"_s);
     mail->setObjectName(u"sendMail"_s);
     connect(mail, &QPushButton::clicked, this, &BugReportDialog::openMail);
     footer->addWidget(mail);
-    auto* issue = new QPushButton(QIcon(u":/icons/external-link-line.png"_s), tr("Open GitHub issue"), this);
+    auto* issue = new QPushButton(tr("Open GitHub issue"), this);
+    icons::bind(issue, u"external-link"_s, icons::Tone::OnAccent); // on the accent fill
     issue->setObjectName(u"openIssue"_s);
     issue->setDefault(true);
     issue->setProperty("accent", true);
@@ -155,10 +159,9 @@ void BugReportDialog::openMail()
 void BugReportDialog::restyleDisclosure()
 {
     // A link-like toggle in the accent colour with a chevron, as in the mock.
-    const QColor accent = palette().color(QPalette::Highlight);
-    const QString chevron =
-        m_disclosure->isChecked() ? u":/icons/arrow-down-s-line.png"_s : u":/icons/arrow-right-s-line.png"_s;
-    m_disclosure->setIcon(tintedIcon(chevron, accent));
+    const QColor accent = icons::color(icons::Tone::Accent, this);
+    const QString chevron = m_disclosure->isChecked() ? u"chevron-down"_s : u"chevron-right"_s;
+    m_disclosure->setIcon(icons::icon(chevron, accent));
     m_disclosure->setStyleSheet(
         u"#detailsToggle { color: %1; background: transparent; border: none; padding: 2px 0; }"_s.arg(
             accent.name()));

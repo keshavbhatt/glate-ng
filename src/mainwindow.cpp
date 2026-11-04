@@ -23,6 +23,7 @@
 #include "Diagnostics.h"
 #include "Logging.h"
 #include "StatusPill.h"
+#include "ShellIcons.h"
 #include "ShellStyle.h"
 #include "WelcomeCard.h"
 
@@ -59,6 +60,20 @@ constexpr auto kTranslationCountKey = "shell/translationCount";
 MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), m_theme(theme) {
   ui->setupUi(this);
+  // Lucide glyphs, tinted for the theme and redrawn when it changes.
+  {
+    namespace icons = glate::shell::icons;
+    const std::pair<QAbstractButton *, const char *> glyphs[] = {
+        {ui->history, "history"}, {ui->lineByline, "line-by-line"},
+        {ui->help, "help"},       {ui->settings, "settings"},
+        {ui->account, "account"}, {ui->about, "about"},
+        {ui->play1, "volume"},    {ui->paste, "paste"},
+        {ui->clear, "close"},     {ui->switch_lang, "swap"},
+        {ui->copy, "copy"},       {ui->share, "share"},
+        {ui->play2, "volume"}};
+    for (const auto &[button, glyph] : glyphs)
+      icons::bind(button, QString::fromLatin1(glyph));
+  }
 
   m_trayManager = new SystemTrayManager(this);
 
@@ -108,7 +123,6 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
                     SLOT(click()));
   shortcut->setContext(Qt::ApplicationShortcut);
   shortcut->setAutoRepeat(false); // holding the keys translates once
-  m_translate->setIcon(QIcon(":/icons/arrow-right-circle-line.png"));
   QTimer::singleShot(100, this, SLOT(resizeFix()));
   connect(m_translate, &QAbstractButton::clicked, this,
           &MainWindow::translate_clicked);
@@ -173,23 +187,19 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
   ui->lang1->blockSignals(true);
   ui->lang2->blockSignals(true);
 
-  ui->lang1->addItem(QIcon(":/icons/translate-2.png"), "Auto Detect");
+  ui->lang1->addItem("Auto Detect");
   ui->lang1->addItems(m_langName);
   ui->lang2->addItems(m_langName);
   // Cap the (very long) language popups so they scroll instead of spanning the
   // whole screen height (needs `combobox-popup: 0` in the Fusion 2 QSS).
   ui->lang1->setMaxVisibleItems(14);
   ui->lang2->setMaxVisibleItems(14);
-  for (int i = 0; i < ui->lang1->count(); i++) {
-    if (i == 0) {
-      ui->lang1->setItemIcon(i, QIcon(":/icons/magic-line.png"));
-    } else {
-      ui->lang1->setItemIcon(i, QIcon(":/icons/translate-2.png"));
-    }
-  }
-  for (int i = 0; i < ui->lang2->count(); i++) {
-    ui->lang2->setItemIcon(i, QIcon(":/icons/translate-2.png"));
-  }
+  using glate::shell::icons::Tone;
+  for (int i = 0; i < ui->lang1->count(); i++)
+    glate::shell::icons::bindItem(ui->lang1, i, i == 0 ? "auto" : "translate",
+                                  Tone::Muted);
+  for (int i = 0; i < ui->lang2->count(); i++)
+    glate::shell::icons::bindItem(ui->lang2, i, "translate", Tone::Muted);
 
   // load settings
   ui->lang1->setCurrentIndex(m_settings.value("lang1", 0).toInt());
@@ -240,7 +250,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
             const QString activeButton = activePlayButtonName();
             if (!activeButton.isEmpty()) {
               setPlayButtonState(activeButton,
-                                 QIcon(":/icons/loader-2-fill.png"), status);
+                                 QStringLiteral("loader"), status);
             }
           });
   connect(m_ttsDownloader, &TtsDownloader::finished, this,
@@ -271,7 +281,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
             const QString activeButton = activePlayButtonName();
             if (!activeButton.isEmpty() &&
                 state == QMediaPlayer::StoppedState) {
-              setPlayButtonState(activeButton, QIcon(":/icons/volume-up-line.png"),
+              setPlayButtonState(activeButton, QStringLiteral("volume"),
                                  activeButton == "play1"
                                      ? kPlay1IdleTooltip
                                      : kPlay2IdleTooltip);
@@ -280,7 +290,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
             }
             if (!activeButton.isEmpty() &&
                 state == QMediaPlayer::PlayingState) {
-              setPlayButtonState(activeButton, QIcon(":/icons/stop-line.png"),
+              setPlayButtonState(activeButton, QStringLiteral("stop"),
                                  kStopTooltip);
             }
           });
@@ -314,12 +324,12 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
                 (mediastate == QMediaPlayer::LoadingMedia ||
                  mediastate == QMediaPlayer::BufferingMedia)) {
               setPlayButtonState(activeButton,
-                                 QIcon(":/icons/loader-2-fill.png"),
+                                 QStringLiteral("loader"),
                                  kBufferingTooltip);
             }
             if (!activeButton.isEmpty() &&
                 (mediastate == QMediaPlayer::BufferedMedia)) {
-              setPlayButtonState(activeButton, QIcon(":/icons/stop-line.png"),
+              setPlayButtonState(activeButton, QStringLiteral("stop"),
                                  kStopTooltip);
             }
           });
@@ -454,6 +464,11 @@ void MainWindow::init_history() {
 
 void MainWindow::changeEvent(QEvent *e) {
   QMainWindow::changeEvent(e);
+  // A theme switch: the drawn arrow and the caption icon follow it.
+  if (e->type() == QEvent::PaletteChange && m_offlinePill != nullptr) {
+    refreshOfflineIndicator();
+    updateOfflineCaption();
+  }
   //  if (e->type() == QEvent::WindowStateChange) {
   //    m_trayManager->updateMenu(this->isVisible());
   //  }
@@ -970,21 +985,21 @@ QString MainWindow::activePlayButtonName() const {
   return parts.isEmpty() ? QString() : parts.last();
 }
 
-void MainWindow::setPlayButtonState(const QString &buttonName, const QIcon &icon,
+void MainWindow::setPlayButtonState(const QString &buttonName, const QString &glyph,
                                     const QString &toolTip) const {
   if (buttonName == "play1") {
-    ui->play1->setIcon(icon);
+    glate::shell::icons::bind(ui->play1, glyph);
     ui->play1->setToolTip(toolTip);
   } else if (buttonName == "play2") {
-    ui->play2->setIcon(icon);
+    glate::shell::icons::bind(ui->play2, glyph);
     ui->play2->setToolTip(toolTip);
   }
 }
 
 void MainWindow::resetPlayIcons() {
-  setPlayButtonState("play1", QIcon(":/icons/volume-up-line.png"),
+  setPlayButtonState("play1", QStringLiteral("volume"),
                      kPlay1IdleTooltip);
-  setPlayButtonState("play2", QIcon(":/icons/volume-up-line.png"),
+  setPlayButtonState("play2", QStringLiteral("volume"),
                      kPlay2IdleTooltip);
 }
 
@@ -1033,14 +1048,14 @@ void MainWindow::startTtsSession(const QString &playerName, const QString &text,
   m_player->setObjectName("player_" + playerName);
 
   if (playerName == "play1") {
-    setPlayButtonState("play1", QIcon(":/icons/loader-2-fill.png"),
+    setPlayButtonState("play1", QStringLiteral("loader"),
                        kPreparingTooltip);
-    setPlayButtonState("play2", QIcon(":/icons/volume-up-line.png"),
+    setPlayButtonState("play2", QStringLiteral("volume"),
                        kPlay2IdleTooltip);
   } else if (playerName == "play2") {
-    setPlayButtonState("play2", QIcon(":/icons/loader-2-fill.png"),
+    setPlayButtonState("play2", QStringLiteral("loader"),
                        kPreparingTooltip);
-    setPlayButtonState("play1", QIcon(":/icons/volume-up-line.png"),
+    setPlayButtonState("play1", QStringLiteral("volume"),
                        kPlay1IdleTooltip);
   } else {
     resetPlayIcons();
@@ -1514,7 +1529,7 @@ void MainWindow::initShell() {
 
   // The "Offline" pill takes the top bar's centre, where an empty logo label sat.
   m_offlinePill = new glate::shell::StatusPill(
-      tr("Offline"), QStringLiteral(":/icons/macbook-line.png"), this);
+      tr("Offline"), glate::shell::icons::path(QStringLiteral("laptop")), this);
   m_offlinePill->setObjectName(QStringLiteral("offlinePill"));
   m_offlinePill->setToolTip(tr("Offline mode is on: translations happen on this "
                                "computer. Click to manage languages."));
@@ -1534,15 +1549,15 @@ void MainWindow::initShell() {
   m_welcome = new glate::shell::WelcomeCard(
       tr("Welcome to Glate"),
       tr("Translate text and listen to it, online or on this computer."),
-      {{QStringLiteral(":/icons/text.png"),
+      {{glate::shell::icons::path(QStringLiteral("type")),
         tr("Type or paste on the left, then press <kbd>Shift</kbd> + <kbd>Enter</kbd> or "
            "the arrow.")},
-       {QStringLiteral(":/icons/arrow-left-right-line.png"),
+       {glate::shell::icons::path(QStringLiteral("swap")),
         tr("Pick both languages below; the middle button swaps them.")},
-       {QStringLiteral(":/icons/macbook-line.png"),
+       {glate::shell::icons::path(QStringLiteral("laptop")),
         tr("Turn on offline mode in Settings to translate without internet "
            "(Pro).")}},
-      tr("Take the tour"), QStringLiteral(":/icons/sparkling-line.png"),
+      tr("Take the tour"), glate::shell::icons::path(QStringLiteral("sparkles")),
       ui->src2->viewport());
   m_resultPlaceholder = ui->src2->placeholderText();
   connect(m_welcome, &glate::shell::WelcomeCard::buttonClicked, this,
@@ -1599,7 +1614,10 @@ void MainWindow::refreshOfflineIndicator() {
   const bool on = offlineModeEnabled() && (!m_licenseKnown || m_hasPremiumAccess);
   m_offlinePill->setVisible(on);
 
-  QPixmap arrow = QIcon(":/icons/arrow-right-circle-line.png").pixmap(64, 64);
+  // The arrow in the text colour; offline adds a green dot (redrawn with the theme).
+  QPixmap arrow = glate::shell::icons::pixmap(
+      QStringLiteral("next"),
+      glate::shell::icons::color(glate::shell::icons::Tone::Text, this), 64);
   if (on) {
     QPainter painter(&arrow);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -1619,7 +1637,7 @@ void MainWindow::updateOfflineCaption() {
     const QColor muted = glate::shell::mutedColor(this);
     const QColor green = glate::shell::offlineColor(this);
     const QPixmap icon = glate::shell::tintedIcon(
-        QStringLiteral(":/icons/macbook-line.png"), green).pixmap(14, 14);
+        glate::shell::icons::path(QStringLiteral("laptop")), green).pixmap(14, 14);
     QByteArray png;
     QBuffer buffer(&png);
     buffer.open(QIODevice::WriteOnly);

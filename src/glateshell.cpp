@@ -1,4 +1,5 @@
 #include "AppStrip.h"
+#include "ShellIcons.h"
 #include "glateshell.h"
 
 #include "AboutDialog.h"
@@ -84,7 +85,7 @@ QList<AboutInfo::Row> openSource()
                                                        "and ssplit (MIT, Apache-2.0, BSD)")},
         {u"KtechpitApps"_s, u"MIT"_s},
         {u"QtWaitingSpinner"_s, u"MIT"_s},
-        {u"Remix Icon"_s, u"Apache-2.0"_s},
+        {u"Lucide icons"_s, u"ISC"_s},
     };
 }
 
@@ -135,13 +136,13 @@ void GlateShell::showAbout()
     info.author = tr("Designed and developed by Keshav Bhatt, ktechpit.com");
     info.icon = QIcon(u":/icons/app/icon-128.png"_s);
     info.links = {
-        {tr("Report a bug..."), u":/icons/bug-line.png"_s, {}},
-        {tr("Source code"), u":/icons/code-s-slash-line.png"_s, QUrl(kRepository)},
+        {tr("Report a bug..."), u"bug"_s, {}},
+        {tr("Source code"), u"code"_s, QUrl(kRepository)},
         {tr("Website"),
-         u":/icons/global-line.png"_s,
+         u"globe"_s,
          QUrl(u"https://ktechpit.com/USS/public/product.php?slug=glate"_s)},
-        {tr("Donate"), u":/icons/heart-line.png"_s, QUrl(u"https://paypal.me/keshavnrj/9"_s)},
-        {tr("Rate"), u":/icons/star-line.png"_s, rateUrl()},
+        {tr("Donate"), u"heart"_s, QUrl(u"https://paypal.me/keshavnrj/9"_s)},
+        {tr("Rate"), u"star"_s, rateUrl()},
     };
     info.credits = credits();
     info.openSource = openSource();
@@ -221,18 +222,21 @@ QMenu* GlateShell::createHelpMenu(QWidget* parent, const std::function<void()>& 
 {
     auto* menu = new QMenu(parent);
     menu->setMinimumWidth(230);
-    menu->addAction(QIcon(u":/icons/sparkling-line.png"_s), tr("Welcome tour"), this, tour);
-    menu->addAction(QIcon(u":/icons/star-line.png"_s),
-                    tr("What's new in %1").arg(QApplication::applicationVersion()), this,
-                    &GlateShell::showWhatsNew);
-    QAction* keys =
-        menu->addAction(QIcon(u":/icons/keyboard-line.png"_s), tr("Keyboard shortcuts"), this, &GlateShell::showShortcuts);
+    namespace icons = glate::shell::icons;
+    icons::bind(menu->addAction(tr("Welcome tour"), this, tour), u"sparkles"_s);
+    icons::bind(menu->addAction(tr("What's new in %1").arg(QApplication::applicationVersion()), this,
+                                &GlateShell::showWhatsNew),
+                u"star"_s);
+    QAction* keys = menu->addAction(tr("Keyboard shortcuts"), this, &GlateShell::showShortcuts);
+    icons::bind(keys, u"keyboard"_s);
     keys->setShortcut(QKeySequence(u"F1"_s));
     menu->addSeparator();
-    menu->addAction(QIcon(u":/icons/bug-line.png"_s), tr("Report a bug..."), this, [this]() { showBugReport(); });
-    menu->addAction(QIcon(u":/icons/folder-line.png"_s), tr("Open log folder"), this, []() {
-        QDir().mkpath(logDirectory());
-        QDesktopServices::openUrl(QUrl::fromLocalFile(logDirectory()));
-    });
+    icons::bind(menu->addAction(tr("Report a bug..."), this, [this]() { showBugReport(); }), u"bug"_s);
+    icons::bind(menu->addAction(tr("Open log folder"), this,
+                                []() {
+                                    QDir().mkpath(logDirectory());
+                                    QDesktopServices::openUrl(QUrl::fromLocalFile(logDirectory()));
+                                }),
+                u"folder"_s);
     return menu;
 }

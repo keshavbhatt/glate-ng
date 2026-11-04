@@ -1,5 +1,7 @@
 #include "ShellStyle.h"
 
+#include "ShellIcons.h"
+
 #include <QApplication>
 #include <QBoxLayout>
 #include <QDialog>
@@ -17,6 +19,9 @@ namespace glate::shell {
 
 QIcon tintedIcon(const QString& resourcePath, const QColor& color, int size)
 {
+    if (resourcePath.endsWith(u".svg"_s)) {
+        return {icons::pixmapAt(resourcePath, color, size, 2.0)};
+    }
     QPixmap source(resourcePath);
     if (source.isNull()) {
         return {};

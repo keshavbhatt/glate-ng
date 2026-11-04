@@ -18,8 +18,8 @@ struct AboutInfo
     struct Link
     {
         QString text;
-        QString iconPath;
-        QUrl url; // empty: emits bugReportRequested() instead of opening a URL
+        QString icon; // a glyph name (ShellIcons.h)
+        QUrl url;     // empty: emits bugReportRequested() instead of opening a URL
     };
     struct Row
     {

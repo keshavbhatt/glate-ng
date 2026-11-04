@@ -17,6 +17,8 @@ qt_add_library(app_shell STATIC
     LogSink.h
     Logging.cpp
     Logging.h
+    ShellIcons.cpp
+    ShellIcons.h
     ShellStyle.cpp
     ShellStyle.h
     ShortcutsDialog.cpp
@@ -37,7 +39,7 @@ set_target_properties(app_shell PROPERTIES
 glate_set_warnings(app_shell)
 
 target_include_directories(app_shell PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(app_shell PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(app_shell PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets PRIVATE Qt6::Svg)
 
 target_compile_definitions(app_shell PRIVATE
     QT_NO_CAST_FROM_ASCII

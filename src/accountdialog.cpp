@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Keshav Bhatt (Ktechpit)
 // SPDX-License-Identifier: LicenseRef-Ktechpit-Licensing-Module
 
+#include "ShellIcons.h"
 #include "accountdialog.h"
 #include "planscomparisiondialog.h"
 #include "ui_accountdialog.h"
@@ -17,6 +18,12 @@
 AccountDialog::AccountDialog(QWidget *parent)
     : QDialog(parent), ui(new Ui::AccountDialog) {
   ui->setupUi(this);
+  glate::shell::icons::bind(ui->copyAccId, QStringLiteral("copy"));
+  glate::shell::icons::bind(ui->restoreBtn, QStringLiteral("refresh"));
+  glate::shell::icons::bind(ui->purchaseBtn, QStringLiteral("star"));
+  glate::shell::icons::bind(ui->portalBtn, QStringLiteral("link"));
+  glate::shell::icons::bind(ui->planCompareButton, QStringLiteral("help"));
+  glate::shell::icons::bind(ui->closeBtn, QStringLiteral("close"));
   {
     auto *_esc = new QShortcut(Qt::Key_Escape, this);
     connect(_esc, &QShortcut::activated, this, [this] { close(); });

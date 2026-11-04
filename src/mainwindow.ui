@@ -84,10 +84,6 @@
              <property name="text">
               <string/>
              </property>
-             <property name="icon">
-              <iconset resource="icons.qrc">
-               <normaloff>:/icons/archive-drawer-line.png</normaloff>:/icons/archive-drawer-line.png</iconset>
-             </property>
              <property name="iconSize">
               <size>
                <width>22</width>
@@ -112,10 +108,6 @@
              </property>
              <property name="text">
               <string/>
-             </property>
-             <property name="icon">
-              <iconset resource="icons.qrc">
-               <normaloff>:/icons/magic-line.png</normaloff>:/icons/magic-line.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -225,10 +217,6 @@
              <property name="text">
               <string/>
              </property>
-             <property name="icon">
-              <iconset resource="icons.qrc">
-               <normaloff>:/icons/questionnaire-line.png</normaloff>:/icons/questionnaire-line.png</iconset>
-             </property>
              <property name="iconSize">
               <size>
                <width>22</width>
@@ -253,10 +241,6 @@
              </property>
              <property name="text">
               <string/>
-             </property>
-             <property name="icon">
-              <iconset resource="icons.qrc">
-               <normaloff>:/icons/setting-line.png</normaloff>:/icons/setting-line.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -283,10 +267,6 @@
              <property name="text">
               <string/>
              </property>
-             <property name="icon">
-              <iconset resource="icons.qrc">
-               <normaloff>:/icons/user-3-line.png</normaloff>:/icons/user-3-line.png</iconset>
-             </property>
              <property name="iconSize">
               <size>
                <width>22</width>
@@ -311,10 +291,6 @@
              </property>
              <property name="text">
               <string/>
-             </property>
-             <property name="icon">
-              <iconset resource="icons.qrc">
-               <normaloff>:/icons/information-2-line.png</normaloff>:/icons/information-2-line.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -417,10 +393,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/volume-up-line.png</normaloff>:/icons/volume-up-line.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>22</width>
@@ -446,10 +418,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/clipboard-line.png</normaloff>:/icons/clipboard-line.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>22</width>
@@ -474,10 +442,6 @@
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/close-fill.png</normaloff>:/icons/close-fill.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -561,10 +525,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/swap-box-line.png</normaloff>:/icons/swap-box-line.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>22</width>
@@ -635,10 +595,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/file-copy-line.png</normaloff>:/icons/file-copy-line.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>22</width>
@@ -664,10 +620,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/share-line.png</normaloff>:/icons/share-line.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>22</width>
@@ -692,10 +644,6 @@
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/volume-up-line.png</normaloff>:/icons/volume-up-line.png</iconset>
           </property>
           <property name="iconSize">
            <size>

@@ -1,11 +1,13 @@
 #include "AboutDialog.h"
 #include "BugReportDialog.h"
+#include "ShellIcons.h"
 #include "StatusPill.h"
 #include "WelcomeCard.h"
 #include "WhatsNewDialog.h"
 
 #include <QCheckBox>
 #include <QComboBox>
+#include <QImage>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPlainTextEdit>
@@ -61,8 +63,8 @@ private Q_SLOTS:
         info.appName = u"App"_s;
         info.version = u"2.0"_s;
         info.links = {
-            {.text = u"Report a bug"_s, .iconPath = {}, .url = {}},
-            {.text = u"Site"_s, .iconPath = {}, .url = QUrl(u"https://example.org"_s)},
+            {.text = u"Report a bug"_s, .icon = {}, .url = {}},
+            {.text = u"Site"_s, .icon = {}, .url = QUrl(u"https://example.org"_s)},
         };
         info.credits = {{.name = u"Engine"_s, .text = u"MPL-2.0"_s}};
         info.diagnostics = u"diag text"_s;
@@ -140,6 +142,44 @@ private Q_SLOTS:
         const QSignalSpy clicked(&pill, &StatusPill::clicked);
         pill.click();
         QCOMPARE(clicked.count(), 1);
+    }
+
+    // A bound glyph is drawn in its tone and redrawn when the theme changes.
+    void boundGlyphFollowsThePalette()
+    {
+        const QPalette original = QApplication::palette();
+        const auto paint = [](const QColor& color) {
+            QPalette palette = QApplication::palette();
+            palette.setColor(QPalette::Active, QPalette::WindowText, color);
+            QApplication::setPalette(palette);
+        };
+        // The colour of the glyph's strokes: its most opaque pixel.
+        const auto strokeColour = [](const QPushButton& button) {
+            const QImage image = button.icon().pixmap(48, 48).toImage();
+            QColor best;
+            for (int y = 0; y < image.height(); ++y) {
+                for (int x = 0; x < image.width(); ++x) {
+                    const QColor pixel = image.pixelColor(x, y);
+                    if (!best.isValid() || pixel.alpha() > best.alpha()) {
+                        best = pixel;
+                    }
+                }
+            }
+            return best;
+        };
+
+        paint(Qt::red);
+        QPushButton button;
+        icons::bind(&button, u"close"_s);
+        QCOMPARE(strokeColour(button).rgb(), QColor(Qt::red).rgb());
+
+        paint(Qt::blue);
+        QTRY_COMPARE(strokeColour(button).rgb(), QColor(Qt::blue).rgb());
+
+        icons::bind(&button, u"copy"_s, icons::Tone::OnAccent);
+        QCOMPARE(button.icon().cacheKey(),
+                 icons::icon(u"copy"_s, icons::color(icons::Tone::OnAccent)).cacheKey());
+        QApplication::setPalette(original);
     }
 };
 

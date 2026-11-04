@@ -14,7 +14,8 @@ class QWidget;
 // with 20 px margins and a footer strip with the buttons (as in omnidict).
 namespace glate::shell {
 
-// The icon at resourcePath with every opaque pixel painted in color.
+// The icon at resourcePath with every opaque pixel painted in color; a Lucide
+// SVG (ShellIcons.h) is drawn in color instead.
 [[nodiscard]] QIcon tintedIcon(const QString& resourcePath, const QColor& color, int size = 64);
 
 // Secondary text: the text colour 60 % of the way from the window colour, as in the mocks.

@@ -1,3 +1,4 @@
+#include "ShellIcons.h"
 #include "history.h"
 #include "ui_history.h"
 #include "utils.h"
@@ -26,6 +27,7 @@ QString singleLinePreview(const QString &text) { return text.simplified(); }
 
 History::History(QWidget *parent) : QWidget(parent), ui(new Ui::History) {
   ui->setupUi(this);
+  glate::shell::icons::bind(ui->clearall, QStringLiteral("close"));
   {
     auto *_esc = new QShortcut(Qt::Key_Escape, this);
     connect(_esc, &QShortcut::activated, this, [this] { close(); });

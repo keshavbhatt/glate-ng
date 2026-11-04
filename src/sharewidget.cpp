@@ -1,3 +1,4 @@
+#include "ShellIcons.h"
 #include "sharewidget.h"
 #include "ui_sharewidget.h"
 
@@ -12,6 +13,10 @@
 
 Share::Share(QWidget *parent) : QWidget(parent), ui(new Ui::Share) {
   ui->setupUi(this);
+  glate::shell::icons::bind(ui->email, QStringLiteral("mail-plus"));
+  glate::shell::icons::bind(ui->pastebin, QStringLiteral("paste"));
+  glate::shell::icons::bind(ui->download, QStringLiteral("volume"));
+  glate::shell::icons::bind(ui->text, QStringLiteral("file-text"));
   setWindowTitle(tr("Glate | Share"));
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
 

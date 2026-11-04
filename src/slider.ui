@@ -80,10 +80,6 @@ border:none;</string>
          <property name="text">
           <string/>
          </property>
-         <property name="icon">
-          <iconset resource="icons.qrc">
-           <normaloff>:/icons/arrow-left-circle-line.png</normaloff>:/icons/arrow-left-circle-line.png</iconset>
-         </property>
          <property name="iconSize">
           <size>
            <width>32</width>
@@ -119,10 +115,6 @@ border:none;</string>
          </property>
          <property name="text">
           <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="icons.qrc">
-           <normaloff>:/icons/stop-line.png</normaloff>:/icons/stop-line.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -233,10 +225,6 @@ border:none;</string>
          </property>
          <property name="text">
           <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="icons.qrc">
-           <normaloff>:/icons/arrow-right-circle-line.png</normaloff>:/icons/arrow-right-circle-line.png</iconset>
          </property>
          <property name="iconSize">
           <size>

@@ -117,10 +117,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/file-copy-line.png</normaloff>:/icons/file-copy-line.png</iconset>
-          </property>
           <property name="flat">
            <bool>true</bool>
           </property>
@@ -245,20 +241,12 @@
        <property name="text">
         <string>Refresh Status</string>
        </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/refresh-line.png</normaloff>:/icons/refresh-line.png</iconset>
-       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="purchaseBtn">
        <property name="text">
         <string>Purchase Pro Licence</string>
-       </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/star-line.png</normaloff>:/icons/star-line.png</iconset>
        </property>
       </widget>
      </item>
@@ -269,10 +257,6 @@
        </property>
        <property name="text">
         <string>Self Service Portal</string>
-       </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/links-line.png</normaloff>:/icons/links-line.png</iconset>
        </property>
       </widget>
      </item>
@@ -372,10 +356,6 @@
        <property name="text">
         <string>Evaluation vs Pro vs Free</string>
        </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/questionnaire-line.png</normaloff>:/icons/questionnaire-line.png</iconset>
-       </property>
       </widget>
      </item>
      <item>
@@ -395,10 +375,6 @@
       <widget class="QPushButton" name="closeBtn">
        <property name="text">
         <string>Close</string>
-       </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/close-fill.png</normaloff>:/icons/close-fill.png</iconset>
        </property>
       </widget>
      </item>

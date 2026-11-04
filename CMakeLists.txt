@@ -23,7 +23,7 @@ include(Warnings)
 # ---------------------------------------------------------------------------
 set(GLATE_QT_MIN_VERSION "6.10" CACHE STRING "Minimum required Qt6 version")
 find_package(Qt6 ${GLATE_QT_MIN_VERSION} REQUIRED COMPONENTS
-    Core Gui Widgets Network Multimedia LinguistTools)
+    Core Gui Widgets Network Multimedia Svg LinguistTools)
 
 # The global shortcut's X11 key grab and desktop portal (modules/GlobalShortcut).
 # Found here, as imported targets, so the SDK include workaround below covers them too.

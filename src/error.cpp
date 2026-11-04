@@ -1,3 +1,4 @@
+#include "ShellIcons.h"
 #include "error.h"
 #include "ui_error.h"
 
@@ -59,8 +60,8 @@ Error::Error(QWidget *parent) : QWidget(parent), ui(new Ui::Error) {
   ui->horizontalLayout->setContentsMargins(16, 10, 16, 12);
   ui->horizontalLayout->setSpacing(8);
   restyle();
-  m_report = new QPushButton(QIcon(QStringLiteral(":/icons/bug-line.png")),
-                             tr("Report a bug..."), this);
+  m_report = new QPushButton(tr("Report a bug..."), this);
+  glate::shell::icons::bind(m_report, QStringLiteral("bug"));
   m_report->setObjectName(QStringLiteral("reportButton"));
   ui->horizontalLayout->insertWidget(0, m_report);
   ui->horizontalLayout->insertStretch(1, 1);
@@ -82,9 +83,8 @@ void Error::setError(const QString &heading, const QString &explanation,
 
 void Error::restyle() {
   using namespace glate::shell;
-  ui->icon->setPixmap(tintedIcon(QStringLiteral(":/icons/error-warning-line.png"),
-                                 dangerColor(this))
-                          .pixmap(kIconSize, kIconSize));
+  ui->icon->setPixmap(icons::pixmap(QStringLiteral("alert"), dangerColor(this),
+                                    kIconSize, devicePixelRatioF()));
   QString text = QStringLiteral("<b>%1</b>").arg(m_heading.toHtmlEscaped());
   if (!m_explanation.isEmpty())
     text += QStringLiteral("<div style=\"color:%1; font-size:small; margin-top:4px;\">%2</div>")

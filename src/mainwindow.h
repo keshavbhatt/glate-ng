@@ -129,7 +129,7 @@ private slots:
   void playCurrentTtsChunk();
   void stopTtsSession(bool stopPlayer);
   void resetPlayIcons();
-  void setPlayButtonState(const QString &buttonName, const QIcon &icon,
+  void setPlayButtonState(const QString &buttonName, const QString &glyph,
                           const QString &toolTip) const;
   QString activePlayButtonName() const;
   bool resolveTtsVoiceConfig(const QString &baseLang, QString &ttsLang,

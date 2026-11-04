@@ -158,10 +158,6 @@ background: transparent;
           <property name="text">
            <string>Load translation</string>
           </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/translate-2.png</normaloff>:/icons/translate-2.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>16</width>
@@ -180,10 +176,6 @@ background: transparent;
           </property>
           <property name="text">
            <string>Remove</string>
-          </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/icons/close-fill.png</normaloff>:/icons/close-fill.png</iconset>
           </property>
           <property name="iconSize">
            <size>

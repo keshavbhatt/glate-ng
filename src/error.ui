@@ -39,9 +39,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="pixmap">
-        <pixmap resource="icons.qrc">:/icons/error-warning-line.png</pixmap>
-       </property>
        <property name="scaledContents">
         <bool>false</bool>
        </property>

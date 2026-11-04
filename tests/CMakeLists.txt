@@ -58,6 +58,10 @@ target_compile_definitions(tst_app_shell PRIVATE
     GLATE_METAINFO_PATH="${PROJECT_SOURCE_DIR}/src/com.ktechpit.glate.metainfo.xml"
     GLATE_VERSION="${PROJECT_VERSION}")
 glate_add_test(tst_shell_dialogs tst_shell_dialogs.cpp app_shell GUI)
+# Two glyphs, at the path the app's resources give them.
+qt_add_resources(tst_shell_dialogs "test_glyphs" PREFIX "/icons/ui"
+    BASE "${PROJECT_SOURCE_DIR}/src/icons/ui"
+    FILES "${PROJECT_SOURCE_DIR}/src/icons/ui/close.svg" "${PROJECT_SOURCE_DIR}/src/icons/ui/copy.svg")
 
 # modules/GlobalShortcut; the portal tests run against a fake portal on a
 # private D-Bus daemon (fake_portal.h), never the session's.

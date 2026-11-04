@@ -110,10 +110,6 @@
        <property name="text">
         <string>Clear all history</string>
        </property>
-       <property name="icon">
-        <iconset resource="icons.qrc">
-         <normaloff>:/icons/close-fill.png</normaloff>:/icons/close-fill.png</iconset>
-       </property>
        <property name="iconSize">
         <size>
          <width>22</width>

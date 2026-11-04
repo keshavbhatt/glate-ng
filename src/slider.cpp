@@ -1,3 +1,4 @@
+#include "ShellIcons.h"
 #include "slider.h"
 
 #include <QDesktopServices>
@@ -8,6 +9,8 @@
 
 Slider::Slider(QWidget *parent) : QWidget(parent), ui(new Ui::Slider) {
   ui->setupUi(this);
+  glate::shell::icons::bind(ui->prev, QStringLiteral("previous"));
+  glate::shell::icons::bind(ui->next, QStringLiteral("next"));
   setWindowTitle(tr("Glate | Welcome"));
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   /*  Set Global variables here
@@ -88,11 +91,11 @@ void Slider::reset() {
 void Slider::updateStopButton() {
   if (timer->isActive()) {
     ui->stop->setToolTip("Stop");
-    ui->stop->setIcon(QIcon(":/icons/stop-line.png"));
+    glate::shell::icons::bind(ui->stop, QStringLiteral("stop"));
   }
   if (timer->isActive() == false) {
     ui->stop->setToolTip("Play");
-    ui->stop->setIcon(QIcon(":/icons/play-line.png"));
+    glate::shell::icons::bind(ui->stop, QStringLiteral("play"));
   }
 }
 

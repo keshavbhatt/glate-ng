@@ -1,6 +1,7 @@
 #include "AboutDialog.h"
 
 #include "FlowLayout.h"
+#include "ShellIcons.h"
 #include "ShellStyle.h"
 
 #include <QApplication>
@@ -192,7 +193,10 @@ QWidget* AboutDialog::buildLinks(const AboutInfo& info)
     auto* links = new QWidget(this);
     auto* flow = new FlowLayout(links, 6);
     for (const AboutInfo::Link& link : info.links) {
-        auto* button = new QPushButton(QIcon(link.iconPath), link.text, links);
+        auto* button = new QPushButton(link.text, links);
+        if (!link.icon.isEmpty()) {
+            icons::bind(button, link.icon);
+        }
         button->setIconSize(QSize(kLinkIcon, kLinkIcon));
         if (link.url.isEmpty()) {
             button->setObjectName(u"aboutBugReport"_s);
@@ -221,12 +225,14 @@ QWidget* AboutDialog::buildDiagnostics(const AboutInfo& info)
     column->addWidget(m_diagnostics);
 
     auto* buttons = new QHBoxLayout;
-    auto* copy = new QPushButton(QIcon(u":/icons/file-copy-line.png"_s), tr("Copy"), page);
+    auto* copy = new QPushButton(tr("Copy"), page);
+    icons::bind(copy, u"copy"_s);
     connect(copy, &QPushButton::clicked, this,
             [this] { QApplication::clipboard()->setText(m_diagnostics->toPlainText()); });
     buttons->addWidget(copy);
     if (!info.logDirectory.isEmpty()) {
-        auto* folder = new QPushButton(QIcon(u":/icons/folder-line.png"_s), tr("Open log folder"), page);
+        auto* folder = new QPushButton(tr("Open log folder"), page);
+        icons::bind(folder, u"folder"_s);
         const QUrl url = QUrl::fromLocalFile(info.logDirectory);
         connect(folder, &QPushButton::clicked, this, [url] { QDesktopServices::openUrl(url); });
         buttons->addWidget(folder);

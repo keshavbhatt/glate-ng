@@ -1,3 +1,4 @@
+#include "ShellIcons.h"
 #include "linebyline.h"
 #include "ui_linebyline.h"
 #include <QScrollBar>
@@ -6,6 +7,10 @@
 LineByLine::LineByLine(QWidget *parent, QClipboard *clipborad)
     : QWidget(parent), ui(new Ui::LineByLine) {
   ui->setupUi(this);
+  glate::shell::icons::bind(ui->copySrc1, QStringLiteral("copy"));
+  glate::shell::icons::bind(ui->readSrc1, QStringLiteral("volume"));
+  glate::shell::icons::bind(ui->copySrc2, QStringLiteral("copy"));
+  glate::shell::icons::bind(ui->readSrc2, QStringLiteral("volume"));
   setWindowTitle(tr("Glate | Line by Line"));
   { auto *_esc = new QShortcut(Qt::Key_Escape, this); connect(_esc, &QShortcut::activated, this, [this]{ close(); }); }
   this->clipborad = clipborad;
