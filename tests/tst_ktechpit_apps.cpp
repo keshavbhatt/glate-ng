@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 #include "AppCatalog.h"
 #include "AppLinks.h"
+#include "AppStrip.h"
 
 #include <QFile>
+#include <QFrame>
 #include <QRandomGenerator>
 #include <QSet>
 #include <QTest>
@@ -161,6 +163,18 @@ private Q_SLOTS:
         AppInfo a = app(u"red"_s);
         a.page = QUrl(u"https://ktechpit.com/USS/public/product.php?slug=red"_s);
         QCOMPARE(ktechpit::AppLinks::pageUrl(a, QString(), u"about"_s), a.page);
+    }
+
+    void stripCardsShareTheWidth()
+    {
+        AppCatalog::init({}); // the bundled catalog
+        ktechpit::AppStrip strip(u"test"_s, 2, ktechpit::AppStrip::Orientation::Horizontal);
+        strip.resize(640, strip.sizeHint().height());
+        strip.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&strip));
+        const QList<QFrame*> cards = strip.findChildren<QFrame*>(u"ktechpitAppCard"_s);
+        QCOMPARE(cards.size(), 2);
+        QVERIFY(qAbs(cards.at(0)->width() - cards.at(1)->width()) <= 1);
     }
 };
 

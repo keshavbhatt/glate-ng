@@ -21,6 +21,7 @@ AppStrip::AppStrip(const QString& place, int count, Orientation orientation, QWi
     setObjectName(u"ktechpitAppStrip"_s);
 
     m_title = new QLabel(tr("More apps from Ktechpit"), this);
+    m_title->setObjectName(u"ktechpitAppStripTitle"_s); // for the host's style sheet
     QFont bold = m_title->font();
     bold.setBold(true);
     m_title->setFont(bold);
@@ -43,7 +44,7 @@ AppStrip::AppStrip(const QString& place, int count, Orientation orientation, QWi
                         ? static_cast<QBoxLayout*>(new QHBoxLayout(m_cards))
                         : static_cast<QBoxLayout*>(new QVBoxLayout(m_cards));
     m_cardsLayout->setContentsMargins(0, 0, 0, 0);
-    m_cardsLayout->setSpacing(6);
+    m_cardsLayout->setSpacing(10);
 
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -89,7 +90,9 @@ void AppStrip::rebuild(bool repick)
         m_shown << app.id;
     }
     for (const AppInfo& app : apps) {
-        m_cardsLayout->addWidget(new AppCard(app, m_place, m_cards));
+        // Equal stretch: side by side, every card gets the same width, whatever
+        // the length of its text.
+        m_cardsLayout->addWidget(new AppCard(app, m_place, m_cards), 1);
     }
     setVisible(!apps.isEmpty());
 }

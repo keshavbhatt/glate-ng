@@ -75,7 +75,7 @@ ktechpit::MoreAppsDialog(u"menu"_s, this).exec();
 ```
 
 The widgets draw with the host's palette and fonts. Object names for style sheets:
-`ktechpitAppCard`, `ktechpitAppStrip`, `ktechpitMoreAppsDialog`.
+`ktechpitAppCard`, `ktechpitAppStrip`, `ktechpitAppStripTitle` (its heading), `ktechpitMoreAppsDialog`.
 
 Give users a way to turn it off (a "Show other Ktechpit apps" setting that calls
 `setEnabled`); every strip then hides.
