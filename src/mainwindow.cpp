@@ -1690,7 +1690,7 @@ void MainWindow::positionPaneOverlays() {
 //   GLATE_DEBUG_TEXT=<text>            source text, translated once the window is up
 //   GLATE_DEBUG_OFFLINE=0|1            offline mode on or off for this run
 //   GLATE_DEBUG_OPEN=settings|history|linebyline|offline|share|about|account|
-//                    whatsnew|bugreport|shortcuts|helpmenu|error
+//                    whatsnew|bugreport|shortcuts|helpmenu|error|plans
 //   GLATE_DEBUG_ABOUT_TAB=<n>            with OPEN=about, the tab to show
 //   GLATE_DEBUG_GRAB=<png>[,<seconds>] saves the opened screen (or the main
 //                                      window) after the delay, then quits
@@ -1756,6 +1756,14 @@ void MainWindow::debugRun() {
       }
       else if (open == QStringLiteral("account"))
         on_account_clicked();
+      else if (open == QStringLiteral("plans")) {
+        // The Plans window opens from Account and runs modally.
+        on_account_clicked();
+        QTimer::singleShot(500, this, [this]() {
+          QMetaObject::invokeMethod(m_accountDialog,
+                                    "on_planCompareButton_clicked");
+        });
+      }
       else if (open == QStringLiteral("offline"))
         showOfflineLanguages();
       else if (open == QStringLiteral("whatsnew"))
@@ -1783,6 +1791,8 @@ void MainWindow::debugRun() {
       QWidget *shot = target;
       if (open == QStringLiteral("offline"))
         shot = m_offlineDialog;
+      else if (open == QStringLiteral("plans"))
+        shot = QApplication::activeModalWidget();
       else if (open == QStringLiteral("about"))
         shot = m_shell->aboutDialog();
       else if (open == QStringLiteral("whatsnew"))
