@@ -8,6 +8,8 @@
 #   make screenshots  store screenshots into screenshots/ (scripts/screenshots.sh)
 
 BUILD_DIR ?= build-sdk
+# Every core for tests and clang-tidy; the build uses them already (dev-build.sh).
+NPROC := $(shell nproc)
 
 # Code held to the omnidict standards. Legacy src/ and the older modules are
 # left as they are until they are cleaned up (ADR-002).
@@ -26,11 +28,12 @@ build:
 	scripts/dev-build.sh
 
 test: build
-	GLATE_BUILD_DIR=$(abspath $(BUILD_DIR)) scripts/dev-run.sh --ctest
+	GLATE_BUILD_DIR=$(abspath $(BUILD_DIR)) scripts/dev-run.sh --ctest -j$(NPROC)
 
 lint: build
 	clang-format --dry-run --Werror $(CXX_SOURCES)
-	clang-tidy -p $(BUILD_DIR) --quiet --warnings-as-errors='*' $(TIDY_SOURCES)
+	printf '%s\n' $(TIDY_SOURCES) | xargs -P$(NPROC) -n1 \
+		clang-tidy -p $(BUILD_DIR) --quiet --warnings-as-errors='*'
 	shellcheck -x scripts/*.sh
 	uvx reuse lint
 
