@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(glate VERSION 4.5.0 LANGUAGES CXX)
+project(glate VERSION 4.6.0 LANGUAGES CXX)
 
 # ---------------------------------------------------------------------------
 # Options

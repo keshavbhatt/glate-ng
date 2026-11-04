@@ -119,6 +119,20 @@
   </keywords>
 
   <releases>
+    <release version="4.6.0" date="2026-11-04">
+      <description>
+        <p>A fresh look, a clearer Settings window and a few fixes.</p>
+        <ul>
+          <li>New icons and colours that look right in both the light and the dark theme.</li>
+          <li>Settings is reorganised into Translation, Quick Translate, Appearance and General. Choose light, dark or follow your system.</li>
+          <li>When Google limits requests, Pro and evaluation users get the translation on their computer instead, if that language pair is downloaded. Everyone else sees a clear message instead of a connection error.</li>
+          <li>Shift+Enter starts one translation, not several, and the Translate button shows its shortcut.</li>
+          <li>Line by line skips empty lines.</li>
+          <li>A clearer comparison of the Free, Evaluation and Pro plans.</li>
+          <li>A roomier About window, which also suggests other apps by the same developer.</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.5.0" date="2026-10-23">
       <description>
         <p>A clearer app around the translator.</p>
