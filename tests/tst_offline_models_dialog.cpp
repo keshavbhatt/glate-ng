@@ -92,7 +92,7 @@ private Q_SLOTS:
         const int german = rowOf(table, QStringLiteral("German"));
         QCOMPARE(dialog.directionsFor(QStringLiteral("de")),
                  (QStringList{QStringLiteral("de-en"), QStringLiteral("en-de")}));
-        auto* button = table->cellWidget(german, 3)->findChild<QPushButton*>();
+        auto* button = qobject_cast<QPushButton*>(table->cellWidget(german, 3));
         QVERIFY(button != nullptr);
         QCOMPARE(button->text(), QStringLiteral("Download"));
 

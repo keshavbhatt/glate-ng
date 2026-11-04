@@ -29,6 +29,8 @@ enum Column
 };
 
 constexpr int kCodeRole = Qt::UserRole;
+// Space between the action button and the scrollbar.
+constexpr int kActionGap = 20; // the scrollbar may be drawn over part of it
 
 } // namespace
 
@@ -64,7 +66,8 @@ OfflineModelsDialog::OfflineModelsDialog(ModelManager* manager, const glate::off
     m_table->horizontalHeader()->setSectionResizeMode(LanguageColumn, QHeaderView::Stretch);
     m_table->horizontalHeader()->setSectionResizeMode(SizeColumn, QHeaderView::ResizeToContents);
     m_table->horizontalHeader()->setSectionResizeMode(StatusColumn, QHeaderView::ResizeToContents);
-    m_table->horizontalHeader()->setSectionResizeMode(ActionColumn, QHeaderView::ResizeToContents);
+    // Sized in rebuild(): cell widgets do not count for ResizeToContents.
+    m_table->horizontalHeader()->setSectionResizeMode(ActionColumn, QHeaderView::Fixed);
 
     auto* bottom = new QHBoxLayout;
     bottom->addWidget(m_summary, 1);
@@ -206,6 +209,7 @@ void OfflineModelsDialog::rebuild()
         probe.setText(label);
         buttonWidth = std::max(buttonWidth, probe.sizeHint().width());
     }
+    m_table->horizontalHeader()->resizeSection(ActionColumn, buttonWidth + kActionGap);
     m_table->verticalHeader()->setMinimumSectionSize(probe.sizeHint().height() + 8);
     m_table->verticalHeader()->setDefaultSectionSize(probe.sizeHint().height() + 8);
 
@@ -225,14 +229,9 @@ void OfflineModelsDialog::rebuild()
         m_table->setItem(row, SizeColumn, size);
         m_table->setItem(row, StatusColumn, new QTableWidgetItem);
 
-        // In a holder with margins, so the button keeps clear of the
-        // scrollbar and of the rows above and below.
-        auto* holder = new QWidget(m_table);
-        auto* holderLayout = new QHBoxLayout(holder);
-        holderLayout->setContentsMargins(0, 2, 12, 2);
-        auto* button = new QPushButton(holder);
+        // Fixed width at the left of a wider column: the rest is the gap.
+        auto* button = new QPushButton(m_table);
         button->setFixedWidth(buttonWidth);
-        holderLayout->addWidget(button);
         connect(button, &QPushButton::clicked, this, [this, code] {
             const QStringList ids = directionsFor(code);
             const bool busy = std::any_of(ids.cbegin(), ids.cend(),
@@ -254,7 +253,7 @@ void OfflineModelsDialog::rebuild()
                 refreshRow(at);
             }
         });
-        m_table->setCellWidget(row, ActionColumn, holder);
+        m_table->setCellWidget(row, ActionColumn, button);
         refreshRow(row);
     }
     applyFilter(m_filter->text());
@@ -289,8 +288,7 @@ void OfflineModelsDialog::refreshRow(int row)
         action = tr("Download");
     }
     m_table->item(row, StatusColumn)->setText(status);
-    QWidget* holder = m_table->cellWidget(row, ActionColumn);
-    if (auto* button = holder != nullptr ? holder->findChild<QPushButton*>() : nullptr) {
+    if (auto* button = qobject_cast<QPushButton*>(m_table->cellWidget(row, ActionColumn))) {
         button->setText(action);
     }
 }
