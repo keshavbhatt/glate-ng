@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Look and feel</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script>
+<style>
+  body { background: #888; padding: 24px 16px 120px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1500px; margin: 0 auto; }
+  .pair > div { padding: 14px; border-radius: 12px; background: var(--bg); color: var(--text); }
+  .pair h2 { font-size: 14px; margin: 0 0 10px; }
+  .pair > div { min-width: 0; } .pair .window { width: 100%; max-width: none; min-width: 0; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .swatches span { font: 11px ui-monospace, monospace; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); }
+  .icons { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; color: var(--text); }
+  .icons .ic { width: 20px; height: 20px; }
+</style></head>
+<body>
+<h1 style="font-size:18px;max-width:1500px;margin:0 auto 12px;color:#111">Look and feel: Lucide icons, Omnidict colours</h1>
+<div class="pair">
+  <div data-theme="light"><h2>Light</h2>
+    <div class="window" data-main data-src="Good morning! The train leaves at half past nine." data-result="¡Buen día! El tren sale a las nueve y media."></div>
+    <div class="swatches"><span style="background:var(--accent);color:#fff">accent #1C71D8</span><span style="background:var(--bg)">bg #F4F5F7</span><span style="background:var(--panel)">panel #FFFFFF</span><span style="background:var(--hover)">hover #ECEEF2</span><span style="color:var(--muted)">muted #5C6573</span><span style="color:var(--offline)">offline #1B7F38</span></div>
+    <div class="icons"></div>
+  </div>
+  <div data-theme="dark"><h2>Dark</h2>
+    <div class="window" data-main data-offline="1" data-caption="1" data-src="Good morning! The train leaves at half past nine." data-result="¡Buen día! El tren sale a las nueve y media."></div>
+    <div class="swatches"><span style="background:var(--accent);color:#fff">accent #62A0EA</span><span style="background:var(--bg)">bg #16181B</span><span style="background:var(--panel)">panel #1E2024</span><span style="background:var(--hover)">hover #2D3138</span><span style="color:var(--muted)">muted #9AA2AD</span><span style="color:var(--offline)">offline #5CCB84</span></div>
+    <div class="icons"></div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const names = [...document.querySelectorAll('symbol')].map(s => s.id);
+  document.querySelectorAll('.icons').forEach(box => {
+    box.innerHTML = names.map(n => `<svg class="ic" title="${n}"><use href="#${n}"/></svg>`).join('');
+  });
+});
+</script>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Icons.</b> Every glyph becomes Lucide, the outline set Omnidict, Red and the other Ktechpit apps use (shown under each window). They are SVGs drawn in one colour and tinted when drawn, as in Omnidict: the normal text colour, the muted colour, the accent or the disabled colour, and redrawn when the theme changes. Today's PNG glyphs have their colour baked in, which is why some look wrong in one of the themes.</li>
+  <li><b>Colours.</b> Omnidict's tokens for both themes: the accent is #1C71D8 in light and #62A0EA in dark (both inside the blue range of Glate's icon), cooler greys for windows, panels, hover and borders, and the same green, amber and red for offline, warnings and errors. The accent stays fixed; there is no setting for it.</li>
+  <li><b>Shape.</b> As Omnidict: 8 px corners on controls, 12 px on cards, 14 px on sheets.</li>
+  <li>Every other mock in this folder now draws with these icons and colours, so each screen can be checked in both themes with the toolbar.</li>
+</ol></div>
+</body></html>

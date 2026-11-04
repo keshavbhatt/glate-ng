@@ -1,28 +1,29 @@
-/* Glate mock sheet. The tokens follow the app's Fusion 2 skin (modules/AppChrome) with the
-   default accent #4a78ff; every mock reads only these. Light on :root, dark under
-   [data-theme=dark] and the system preference. Nothing here ships in the app. */
-:root {
-  --accent: #4785D6; --accent-hover: #3D73BC; --accent-text: #FFFFFF; --accent-soft: #E6EDFF;
+/* Glate mock sheet. The tokens are Omnidict's (its DOCS/DESIGN.md section 1), which the app's
+   Fusion 2 skin (modules/AppChrome) follows; every mock reads only these. Light on :root and
+   [data-theme=light], dark under [data-theme=dark] and the system preference. Nothing here
+   ships in the app. */
+:root, [data-theme=light] {
+  --accent: #1C71D8; --accent-hover: #1A5FB4; --accent-text: #FFFFFF; --accent-soft: #E4EEFB;
   --offline: #1B7F38; --offline-soft: #E3F4E8;
-  --bg: #EFEFF1; --bar: #F6F6F7; --panel: #FFFFFF; --pane: #FFFFFF; --elevated: #FFFFFF; --hover: #E7E8EB;
-  --input: #FFFFFF; --border: #D9DBE0; --text: #1B1C1F; --muted: #6B7280;
-  --warning: #B45309; --danger: #C01C28; --shadow: 0 10px 30px rgba(16,24,40,.18);
-  --r-ctl: 6px; --r-pill: 999px; --r-sheet: 10px;
+  --bg: #F4F5F7; --bar: #FFFFFF; --panel: #FFFFFF; --pane: #FFFFFF; --elevated: #FFFFFF; --hover: #ECEEF2;
+  --input: #FFFFFF; --border: #DEE1E7; --text: #16181D; --muted: #5C6573;
+  --warning: #B45309; --danger: #C01C28; --shadow: 0 8px 28px rgba(16,24,40,.16);
+  --r-ctl: 8px; --r-pill: 999px; --r-sheet: 14px;
   --font: "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 [data-theme=dark] {
-  --accent: #4785D6; --accent-hover: #5298F0; --accent-text: #FFFFFF; --accent-soft: #1C2747;
+  --accent: #62A0EA; --accent-hover: #3584E4; --accent-text: #FFFFFF; --accent-soft: #1B2B42;
   --offline: #5CCB84; --offline-soft: #17301F;
-  --bg: #121212; --bar: #141414; --panel: #1C1C1C; --pane: #191919; --elevated: #242424; --hover: #2A2A2A;
-  --input: #151515; --border: #2C2C2C; --text: #E8E8E8; --muted: #9A9A9A;
+  --bg: #16181B; --bar: #1C1E22; --panel: #1E2024; --pane: #1E2024; --elevated: #272A30; --hover: #2D3138;
+  --input: #131518; --border: #2F333A; --text: #EEF0F3; --muted: #9AA2AD;
   --warning: #F5B14C; --danger: #FF6B6B; --shadow: 0 10px 30px rgba(0,0,0,.55);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme=light]) {
-    --accent: #4785D6; --accent-hover: #5298F0; --accent-text: #FFFFFF; --accent-soft: #1C2747;
+    --accent: #62A0EA; --accent-hover: #3584E4; --accent-text: #FFFFFF; --accent-soft: #1B2B42;
     --offline: #5CCB84; --offline-soft: #17301F;
-    --bg: #121212; --bar: #141414; --panel: #1C1C1C; --pane: #191919; --elevated: #242424; --hover: #2A2A2A;
-    --input: #151515; --border: #2C2C2C; --text: #E8E8E8; --muted: #9A9A9A;
+    --bg: #16181B; --bar: #1C1E22; --panel: #1E2024; --pane: #1E2024; --elevated: #272A30; --hover: #2D3138;
+    --input: #131518; --border: #2F333A; --text: #EEF0F3; --muted: #9AA2AD;
     --warning: #F5B14C; --danger: #FF6B6B; --shadow: 0 10px 30px rgba(0,0,0,.55);
   }
 }
@@ -34,7 +35,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 p { margin: 0; }
 code { font: 12px ui-monospace, monospace; }
 .muted { color: var(--muted); } .small { font-size: 12px; } .grow { flex: 1; }
-.ic { width: 18px; height: 18px; fill: currentColor; flex: none; }
+.ic { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .ic.s { width: 14px; height: 14px; }
 
 /* The main window. */
