@@ -147,8 +147,8 @@ void Settings::on_light_toggled(bool checked) {
 
 namespace {
 // Appearance settings keys (kept in sync with main.cpp / mainwindow.cpp).
-constexpr auto kKeyMode = "appearance/mode";     // system | light | dark
-constexpr auto kKeySkin = "appearance/skin";     // fusion | fusion2
+// Fusion 2 is the only theme; main.cpp moves the old appearance/mode here.
+constexpr auto kKeyMode = "theme/mode";          // system | light | dark
 constexpr auto kKeyAccent = "appearance/accent"; // #rrggbb
 constexpr auto kKeyCsd = "appearance/csd";       // bool
 constexpr auto kKeyUiLanguage = "ui_language";   // system | locale code
@@ -215,14 +215,6 @@ void Settings::buildAppearanceSection() {
   m_modeCombo->addItem(tr("Dark"), QStringLiteral("dark"));
   form->addRow(tr("Appearance:"), m_modeCombo);
 
-  // Theme (skin).
-  m_skinCombo = new QComboBox(box);
-  m_skinCombo->addItem(tr("Fusion"), QStringLiteral("fusion"));
-  m_skinCombo->addItem(tr("Fusion 2"), QStringLiteral("fusion2"));
-  m_skinCombo->setToolTip(tr("Overall look — \"Fusion\" is the clean native "
-                             "style; \"Fusion 2\" is richer and branded."));
-  form->addRow(tr("Theme:"), m_skinCombo);
-
   // UI language (applies on next launch).
   m_languageCombo = new QComboBox(box);
   m_languageCombo->addItem(tr("Follow system"), QStringLiteral("system"));
@@ -260,13 +252,11 @@ void Settings::buildAppearanceSection() {
 
   // ── Load current values ─────────────────────────────────────────────────
   const QString mode = settings.value(kKeyMode, "system").toString();
-  const QString skin = settings.value(kKeySkin, "fusion2").toString();
   const QString uiLanguage = settings.value(kKeyUiLanguage, "system").toString();
   m_accentColor = QColor(settings.value(kKeyAccent, defaultAccent().name()).toString());
   if (!m_accentColor.isValid())
     m_accentColor = defaultAccent();
   m_modeCombo->setCurrentIndex(qMax(0, m_modeCombo->findData(mode)));
-  m_skinCombo->setCurrentIndex(qMax(0, m_skinCombo->findData(skin)));
   m_languageCombo->setCurrentIndex(qMax(0, m_languageCombo->findData(uiLanguage)));
   m_csdCheckBox->setChecked(
       settings.value(kKeyCsd, WindowChrome::defaultEnabled()).toBool());
@@ -275,18 +265,15 @@ void Settings::buildAppearanceSection() {
   // ── Apply + persist on change (live, no restart for theme/skin/accent) ────
   auto applyTheme = [this]() {
     settings.setValue(kKeyMode, m_modeCombo->currentData().toString());
-    settings.setValue(kKeySkin, m_skinCombo->currentData().toString());
     settings.setValue(kKeyAccent, m_accentColor.name());
     if (m_theme)
       m_theme->configure(
-          AppTheme::skinFromString(m_skinCombo->currentData().toString()),
+          AppTheme::Skin::Fusion2,
           AppTheme::modeFromString(m_modeCombo->currentData().toString()),
           m_accentColor.isValid() ? m_accentColor : defaultAccent());
   };
 
   connect(m_modeCombo, &QComboBox::currentIndexChanged, this,
-          [applyTheme](int) { applyTheme(); });
-  connect(m_skinCombo, &QComboBox::currentIndexChanged, this,
           [applyTheme](int) { applyTheme(); });
   connect(m_languageCombo, &QComboBox::currentIndexChanged, this, [this](int) {
     settings.setValue(kKeyUiLanguage, m_languageCombo->currentData().toString());

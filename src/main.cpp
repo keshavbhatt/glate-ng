@@ -98,13 +98,24 @@ int main(int argc, char *argv[]) {
   // (Fusion/Fusion 2, follow-system/light/dark) and track the OS scheme live.
   // Replaces glate's bundled qbreeze stylesheet.
   QSettings appSettings; // org/app name already set above
-  const QString skin = appSettings.value("appearance/skin", "fusion2").toString();
-  const QString mode = appSettings.value("appearance/mode", "system").toString();
+  // Glate has one theme, Fusion 2; only light, dark or follow system is
+  // stored, under a new key. A valid old choice carries over once; the old
+  // keys go, so an old "fusion" skin value is never read again.
+  if (!appSettings.contains("theme/mode")) {
+    const QString old = appSettings.value("appearance/mode").toString();
+    const bool valid = old == QLatin1String("light") ||
+                       old == QLatin1String("dark") ||
+                       old == QLatin1String("system");
+    appSettings.setValue("theme/mode", valid ? old : QStringLiteral("system"));
+  }
+  appSettings.remove("appearance/skin");
+  appSettings.remove("appearance/mode");
+  const QString mode = appSettings.value("theme/mode", "system").toString();
   QColor accent(appSettings.value("appearance/accent", "#4a78ff").toString());
   if (!accent.isValid())
     accent = QColor(0x4a, 0x78, 0xff);
   auto *themeController = new ThemeController(a, AppTheme::Accents{}, &a);
-  themeController->configure(AppTheme::skinFromString(skin),
+  themeController->configure(AppTheme::Skin::Fusion2,
                              AppTheme::modeFromString(mode), accent);
 
   // Client-side decoration (opt-in via Settings). When on, give the app's own

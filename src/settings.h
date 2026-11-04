@@ -74,7 +74,6 @@ private:
   // Appearance controls (built in code, AppChrome-driven).
   ThemeController *m_theme = nullptr;
   QComboBox *m_modeCombo = nullptr;
-  QComboBox *m_skinCombo = nullptr;
   QComboBox *m_languageCombo = nullptr;
   QPushButton *m_accentButton = nullptr;
   QCheckBox *m_csdCheckBox = nullptr;

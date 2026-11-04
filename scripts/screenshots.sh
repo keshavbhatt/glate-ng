@@ -35,8 +35,7 @@ shell/whatsNewSeenVersion=$VERSION
 shell/translationCount=5
 closeToTray=false
 voiceGender=0
-appearance/mode=dark
-appearance/skin=fusion2
+theme/mode=dark
 appearance/csd=true
 CONF
 cp -r "$DIR/third_party/test-models/en-de" "$DIR/third_party/test-models/de-en" "$MODELS/"

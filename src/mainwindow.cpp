@@ -1589,10 +1589,9 @@ QStringList MainWindow::diagnosticsLines() const {
           .arg(languages.size())
           .arg(languages.isEmpty() ? QString()
                                    : QStringLiteral(" (%1)").arg(languages.join(", "))),
-      QStringLiteral("UI language: %1, theme: %2 %3")
+      QStringLiteral("UI language: %1, theme: %2")
           .arg(m_settings.value("ui_language", "system").toString(),
-               m_settings.value("appearance/skin", "fusion2").toString(),
-               m_settings.value("appearance/mode", "system").toString()),
+               m_settings.value("theme/mode", "system").toString()),
   };
 }
 
