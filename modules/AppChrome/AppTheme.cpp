@@ -333,32 +333,35 @@ Mode resolveEffective(Mode requested) {
 
 namespace {
 
-// Palettes aligned to the Fusion 2 stylesheet's hard-coded colours, so widgets
-// that read QPalette (selection tints, dark-detection, palette(base) previews)
-// stay cohesive with the skin.
-QPalette fusion2DarkPalette(const QColor &accent) {
+// Palettes aligned to the Fusion 2 stylesheet's colours (the Omnidict tokens,
+// DOCS/mocks/mock.css), so widgets that read QPalette (selection tints,
+// dark-detection, palette(base) previews) stay cohesive with the skin.
+QPalette fusion2DarkPalette(const QColor &accent, const QColor &accentText) {
   QPalette p;
-  const QColor window(0x12, 0x12, 0x12);
-  const QColor base(0x2a, 0x2a, 0x2a);
-  const QColor text(0xf5, 0xf5, 0xf5);
-  const QColor disabled(0x53, 0x53, 0x53);
+  const QColor window(0x16, 0x18, 0x1b);   // bg
+  const QColor base(0x13, 0x15, 0x18);     // input
+  const QColor text(0xee, 0xf0, 0xf3);     // text
+  const QColor muted(0x9a, 0xa2, 0xad);    // muted
+  const QColor disabled(0x5e, 0x65, 0x70);
   p.setColor(QPalette::Window, window);
   p.setColor(QPalette::WindowText, text);
   p.setColor(QPalette::Base, base);
-  p.setColor(QPalette::AlternateBase, QColor(0x18, 0x18, 0x18));
-  p.setColor(QPalette::ToolTipBase, QColor(0x28, 0x28, 0x28));
+  p.setColor(QPalette::AlternateBase, QColor(0x1e, 0x20, 0x24)); // panel
+  p.setColor(QPalette::ToolTipBase, QColor(0x27, 0x2a, 0x30));   // elevated
   p.setColor(QPalette::ToolTipText, text);
-  p.setColor(QPalette::PlaceholderText, QColor(0x6a, 0x6a, 0x6a));
+  p.setColor(QPalette::PlaceholderText, QColor(0x6e, 0x76, 0x81));
   p.setColor(QPalette::Text, text);
-  p.setColor(QPalette::Button, QColor(0x26, 0x26, 0x2c));
+  p.setColor(QPalette::Button, QColor(0x27, 0x2a, 0x30));
   p.setColor(QPalette::ButtonText, text);
-  p.setColor(QPalette::Midlight, QColor(0x2e, 0x2e, 0x34)); // control hover
-  p.setColor(QPalette::Mid, QColor(0x3e, 0x3e, 0x3e));
-  p.setColor(QPalette::Dark, QColor(0x28, 0x28, 0x28));
+  p.setColor(QPalette::Light, muted);
+  p.setColor(QPalette::Midlight, QColor(0x2d, 0x31, 0x38)); // hover
+  p.setColor(QPalette::Mid, QColor(0x3a, 0x3f, 0x47));
+  p.setColor(QPalette::Dark, QColor(0x2f, 0x33, 0x3a));     // border
   p.setColor(QPalette::Highlight, accent);
   p.setColor(QPalette::HighlightedText,
              accent.lightnessF() >= 0.62 ? QColor(Qt::black) : QColor(Qt::white));
-  p.setColor(QPalette::Link, accent);
+  p.setColor(QPalette::Link, accentText);
+  p.setColor(QPalette::LinkVisited, accentText);
   p.setColor(QPalette::Disabled, QPalette::WindowText, disabled);
   p.setColor(QPalette::Disabled, QPalette::Text, disabled);
   p.setColor(QPalette::Disabled, QPalette::ButtonText, disabled);
@@ -367,27 +370,30 @@ QPalette fusion2DarkPalette(const QColor &accent) {
 
 QPalette fusion2LightPalette(const QColor &accent) {
   QPalette p;
-  const QColor window(0xf5, 0xf6, 0xf8);
-  const QColor base(0xff, 0xff, 0xff);
-  const QColor text(0x1a, 0x1d, 0x23);
-  const QColor disabled(0x8a, 0x92, 0xa0);
+  const QColor window(0xf4, 0xf5, 0xf7);   // bg
+  const QColor base(0xff, 0xff, 0xff);     // input
+  const QColor text(0x16, 0x18, 0x1d);     // text
+  const QColor muted(0x5c, 0x65, 0x73);    // muted
+  const QColor disabled(0x8a, 0x92, 0x9e);
   p.setColor(QPalette::Window, window);
   p.setColor(QPalette::WindowText, text);
   p.setColor(QPalette::Base, base);
-  p.setColor(QPalette::AlternateBase, QColor(0xf1, 0xf2, 0xf5));
-  p.setColor(QPalette::ToolTipBase, QColor(0x1a, 0x1d, 0x23));
+  p.setColor(QPalette::AlternateBase, QColor(0xff, 0xff, 0xff)); // panel
+  p.setColor(QPalette::ToolTipBase, QColor(0x16, 0x18, 0x1d));
   p.setColor(QPalette::ToolTipText, QColor(0xff, 0xff, 0xff));
-  p.setColor(QPalette::PlaceholderText, QColor(0x8a, 0x92, 0xa0));
+  p.setColor(QPalette::PlaceholderText, disabled);
   p.setColor(QPalette::Text, text);
-  p.setColor(QPalette::Button, QColor(0xe9, 0xeb, 0xef));
+  p.setColor(QPalette::Button, QColor(0xff, 0xff, 0xff));
   p.setColor(QPalette::ButtonText, text);
-  p.setColor(QPalette::Midlight, QColor(0xe4, 0xe7, 0xec)); // control hover
-  p.setColor(QPalette::Mid, QColor(0xd2, 0xd6, 0xdc));
-  p.setColor(QPalette::Dark, QColor(0xe3, 0xe6, 0xea));
+  p.setColor(QPalette::Light, muted);
+  p.setColor(QPalette::Midlight, QColor(0xec, 0xee, 0xf2)); // hover
+  p.setColor(QPalette::Mid, QColor(0xd0, 0xd4, 0xdb));
+  p.setColor(QPalette::Dark, QColor(0xde, 0xe1, 0xe7));     // border
   p.setColor(QPalette::Highlight, accent);
   p.setColor(QPalette::HighlightedText,
              accent.lightnessF() >= 0.62 ? QColor(Qt::black) : QColor(Qt::white));
   p.setColor(QPalette::Link, accent);
+  p.setColor(QPalette::LinkVisited, accent);
   p.setColor(QPalette::Disabled, QPalette::WindowText, disabled);
   p.setColor(QPalette::Disabled, QPalette::Text, disabled);
   p.setColor(QPalette::Disabled, QPalette::ButtonText, disabled);
@@ -440,8 +446,12 @@ void apply(QApplication &app, Skin skin, Mode requested, const Accents &accents)
     // the sheet, then the sheet + accent override.
     if (QStyle *fusion = QStyleFactory::create(QStringLiteral("Fusion")))
       app.setStyle(new FusionChromeStyle(fusion, /*switchCheckboxes=*/true));
-    app.setPalette(effective == Mode::Dark ? fusion2DarkPalette(accents.highlight)
-                                           : fusion2LightPalette(accents.highlight));
+    const QColor accentText = accents.accentTextDark.isValid()
+                                  ? accents.accentTextDark
+                                  : accents.highlight;
+    app.setPalette(effective == Mode::Dark
+                       ? fusion2DarkPalette(accents.highlight, accentText)
+                       : fusion2LightPalette(accents.highlight));
     QString qss = readResource(
         effective == Mode::Dark
             ? QStringLiteral(":/appchrome/themes/fusion2_dark.qss")

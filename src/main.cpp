@@ -110,11 +110,16 @@ int main(int argc, char *argv[]) {
   }
   appSettings.remove("appearance/skin");
   appSettings.remove("appearance/mode");
-  appSettings.remove("appearance/accent"); // one accent now, the icon's blue
+  appSettings.remove("appearance/accent"); // one fixed accent now
   const QString mode = appSettings.value("theme/mode", "system").toString();
-  // The blue of Glate's icon (the average of its gradient).
-  const QColor accent(0x47, 0x85, 0xd6);
-  auto *themeController = new ThemeController(a, AppTheme::Accents{}, &a);
+  // Omnidict's blues, inside the range of Glate's icon gradient: #1C71D8 fills
+  // selections and primary buttons in both schemes (white text reads on it);
+  // on dark, text, links and glyphs in the accent use the lighter #62A0EA.
+  const QColor accent(0x1c, 0x71, 0xd8);
+  AppTheme::Accents accents;
+  accents.highlight = accent;
+  accents.accentTextDark = QColor(0x62, 0xa0, 0xea);
+  auto *themeController = new ThemeController(a, accents, &a);
   themeController->configure(AppTheme::Skin::Fusion2,
                              AppTheme::modeFromString(mode), accent);
 

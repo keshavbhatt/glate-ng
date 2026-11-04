@@ -30,6 +30,9 @@ enum class Skin { Fusion, Fusion2 };
 // is the user-selectable accent colour, applied to both skins.
 struct Accents {
   QColor highlight = QColor(0xff, 0x7a, 0x1a); // selection / accent colour
+  // Accent for text, links and glyphs on the dark scheme (Fusion 2), where the
+  // fill colour is too dark to read; invalid means "same as highlight".
+  QColor accentTextDark;
   int radiusPx = 6;                            // control corner radius
   int spacingPx = 6;                           // toolbar / layout spacing
 };

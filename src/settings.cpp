@@ -346,7 +346,7 @@ void Settings::buildGeneral(QVBoxLayout *page) {
 // Colours come from the palette, so light and dark both follow the theme.
 void Settings::applyStyles() {
   const bool dark = isDark(this);
-  const QColor card = dark ? QColor(0x1c, 0x1c, 0x1c) : QColor(0xff, 0xff, 0xff);
+  const QColor card = palette().color(QPalette::AlternateBase); // panel
   const QColor border = glate::shell::borderColor();
   const QColor accent = palette().color(QPalette::Highlight);
   const QColor accentText = palette().color(QPalette::HighlightedText);
