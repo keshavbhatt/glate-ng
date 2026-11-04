@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
   // ─────────────────────────────────────────────────────────────────────────
 
   // ── AppChrome: self-contained theming + client-side decoration ────────────
-  // Apply the skin/appearance/accent the user picked in Settings → Appearance
+  // Apply the light/dark mode picked in Settings → Appearance
   // (Fusion/Fusion 2, follow-system/light/dark) and track the OS scheme live.
   // Replaces glate's bundled qbreeze stylesheet.
   QSettings appSettings; // org/app name already set above
@@ -110,10 +110,10 @@ int main(int argc, char *argv[]) {
   }
   appSettings.remove("appearance/skin");
   appSettings.remove("appearance/mode");
+  appSettings.remove("appearance/accent"); // one accent now, the icon's blue
   const QString mode = appSettings.value("theme/mode", "system").toString();
-  QColor accent(appSettings.value("appearance/accent", "#4a78ff").toString());
-  if (!accent.isValid())
-    accent = QColor(0x4a, 0x78, 0xff);
+  // The blue of Glate's icon (the average of its gradient).
+  const QColor accent(0x47, 0x85, 0xd6);
   auto *themeController = new ThemeController(a, AppTheme::Accents{}, &a);
   themeController->configure(AppTheme::Skin::Fusion2,
                              AppTheme::modeFromString(mode), accent);

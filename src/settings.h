@@ -53,10 +53,9 @@ protected:
   void changeEvent(QEvent *event) override;
 
 private:
-  // Builds the "Appearance" section (theme/skin/accent/CSD) and wires it to the
+  // Builds the "Appearance" section (mode, language, CSD) and wires it to the
   // ThemeController; supersedes the old dark/light radios.
   void buildAppearanceSection();
-  void updateAccentButton();
   void promptRestartRequiredDialog();
   // Builds the "Offline translation" section under Appearance.
   void buildOfflineSection();
@@ -75,9 +74,7 @@ private:
   ThemeController *m_theme = nullptr;
   QComboBox *m_modeCombo = nullptr;
   QComboBox *m_languageCombo = nullptr;
-  QPushButton *m_accentButton = nullptr;
   QCheckBox *m_csdCheckBox = nullptr;
-  QColor m_accentColor;
   bool m_restartPromptOpen = false;
 
   // Offline translation controls.

@@ -14,7 +14,6 @@
 #include <ShellStyle.h>
 
 #include <QCheckBox>
-#include <QColorDialog>
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QFormLayout>
@@ -149,24 +148,9 @@ namespace {
 // Appearance settings keys (kept in sync with main.cpp / mainwindow.cpp).
 // Fusion 2 is the only theme; main.cpp moves the old appearance/mode here.
 constexpr auto kKeyMode = "theme/mode";          // system | light | dark
-constexpr auto kKeyAccent = "appearance/accent"; // #rrggbb
 constexpr auto kKeyCsd = "appearance/csd";       // bool
 constexpr auto kKeyUiLanguage = "ui_language";   // system | locale code
-QColor defaultAccent() { return QColor(0x4a, 0x78, 0xff); }
 } // namespace
-
-void Settings::updateAccentButton() {
-  if (!m_accentButton)
-    return;
-  const QColor c = m_accentColor.isValid() ? m_accentColor : defaultAccent();
-  m_accentButton->setText(QStringLiteral("  %1  ").arg(c.name().toUpper()));
-  // Swatch: fill the button with the colour, readable text on top.
-  const bool dark = c.lightnessF() < 0.6;
-  m_accentButton->setStyleSheet(
-      QStringLiteral("QPushButton{background:%1;color:%2;border:1px solid "
-                     "palette(mid);border-radius:4px;padding:4px 10px;}")
-          .arg(c.name(), dark ? "#ffffff" : "#000000"));
-}
 
 void Settings::promptRestartRequiredDialog() {
   if (m_restartPromptOpen)
@@ -227,18 +211,6 @@ void Settings::buildAppearanceSection() {
       tr("Interface language. Change takes effect after restart."));
   form->addRow(tr("Language:"), m_languageCombo);
 
-  // Accent colour (+ reset to default).
-  auto *accentRow = new QHBoxLayout;
-  m_accentButton = new QPushButton(box);
-  m_accentButton->setToolTip(tr("Accent colour for selections and highlights."));
-  m_accentButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-  auto *accentReset = new QPushButton(tr("Reset"), box);
-  accentReset->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-  accentRow->addWidget(m_accentButton);
-  accentRow->addWidget(accentReset);
-  accentRow->addStretch(1);
-  form->addRow(tr("Accent colour:"), accentRow);
-
   // Client-side decoration (applies on restart).
   m_csdCheckBox =
       new QCheckBox(tr("Use the app's own title bar (custom decorations)"), box);
@@ -253,24 +225,17 @@ void Settings::buildAppearanceSection() {
   // ── Load current values ─────────────────────────────────────────────────
   const QString mode = settings.value(kKeyMode, "system").toString();
   const QString uiLanguage = settings.value(kKeyUiLanguage, "system").toString();
-  m_accentColor = QColor(settings.value(kKeyAccent, defaultAccent().name()).toString());
-  if (!m_accentColor.isValid())
-    m_accentColor = defaultAccent();
   m_modeCombo->setCurrentIndex(qMax(0, m_modeCombo->findData(mode)));
   m_languageCombo->setCurrentIndex(qMax(0, m_languageCombo->findData(uiLanguage)));
   m_csdCheckBox->setChecked(
       settings.value(kKeyCsd, WindowChrome::defaultEnabled()).toBool());
-  updateAccentButton();
 
-  // ── Apply + persist on change (live, no restart for theme/skin/accent) ────
+  // ── Apply + persist on change (live, no restart) ─────────────────────────
   auto applyTheme = [this]() {
     settings.setValue(kKeyMode, m_modeCombo->currentData().toString());
-    settings.setValue(kKeyAccent, m_accentColor.name());
     if (m_theme)
-      m_theme->configure(
-          AppTheme::Skin::Fusion2,
-          AppTheme::modeFromString(m_modeCombo->currentData().toString()),
-          m_accentColor.isValid() ? m_accentColor : defaultAccent());
+      m_theme->setMode(
+          AppTheme::modeFromString(m_modeCombo->currentData().toString()));
   };
 
   connect(m_modeCombo, &QComboBox::currentIndexChanged, this,
@@ -278,21 +243,6 @@ void Settings::buildAppearanceSection() {
   connect(m_languageCombo, &QComboBox::currentIndexChanged, this, [this](int) {
     settings.setValue(kKeyUiLanguage, m_languageCombo->currentData().toString());
     promptRestartRequiredDialog();
-  });
-  connect(m_accentButton, &QPushButton::clicked, this, [this, applyTheme]() {
-    const QColor c = QColorDialog::getColor(
-        m_accentColor.isValid() ? m_accentColor : defaultAccent(), this,
-        tr("Choose accent colour"));
-    if (c.isValid()) {
-      m_accentColor = c;
-      updateAccentButton();
-      applyTheme();
-    }
-  });
-  connect(accentReset, &QPushButton::clicked, this, [this, applyTheme]() {
-    m_accentColor = defaultAccent();
-    updateAccentButton();
-    applyTheme();
   });
   connect(m_csdCheckBox, &QCheckBox::toggled, this,
           [this](bool on) {
