@@ -1,5 +1,6 @@
 #include "AppStrip.h"
 #include "ShellIcons.h"
+#include "ShellStyle.h"
 #include "glateshell.h"
 
 #include "AboutDialog.h"
@@ -15,6 +16,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
+#include <QLabel>
 #include <QMenu>
 #include <QSettings>
 #include <QStandardPaths>
@@ -136,13 +138,13 @@ void GlateShell::showAbout()
     info.author = tr("Designed and developed by Keshav Bhatt, ktechpit.com");
     info.icon = QIcon(u":/icons/app/icon-128.png"_s);
     info.links = {
-        {tr("Report a bug..."), u"bug"_s, {}},
-        {tr("Source code"), u"code"_s, QUrl(kRepository)},
         {tr("Website"),
          u"globe"_s,
          QUrl(u"https://ktechpit.com/USS/public/product.php?slug=glate"_s)},
-        {tr("Donate"), u"heart"_s, QUrl(u"https://paypal.me/keshavnrj/9"_s)},
+        {tr("Source code"), u"code"_s, QUrl(kRepository)},
         {tr("Rate"), u"star"_s, rateUrl()},
+        {tr("Donate"), u"heart"_s, QUrl(u"https://paypal.me/keshavnrj/9"_s)},
+        {tr("Report a bug..."), u"bug"_s, {}}, // in the footer
     };
     info.credits = credits();
     info.openSource = openSource();
@@ -150,8 +152,14 @@ void GlateShell::showAbout()
     info.logDirectory = logDirectory();
     auto* about = new AboutDialog(info, m_window);
     // Two other Ktechpit apps, drawn anew each time About opens (ADR-010).
-    about->addBelowLinks(new ktechpit::AppStrip(
-        u"about"_s, 2, ktechpit::AppStrip::Orientation::Horizontal, about));
+    auto* strip = new ktechpit::AppStrip(u"about"_s, 2, ktechpit::AppStrip::Orientation::Horizontal, about);
+    // A section heading like the Settings ones: small, bold, muted capitals.
+    strip->setTitle(tr("More apps from Ktechpit").toUpper());
+    if (auto* title = strip->findChild<QLabel*>(u"ktechpitAppStripTitle"_s)) {
+        glate::shell::setRelativeFont(title, 0.85, true);
+        glate::shell::makeMuted(title);
+    }
+    about->addBelowLinks(strip);
     connect(about, &AboutDialog::whatsNewRequested, this, &GlateShell::showWhatsNew);
     connect(about, &AboutDialog::bugReportRequested, this, [this]() { showBugReport(); });
     m_about = about;

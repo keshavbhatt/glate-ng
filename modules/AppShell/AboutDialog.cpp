@@ -25,10 +25,10 @@ using namespace Qt::StringLiterals;
 namespace glate::shell {
 
 namespace {
-constexpr int kHeroIcon = 72;
+constexpr int kHeroIcon = 80;
 constexpr int kLinkIcon = 16;
 constexpr int kRowNameWidth = 190;
-constexpr int kWidth = 640;
+constexpr int kWidth = 700;
 constexpr int kDiagnosticsLines = 7;
 
 // A page that scrolls vertically when its content is taller than the tab.
@@ -71,7 +71,7 @@ QWidget* makeRowList(const QList<AboutInfo::Row>& rows, QWidget* parent)
         }
         first = false;
         auto* row = new QHBoxLayout;
-        row->setContentsMargins(12, 8, 12, 8);
+        row->setContentsMargins(14, 11, 14, 11);
         row->setSpacing(12);
         auto* name = new QLabel(u"<b>%1</b>"_s.arg(item.name.toHtmlEscaped()), frame);
         name->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -96,7 +96,9 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
 {
     setObjectName(u"aboutDialog"_s);
     QBoxLayout* body = setUpDialog(this, tr("About %1").arg(info.appName));
-    body->setSpacing(14);
+    // Roomier than the other shell dialogs (DOCS/mocks/about.html).
+    body->setContentsMargins(28, 24, 28, 22);
+    body->setSpacing(22);
     body->addWidget(buildHeader(info));
     body->addWidget(m_links);
     m_body = body;
@@ -110,7 +112,20 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
     // A taller window leaves the room below the tabs; nothing above stretches.
     body->addStretch(1);
 
+    // A link without a URL (Report a bug) sits in the footer, apart from the
+    // links that leave the app.
     QBoxLayout* footer = addFooter(this);
+    for (const AboutInfo::Link& link : info.links) {
+        if (link.url.isEmpty()) {
+            auto* button = new QPushButton(link.text, this);
+            button->setObjectName(u"aboutBugReport"_s);
+            if (!link.icon.isEmpty()) {
+                icons::bind(button, link.icon);
+            }
+            connect(button, &QPushButton::clicked, this, &AboutDialog::bugReportRequested);
+            footer->addWidget(button);
+        }
+    }
     footer->addStretch(1);
     addCloseButton(this, footer);
 
@@ -118,7 +133,7 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
     // tallest page, capped; a longer list scrolls inside its page instead of
     // being cut off.
     ensurePolished();
-    constexpr int kPageWidth = kWidth - 40;
+    constexpr int kPageWidth = kWidth - 56;
     constexpr int kMaxPageHeight = 300;
     int pageHeight = 0;
     for (int i = 0; i < tabs->count(); ++i) {
@@ -152,15 +167,15 @@ QWidget* AboutDialog::buildHeader(const AboutInfo& info)
     auto* header = new QWidget(this);
     auto* row = new QHBoxLayout(header);
     row->setContentsMargins(0, 0, 0, 0);
-    row->setSpacing(16);
+    row->setSpacing(20);
     auto* icon = new QLabel(header);
     icon->setPixmap(info.icon.pixmap(kHeroIcon, kHeroIcon));
     row->addWidget(icon, 0, Qt::AlignVCenter);
 
     auto* text = new QVBoxLayout;
-    text->setSpacing(2);
+    text->setSpacing(4);
     auto* name = new QLabel(info.appName, header);
-    setRelativeFont(name, 1.45, true);
+    setRelativeFont(name, 1.6, true);
     auto* tagline = new QLabel(info.tagline, header);
     tagline->setWordWrap(true);
     setRelativeFont(tagline, 1.07);
@@ -195,21 +210,19 @@ QWidget* AboutDialog::buildHeader(const AboutInfo& info)
 QWidget* AboutDialog::buildLinks(const AboutInfo& info)
 {
     auto* links = new QWidget(this);
-    auto* flow = new FlowLayout(links, 6);
+    auto* flow = new FlowLayout(links, 8);
     for (const AboutInfo::Link& link : info.links) {
+        if (link.url.isEmpty()) {
+            continue; // in the footer
+        }
         auto* button = new QPushButton(link.text, links);
         if (!link.icon.isEmpty()) {
             icons::bind(button, link.icon);
         }
         button->setIconSize(QSize(kLinkIcon, kLinkIcon));
-        if (link.url.isEmpty()) {
-            button->setObjectName(u"aboutBugReport"_s);
-            connect(button, &QPushButton::clicked, this, &AboutDialog::bugReportRequested);
-        } else {
-            button->setToolTip(link.url.toString());
-            const QUrl url = link.url;
-            connect(button, &QPushButton::clicked, this, [url] { QDesktopServices::openUrl(url); });
-        }
+        button->setToolTip(link.url.toString());
+        const QUrl url = link.url;
+        connect(button, &QPushButton::clicked, this, [url] { QDesktopServices::openUrl(url); });
         flow->addWidget(button);
     }
     return links;
