@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Plans</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script>
+<style>
+  .plans { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); }
+  .plans > div { padding: 9px 10px; font-size: 13px; display: flex; align-items: center; border-top: 1px solid var(--border); }
+  .plans > div.c { justify-content: center; text-align: center; }
+  .plans > .head { border-top: none; flex-direction: column; align-items: center; gap: 2px; padding: 12px 8px 10px; }
+  .plans > .head b { font-size: 14px; }
+  .plans > .head small { color: var(--muted); font-size: 11.5px; text-align: center; line-height: 1.35; }
+  .plans > .feature small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .plans > .feature { flex-direction: column; align-items: flex-start; justify-content: center; }
+  .plans .yes { color: var(--accent); } .plans .no { color: var(--muted); opacity: .6; }
+  .plans .mine { background: var(--accent-soft); }
+  .plans .mine.head { border-radius: 10px 10px 0 0; }
+  .plans .mine.last { border-radius: 0 0 10px 10px; }
+  .badge { font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 6px; background: var(--accent); color: var(--accent-text); margin-bottom: 4px; }
+  .plans .ic { width: 18px; height: 18px; }
+</style></head>
+<body>
+<div class="window" data-main data-src="Good morning!" data-result="">
+  <div class="overlay"><div class="dialog" style="width:640px">
+    <div class="dtitle">Glate | Plans<span class="x">&#x2715;</span></div>
+    <div class="dbody" style="gap:10px">
+      <div><b style="font-size:15px">Compare plans</b><p class="small muted" style="margin-top:4px">Glate stays free for online translation. Pro adds offline translation and the extras below, with one purchase.</p></div>
+      <div class="plans">
+        <div class="head"></div>
+        <div class="head c"><b>Free</b><small>Always</small></div>
+        <div class="head c mine"><span class="badge">YOUR PLAN</span><b>Evaluation</b><small>15 days, 12 left</small></div>
+        <div class="head c"><b>Pro</b><small>One-time purchase,<br>lifetime updates</small></div>
+
+        <div class="feature">Online translation<small>Google Translate, 100+ languages</small></div>
+        <div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c mine"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div>
+
+        <div class="feature">Quick Translate from any app</div>
+        <div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c mine"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div>
+
+        <div class="feature">History and line by line</div>
+        <div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c mine"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div>
+
+        <div class="feature">Share by email, save as text</div>
+        <div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c mine"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div>
+
+        <div class="feature">Read aloud</div>
+        <div class="c muted">6 a day</div><div class="c mine">Unlimited</div><div class="c">Unlimited</div>
+
+        <div class="feature">Offline translation<small>On this computer, also when Google limits requests</small></div>
+        <div class="c"><svg class="ic no"><use href="#i-minus"/></svg></div><div class="c mine"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div>
+
+        <div class="feature">Export as audio (MP3)</div>
+        <div class="c"><svg class="ic no"><use href="#i-minus"/></svg></div><div class="c mine"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div>
+
+        <div class="feature">Share links</div>
+        <div class="c"><svg class="ic no"><use href="#i-minus"/></svg></div><div class="c mine"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div>
+
+        <div class="feature">Future Pro features</div>
+        <div class="c"><svg class="ic no"><use href="#i-minus"/></svg></div><div class="c mine last"><svg class="ic yes"><use href="#i-check"/></svg></div><div class="c"><svg class="ic yes"><use href="#i-check"/></svg></div>
+      </div>
+    </div>
+    <div class="dfoot"><span class="grow"></span><span class="btn">Close</span><span class="btn primary"><svg class="ic s"><use href="#i-star"/></svg>Get Pro</span></div>
+  </div></div>
+  <span class="pin" style="left:calc(50% - 334px);top:116px">1</span>
+  <span class="pin" style="left:calc(50% + 130px);top:150px">2</span>
+  <span class="pin" style="left:calc(50% - 334px);top:300px">3</span>
+  <span class="pin" style="left:calc(50% + 318px);bottom:62px">4</span>
+</div>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Title and intro.</b> "Glate | Plans" with a one-line summary instead of the bare grid.</li>
+  <li><b>Your plan</b> is tinted and badged (Free, Evaluation with the days left, or Pro), so the table answers "what do I have". Each plan says how long it lasts.</li>
+  <li><b>Content</b> matches what the app actually unlocks today: Free has online translation, Quick Translate, history and line by line, email and text sharing, and 6 read-alouds a day; Evaluation and Pro add unlimited read aloud, offline translation, audio export and share links. Check marks and dashes replace the switches, which looked like settings you could change. "Priority support" goes: nothing in the app provides it.</li>
+  <li><b>Footer.</b> Close, and "Get Pro" (accent) that opens the purchase page, as the Account window's Purchase button does; hidden for Pro users. The upgrade prompt's "What you get with Pro" list gets offline translation added so both say the same.</li>
+</ol></div>
+</body></html>

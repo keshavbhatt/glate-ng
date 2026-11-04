@@ -3,6 +3,8 @@
 // set, the same family the app draws (as in Omnidict).
 (function () {
   const G = {
+    'check': '<path d="M20 6 9 17l-5-5" />',
+    'minus': '<path d="M5 12h14" />',
     'x': '<path d="M18 6 6 18" /><path d="m6 6 12 12" />',
     'down': '<path d="m6 9 6 6 6-6" />',
     'right': '<path d="m9 18 6-6-6-6" />',
