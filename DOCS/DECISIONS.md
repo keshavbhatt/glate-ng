@@ -111,13 +111,15 @@ uploaded separately. omnidict publishes from CI.
 **Decision.** As in omnidict, `.github/workflows/snap.yml` builds the snap for amd64 and
 arm64 on every push to `main` that touches the app and publishes it to `edge` with the
 version `X.Y.Z+git<hash>`; a `vX.Y.Z` tag publishes `X.Y.Z` straight to `stable` (owner,
-2026-10-22: edge is the testing channel, so a tag is the decision to ship; omnidict stops at
-candidate). The tag must equal `project(VERSION)`, checked by both workflows.
+2026-10-22: edge is the testing channel, so a tag is the decision to ship; omnidict does the
+same since its ADR-021). The tag must equal `project(VERSION)`, checked by both workflows.
 The tag workflow (`release.yml`) makes the GitHub release (no Windows build since
 2026-10-23, owner: CI minutes are limited);
 the snap and the Flatpak no longer go there (owner, 2026-10-22: Flathub already publishes
 the Flatpak). Flathub follows tags through the manifest's `x-checker-data`. Publishing is gated by the `SNAPCRAFT_STORE_CREDENTIALS` secret
-and the `PUBLISH_TO_STORE` repository variable. The steps are in `.github/RELEASE.md`.
+and the `PUBLISH_TO_STORE` repository variable. As in omnidict, builds are not kept as
+workflow artifacts (owner, 2026-11-04: align with omnidict; the store channels are the
+download), and a newer push to a branch cancels its older build, never a tag's. The steps are in `.github/RELEASE.md`.
 
 ## ADR-008: App shell module, as in omnidict (2026-10-23)
 

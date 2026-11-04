@@ -36,8 +36,9 @@ tagging it (`snap refresh glate --edge`).
 
 - Secret `SNAPCRAFT_STORE_CREDENTIALS`: the output of
   `snapcraft export-login --snaps=glate --channels=edge,stable --acls=package_access,package_push,package_update,package_release -`.
-- Repository variable `PUBLISH_TO_STORE=true`. Until it is set, snap builds run and keep
-  the snaps as workflow artifacts, but publish nothing.
+- Repository variable `PUBLISH_TO_STORE=true`. Until it is set, snap builds run but
+  publish nothing; builds are not kept as workflow artifacts (the store channels are the
+  download).
 
 ## Local package builds
 
