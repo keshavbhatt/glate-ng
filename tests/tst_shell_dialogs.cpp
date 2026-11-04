@@ -81,6 +81,20 @@ private Q_SLOTS:
         QCOMPARE(whatsNew.count(), 1);
     }
 
+    void aboutExtraWidgetKeepsItsHeightWhenTaller()
+    {
+        AboutInfo info;
+        info.appName = u"App"_s;
+        AboutDialog dialog(info);
+        auto* extra = new QLabel(u"More apps"_s);
+        dialog.addBelowLinks(extra);
+        dialog.show();
+        const int natural = extra->height();
+        dialog.resize(dialog.width(), dialog.height() + 400);
+        QCoreApplication::processEvents();
+        QCOMPARE(extra->height(), natural);
+    }
+
     void aboutKeepsItsSizeAcrossTabs()
     {
         AboutInfo info;

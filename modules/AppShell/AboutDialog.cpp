@@ -106,7 +106,9 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
     tabs->addTab(scrollPage(makeRowList(info.credits, tabs), tabs), tr("Credits"));
     tabs->addTab(scrollPage(makeRowList(info.openSource, tabs), tabs), tr("Open source"));
     tabs->addTab(buildDiagnostics(info), tr("Diagnostics"));
-    body->addWidget(tabs, 1);
+    body->addWidget(tabs);
+    // A taller window leaves the room below the tabs; nothing above stretches.
+    body->addStretch(1);
 
     QBoxLayout* footer = addFooter(this);
     footer->addStretch(1);
@@ -135,6 +137,8 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
 void AboutDialog::addBelowLinks(QWidget* widget)
 {
     widget->setParent(this);
+    // Never taller than it needs, however tall the window is made.
+    widget->setSizePolicy(widget->sizePolicy().horizontalPolicy(), QSizePolicy::Maximum);
     m_body->insertWidget(m_body->indexOf(m_links) + 1, widget);
 }
 
