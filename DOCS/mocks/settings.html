@@ -31,10 +31,10 @@
 </style></head>
 <body><div class="wrap">
 <h1 style="font-size:18px;margin:0 0 4px">Settings redesign</h1>
-<p class="muted small" style="margin:0 0 20px">The same eight controls as today, grouped by what they are about. Toolbar at the bottom right: dark and light.</p>
+<p class="muted small" style="margin:0 0 20px">One scrolling page with four sections. Toolbar at the bottom right: dark and light.</p>
 <div class="opts">
 
-<div class="opt"><h2>Option A (recommended): one page, four sections</h2>
+<div class="opt"><h2>Approved 2026-11-04</h2>
 <div class="dialog">
   <div class="dtitle">Glate | Settings<span class="x">&#x2715;</span></div>
   <div class="dbody" style="gap:14px">
@@ -67,34 +67,13 @@
   <span class="pin" style="left:4px;top:560px">4</span>
 </div></div>
 
-<div class="opt"><h2>Option B: sidebar with pages</h2>
-<div class="dialog">
-  <div class="dtitle">Glate | Settings<span class="x">&#x2715;</span></div>
-  <div class="side">
-    <nav>
-      <span class="on"><svg class="ic s"><use href="#i-languages"/></svg>Translation</span>
-      <span><svg class="ic s"><use href="#i-type"/></svg>Quick Translate</span>
-      <span><svg class="ic s"><use href="#i-sliders"/></svg>Appearance</span>
-      <span><svg class="ic s"><use href="#i-info"/></svg>General</span>
-    </nav>
-    <div class="page">
-      <div class="card">
-        <div class="row"><div class="txt"><span>Translate offline<span class="pro">PRO</span></span><small>On this computer, with downloaded languages. Your text never leaves your device.</small></div><span class="switch off"></span></div>
-        <div class="row"><div class="txt">Offline languages<small>2 languages downloaded (German, French)</small></div><span class="btn">Manage...</span></div>
-        <div class="row"><div class="txt">Reading voice<small>Used when Glate reads text aloud.</small></div><span class="combo" style="min-width:140px"><span class="grow">Female (Default)</span><svg class="ic s"><use href="#i-down"/></svg></span></div>
-      </div>
-    </div>
-  </div>
-  <span class="pin" style="left:4px;top:60px">5</span>
-</div></div>
-
 </div>
 <div class="notes"><h2>Review notes</h2><ol>
   <li><b>Translation</b> first, since it is what Glate is for: offline mode (with a PRO tag, the switch asks Free users to upgrade as today), the downloaded languages with Manage languages, and the reading voice, which used to sit in "App Settings".</li>
   <li><b>Quick Translate</b> gets its own section: the switch, then the keys with Change. The state lines of the approved Quick Translate mock (keys taken, desktop manages it, not allowed, no portal) appear under the Keys row, unchanged.</li>
   <li><b>Appearance</b>: Theme as three buttons (System, Light, Dark) instead of a list, and the title bar switch. Fusion 2 and the icon blue are fixed, so there is nothing else to choose.</li>
   <li><b>General</b>: the interface language (moved out of Appearance) and what closing the window does, as two buttons. Where there is no system tray, "Keeps it in the tray" is greyed out with the reason as its tooltip, as today. The old hidden Dark/Light radios and the "Theme" label in the form go.</li>
-  <li><b>Option B</b> puts the same four sections on pages behind a sidebar. With eight controls, one page (A) shows everything at once without clicking, so A is recommended; B only pays off if Settings grows a lot.</li>
+  <li><b>Scrolling.</b> When the window is shorter than the page, the sections scroll under a vertical scrollbar; nothing is squeezed or cut off.</li>
   <li>Every row: what it is on the left (one line, with a short muted explanation when it needs one), the control on the right. Switches for on/off, buttons for small choices, lists for longer ones. Changes apply at once; "Applies after a restart" rows still offer Restart now, as today.</li>
 </ol></div>
 </div></body></html>
