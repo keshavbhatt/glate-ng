@@ -41,7 +41,7 @@ files carry an SPDX header.
 |---|---|---|
 | `modules/KtechpitApps/` | MIT | KtechpitApps ("More apps from Ktechpit") by Keshav Bhatt, a copy of github.com/keshavbhatt/ktechpit-apps kept with `git subtree` (ADR-010) |
 | `src/waitingspinnerwidget.*` | MIT | QtWaitingSpinner by Alexander Turkin, William Hallatt, Jacob Dawid |
-| `src/icons/*-line.png`, `src/icons/*-fill.png` | Apache-2.0 | Remix Icon |
+| `src/icons/ui/` | ISC | Lucide glyphs, notice in `src/icons/ui/LICENSE` |
 
 Components fetched or downloaded rather than stored here (Qt, Mozilla's translation engine,
 the Firefox translation models) are listed in `THIRD_PARTY.md`.

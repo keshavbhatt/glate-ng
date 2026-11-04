@@ -194,3 +194,24 @@ owner decided there is no setting to hide the cards.
 `git subtree pull --prefix modules/KtechpitApps git@github.com:keshavbhatt/ktechpit-apps.git <tag> --squash`.
 Which apps can appear is decided on the site (`promote`), not in Glate. The module is not held
 to Glate's strict lint set (ADR-002); it has its own tests in its repository.
+
+## ADR-011: Qt Svg and Lucide glyphs; Omnidict's colours (2026-11-04)
+
+**Context.** The owner asked for the look of the other Ktechpit apps (Omnidict, Red): Lucide
+glyphs and Omnidict's palette, and for the icons to look right in both themes. Glate's Remix
+Icon PNGs had their colour baked in, so several looked wrong in one theme. Mock
+`DOCS/mocks/styling.html`, approved 2026-11-04.
+
+**Decision.** As Omnidict (ADR-014 there): Lucide SVGs, pulled with the rewrite kit's
+`icons/pull.sh` and drawn in `#000000`, live in `src/icons/ui/`. `glate::shell::icons`
+(`modules/AppShell/ShellIcons.*`) tints them with Qt Svg per tone (text, muted, accent, on
+accent, offline, danger), with faded Disabled and on-accent Selected modes, and caches the
+pixmaps and icons. `icons::bind()` remembers each button's, action's, label's or list item's
+glyph and redraws it when the application palette changes, so a theme switch needs no code in
+the windows. `tintedIcon()` draws SVG paths the same way. The Fusion 2 palettes and style
+sheets use Omnidict's tokens; fills use `#1C71D8` in both schemes and accent text on dark the
+lighter `#62A0EA` (`AppTheme::Accents::accentTextDark`). The Remix Icon PNGs are removed.
+
+**Consequences.** Qt Svg joins the build (`THIRD_PARTY.md`); it ships with the SDK, the
+`kf6-core24` runtime and the KDE Flatpak platform, so it adds no supplier. New glyphs come in
+with `pull.sh <lucide-name> <glate-name> src/icons/ui` and a line in `src/icons.qrc`.
