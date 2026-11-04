@@ -72,7 +72,7 @@ qt_add_executable(glate
     icons.qrc
     resources.qrc
     slides.qrc
-    planscomparisiondialog.h planscomparisiondialog.cpp planscomparisiondialog.ui
+    planscomparisiondialog.h planscomparisiondialog.cpp
 )
 
 # The release notes, for What's new (modules/AppShell reads <releases>).

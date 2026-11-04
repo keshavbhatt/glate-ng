@@ -42,5 +42,7 @@
         <file>icons/ui/translate.svg</file>
         <file>icons/ui/type.svg</file>
         <file>icons/ui/volume.svg</file>
+        <file>icons/ui/check.svg</file>
+        <file>icons/ui/minus.svg</file>
     </qresource>
 </RCC>

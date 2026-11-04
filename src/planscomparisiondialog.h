@@ -6,20 +6,18 @@
 
 #include <QDialog>
 
-namespace Ui {
-class PlansComparisionDialog;
-}
-
+// Free, Evaluation and Pro side by side, the user's plan marked
+// (DOCS/mocks/plans.html). Accepted when the user clicks "Get Pro".
 class PlansComparisionDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit PlansComparisionDialog(QWidget *parent = nullptr);
-    ~PlansComparisionDialog();
+    enum class Plan { Free, Evaluation, Pro };
 
-private:
-    Ui::PlansComparisionDialog *ui;
+    // evaluationDaysLeft < 0: unknown.
+    explicit PlansComparisionDialog(Plan plan, int evaluationDaysLeft = -1,
+                                    QWidget *parent = nullptr);
 };
 
 #endif // PLANSCOMPARISIONDIALOG_H

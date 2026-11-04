@@ -398,7 +398,11 @@ void AccountDialog::closeEvent(QCloseEvent *event) {
 }
 
 void AccountDialog::on_planCompareButton_clicked() {
-  PlansComparisionDialog dialog(this);
-  dialog.adjustSize();
-  dialog.exec();
+  using Plan = PlansComparisionDialog::Plan;
+  const Plan plan = m_isPaidPlan           ? Plan::Pro
+                    : m_isEvaluationActive ? Plan::Evaluation
+                                           : Plan::Free;
+  PlansComparisionDialog dialog(plan, m_evaluationDaysRemaining, this);
+  if (dialog.exec() == QDialog::Accepted)
+    onPurchaseClicked();
 }

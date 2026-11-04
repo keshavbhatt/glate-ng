@@ -21,8 +21,7 @@ path = [
     "src/accountdialog.h",
     "src/accountdialog.ui",
     "src/planscomparisiondialog.cpp",
-    "src/planscomparisiondialog.h",
-    "src/planscomparisiondialog.ui"
+    "src/planscomparisiondialog.h"
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "2026 Keshav Bhatt (Ktechpit)"
