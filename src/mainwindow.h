@@ -107,6 +107,7 @@ private slots:
   QStringList diagnosticsLines() const;
   void refreshOfflineIndicator();
   void updateOfflineCaption();
+  void updateTranslateToolTip();
   void updateWelcomeCard();
   void positionPaneOverlays();
   void textSelectionChanged(QTextEdit *editor);

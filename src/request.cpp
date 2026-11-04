@@ -17,7 +17,20 @@ void Request::get(const QUrl &url) {
               QString repStr = rep->readAll();
               emit requestFinished(repStr);
             } else {
-              emit downloadError(rep->errorString());
+              // Qt puts the full URL in the message, and its query holds the
+              // text being translated: keep only the part before the query.
+              QString message = rep->errorString();
+              const QUrl url = rep->url();
+              const QString bare =
+                  url.adjusted(QUrl::RemoveQuery | QUrl::RemoveFragment)
+                      .toString() +
+                  QStringLiteral("?...");
+              message.replace(url.toString(), bare);
+              message.replace(url.toString(QUrl::FullyEncoded), bare);
+              emit downloadError(
+                  message,
+                  rep->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                      .toInt());
             }
             rep->deleteLater();
             m_netwManager->deleteLater();

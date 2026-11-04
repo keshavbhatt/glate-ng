@@ -24,9 +24,15 @@ void LineByLine::setData(QList<QStringList> currentTranslationData,
   translationId = tId;
   ui->sLang->setText(sLang);
   ui->tLang->setText(tLang);
-  foreach (QStringList translationFregments, currentTranslationData) {
-    ui->src2->addItem(translationFregments.at(0)); // translation
-    ui->src1->addItem(translationFregments.at(1)); // source
+  for (const QStringList &fragment : currentTranslationData) {
+    // Blank lines in the text come back as fragments of only line breaks,
+    // and fragments keep their trailing break: show neither.
+    const QString translation = fragment.value(0).trimmed();
+    const QString source = fragment.value(1).trimmed();
+    if (translation.isEmpty() && source.isEmpty())
+      continue;
+    ui->src2->addItem(translation);
+    ui->src1->addItem(source);
   }
   if (ui->src1->count() > 0)
     ui->src1->setCurrentRow(0);

@@ -107,6 +107,7 @@ MainWindow::MainWindow(ThemeController *theme, QWidget *parent)
       new QShortcut(QKeySequence(tr("Shift+Return", "Translate")), m_translate,
                     SLOT(click()));
   shortcut->setContext(Qt::ApplicationShortcut);
+  shortcut->setAutoRepeat(false); // holding the keys translates once
   m_translate->setIcon(QIcon(":/icons/arrow-right-circle-line.png"));
   QTimer::singleShot(100, this, SLOT(resizeFix()));
   connect(m_translate, &QAbstractButton::clicked, this,
@@ -578,19 +579,24 @@ void MainWindow::textSelectionChanged(QTextEdit *editor) {
 bool MainWindow::eventFilter(QObject *o, QEvent *e) {
   if (o == ui->src2->viewport() && e->type() == QEvent::Resize)
     positionPaneOverlays();
-  // simulate translate shortcut instead of going to new line when cursor is on
-  // textEdit widgets.
+  // In the text boxes Shift+Return would insert a line break: translate
+  // instead. One key press brings ShortcutOverride, KeyPress and KeyRelease
+  // here, so claim all three but translate only on the first press, not on
+  // its key repeats.
   if (e->type() == QEvent::KeyRelease || e->type() == QEvent::KeyPress ||
       e->type() == QEvent::ShortcutOverride) {
     if (o == ui->src1 || o == ui->src2) {
       const auto keyEvent = static_cast<QKeyEvent *>(e);
-      if ((keyEvent->key() == Qt::Key_Return) &&
-          keyEvent->modifiers() & (Qt::ShiftModifier)) {
-        m_translate->click();
-        return true;
-      } else {
+      if (keyEvent->key() != Qt::Key_Return ||
+          !(keyEvent->modifiers() & Qt::ShiftModifier))
         return false;
+      if (e->type() == QEvent::ShortcutOverride) {
+        // Accepted: the window shortcut stays quiet, the KeyPress comes here.
+        e->accept();
+      } else if (e->type() == QEvent::KeyPress && !keyEvent->isAutoRepeat()) {
+        m_translate->click();
       }
+      return true;
     }
   }
   return QMainWindow::eventFilter(o, e);
@@ -731,14 +737,20 @@ void MainWindow::translate_clicked() {
       m_loader->stop();
       m_settings.setValue("lastTranslation", m_translationId);
     });
-    connect(m_request, &Request::downloadError, this, [=](QString errorString) {
+    connect(m_request, &Request::downloadError, this,
+            [=](QString errorString, int httpStatus) {
       m_loader->stop();
       const QString detail = glate::shell::redactUrlQueries(errorString);
       qCWarning(glate::shell::lcNetwork).noquote() << "translation failed:" << detail;
-      showError(tr("Could not translate"),
-                tr("The translation service did not answer. Check your "
-                   "connection and try again."),
-                detail);
+      // 429: Google throttles this address for a while; the connection is fine.
+      const QString explanation =
+          httpStatus == 429
+              ? tr("Google is limiting requests from this computer for now. "
+                   "Wait a few minutes and try again, or switch to offline "
+                   "translation in Settings.")
+              : tr("The translation service did not answer. Check your "
+                   "connection and try again.");
+      showError(tr("Could not translate"), explanation, detail);
     });
 
     const QString src1 = ui->src1->toPlainText();
@@ -927,16 +939,26 @@ void MainWindow::on_switch_lang_clicked() const {
 void MainWindow::on_lang1_currentIndexChanged(int index) {
   ui->switch_lang->setEnabled(index != 0);
   m_settings.setValue("lang1", index);
-  m_translate->setToolTip(
-      "Translate from " + ui->lang1->itemText(index) + " to " +
-      ui->lang2->itemText(ui->lang2->currentIndex()) + "(Shift + Enter)");
+  updateTranslateToolTip();
 }
 
 void MainWindow::on_lang2_currentIndexChanged(int index) {
   m_settings.setValue("lang2", index);
-  m_translate->setToolTip("Translate from " +
-                          ui->lang1->itemText(ui->lang1->currentIndex()) +
-                          " to " + ui->lang2->itemText(index));
+  updateTranslateToolTip();
+}
+
+// Names the pair and the shortcut; called whenever a language or the mode
+// changes, so the shortcut never drops out of the tooltip.
+void MainWindow::updateTranslateToolTip() {
+  const QString from = ui->lang1->currentText();
+  const QString to = ui->lang2->currentText();
+  // Same rule as the offline pill in refreshOfflineIndicator().
+  const bool offline =
+      offlineModeEnabled() && (!m_licenseKnown || m_hasPremiumAccess);
+  m_translate->setToolTip(
+      offline
+          ? tr("Translate offline from %1 to %2 (Shift + Enter)").arg(from, to)
+          : tr("Translate from %1 to %2 (Shift + Enter)").arg(from, to));
 }
 
 QString MainWindow::activePlayButtonName() const {
@@ -1542,8 +1564,7 @@ void MainWindow::refreshOfflineIndicator() {
     painter.drawEllipse(QRectF(42, 4, 18, 18));
   }
   m_translate->setIcon(QIcon(arrow));
-  m_translate->setToolTip(on ? tr("Translate offline (Shift + Enter)")
-                             : tr("Translate (Shift + Enter)"));
+  updateTranslateToolTip();
 }
 
 void MainWindow::updateOfflineCaption() {
@@ -1680,10 +1701,11 @@ void MainWindow::debugRun() {
         on_help_clicked();
       else if (open == QStringLiteral("error"))
         showError(tr("Could not translate"),
-                  tr("The translation service did not answer. Check your "
-                     "connection and try again."),
-                  QStringLiteral("Error transferring https://host/translate_a/single - "
-                                 "server replied: Service Unavailable"));
+                  tr("Google is limiting requests from this computer for now. "
+                     "Wait a few minutes and try again, or switch to offline "
+                     "translation in Settings."),
+                  QStringLiteral("Error transferring https://host/translate_a/single?... - "
+                                 "server replied with status code 429"));
     });
   }
 

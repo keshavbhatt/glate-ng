@@ -17,7 +17,8 @@ signals:
   void downloadFinished(QNetworkReply &rep);
   void downloadStarted();
   void _downloadProgress(int progress);
-  void downloadError(QString errorString);
+  // httpStatus is 0 when the server never answered.
+  void downloadError(QString errorString, int httpStatus);
 
 private slots:
   void downloadProgress(qint64 got, qint64 tot);

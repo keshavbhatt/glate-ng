@@ -104,6 +104,14 @@ private Q_SLOTS:
         QVERIFY(redacted.endsWith(u"server replied: Bad Request"_s));
         QVERIFY(redacted.contains(u"https://host/translate_a/single?..."_s));
         QCOMPARE(redactUrlQueries(u"no url here"_s), u"no url here"_s);
+
+        // HTTP/2 replies have no reason phrase, so Qt words it differently.
+        const QString limited = redactUrlQueries(
+            u"Error transferring https://host/translate_a/single?client=gtx&q=secret\nmore text - "
+            u"server replied with status code 429"_s);
+        QVERIFY(!limited.contains(u"secret"_s));
+        QVERIFY(!limited.contains(u"text"_s));
+        QVERIFY(limited.endsWith(u"server replied with status code 429"_s));
     }
 
     void issueUrlCarriesTitleAndBody()

@@ -33,9 +33,10 @@ QString redactHome(QString text)
 
 QString redactUrlQueries(const QString& text)
 {
-    // Qt writes "Error transferring <url> - server replied: ...", with spaces decoded,
-    // so a query runs up to that marker when it is there.
-    static const QRegularExpression kQuery(u"(https?://[^\\s?#]+)[?#](?:.*?(?= - server replied:)|\\S*)"_s);
+    // Qt writes "Error transferring <url> - server replied: ..." or "... - server replied
+    // with status code 429", with spaces decoded, so a query runs up to that marker.
+    static const QRegularExpression kQuery(
+        u"(https?://[^\\s?#]+)[?#](?:[\\s\\S]*?(?= - server replied\\b)|\\S*)"_s);
     QString result = text;
     return result.replace(kQuery, u"\\1?..."_s);
 }
