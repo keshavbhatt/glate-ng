@@ -3,6 +3,12 @@
 Versions follow [Semantic Versioning](https://semver.org/): a new catalog field or widget option
 is a minor version, a change that needs the host app to change its code is a major version.
 
+## [1.0.1] - 2026-11-04
+
+- `AppStrip`: side-by-side cards share the width equally, so a long description no longer
+  squeezes the next card, with 10 px between cards.
+- `AppStrip`: the heading has the object name `ktechpitAppStripTitle`, for host style sheets.
+
 ## [1.0.0] - 2026-11-04
 
 First release.
