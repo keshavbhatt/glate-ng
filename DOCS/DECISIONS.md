@@ -170,3 +170,27 @@ Paraphrase.
 leaves the tree, its licence entries and the About window. macOS has no global shortcut.
 Tests run the portal flow against a fake portal on a private D-Bus daemon
 (`tests/fake_portal.h`), never the session's; the real desktop dialogs are checked by hand.
+
+## ADR-010: "More apps from Ktechpit" from the shared KtechpitApps module (2026-11-04)
+
+**Context.** The owner wants every Ktechpit app to show users the other apps, from one shared
+module, as Red does (ADR-025 there). Glate's About had a "More apps" button that only opened
+the Snap Store publisher page.
+
+**Decision.** The `ktechpit-apps` repository (MIT, by the owner) is pulled into
+`modules/KtechpitApps` with `git subtree`, pinned to a release tag (`v1.0.0`), and builds the
+static `ktechpit_apps` library. `main()` sets up `AppCatalog` with the host id `glate`, the
+`?ref=glate-<place>` source and the way this copy was installed (snap, Flatpak, AppImage,
+Windows or native), so **Get** opens the right store. About shows two cards side by side under
+the link row (`AboutDialog::addBelowLinks()`, so AppShell does not depend on the module), drawn
+at random each time About opens, trending apps more often; *See all* opens the full list with a
+Refresh button. The "More apps" button and its icon are gone. The list ships in the module's
+resources, so the cards work offline; about 20 seconds after start, at most once every 7 days,
+the app downloads the current list and icons from `https://ktechpit.com/USS/public/api/apps.php`
+into `~/.cache/ktechpit-apps/`, a plain GET with the user agent `KtechpitApps/1 (glate)`. The
+owner decided there is no setting to hide the cards.
+
+**Consequences.** Module updates come with
+`git subtree pull --prefix modules/KtechpitApps git@github.com:keshavbhatt/ktechpit-apps.git <tag> --squash`.
+Which apps can appear is decided on the site (`promote`), not in Glate. The module is not held
+to Glate's strict lint set (ADR-002); it has its own tests in its repository.

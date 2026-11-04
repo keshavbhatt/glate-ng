@@ -1,3 +1,4 @@
+#include "AppCatalog.h"
 #include "mainwindow.h"
 #include <QApplication>
 #include <QColor>
@@ -114,6 +115,23 @@ int main(int argc, char *argv[]) {
     dialogCfg.showMaximize = true;
     WindowChrome::enableAutoForDialogs(a, dialogCfg);
   }
+
+  // "More apps from Ktechpit" cards (ADR-010): which store "Get" opens
+  // depends on how this copy was installed.
+  ktechpit::CatalogConfig appsConfig;
+  appsConfig.hostAppId = QStringLiteral("glate");
+  appsConfig.source = QStringLiteral("glate");
+  if (qEnvironmentVariableIsSet("SNAP"))
+    appsConfig.package = ktechpit::Package::Snap;
+  else if (qEnvironmentVariableIsSet("FLATPAK_ID"))
+    appsConfig.package = ktechpit::Package::Flatpak;
+  else if (qEnvironmentVariableIsSet("APPIMAGE"))
+    appsConfig.package = ktechpit::Package::AppImage;
+#ifdef Q_OS_WIN
+  else
+    appsConfig.package = ktechpit::Package::Windows;
+#endif
+  ktechpit::AppCatalog::init(appsConfig);
 
   MainWindow w(themeController);
 

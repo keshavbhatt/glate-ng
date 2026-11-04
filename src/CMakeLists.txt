@@ -118,6 +118,7 @@ target_link_libraries(glate PRIVATE
     offline_translation
     app_shell
     global_shortcut
+    ktechpit_apps
     account_license
     app_chrome
     Qt6::Core

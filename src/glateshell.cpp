@@ -1,3 +1,4 @@
+#include "AppStrip.h"
 #include "glateshell.h"
 
 #include "AboutDialog.h"
@@ -81,6 +82,7 @@ QList<AboutInfo::Row> openSource()
         {QApplication::translate("GlateShell", "Mozilla translations engine"),
          QApplication::translate("GlateShell", "MPL-2.0, with Marian, sentencepiece, intgemm, ruy "
                                                        "and ssplit (MIT, Apache-2.0, BSD)")},
+        {u"KtechpitApps"_s, u"MIT"_s},
         {u"QtWaitingSpinner"_s, u"MIT"_s},
         {u"Remix Icon"_s, u"Apache-2.0"_s},
     };
@@ -139,9 +141,6 @@ void GlateShell::showAbout()
          u":/icons/global-line.png"_s,
          QUrl(u"https://ktechpit.com/USS/public/product.php?slug=glate"_s)},
         {tr("Donate"), u":/icons/heart-line.png"_s, QUrl(u"https://paypal.me/keshavnrj/9"_s)},
-        {tr("More apps"),
-         u":/icons/apps-line.png"_s,
-         QUrl(u"https://snapcraft.io/publisher/keshavnrj"_s)},
         {tr("Rate"), u":/icons/star-line.png"_s, rateUrl()},
     };
     info.credits = credits();
@@ -149,6 +148,9 @@ void GlateShell::showAbout()
     info.diagnostics = diagnostics();
     info.logDirectory = logDirectory();
     auto* about = new AboutDialog(info, m_window);
+    // Two other Ktechpit apps, drawn anew each time About opens (ADR-010).
+    about->addBelowLinks(new ktechpit::AppStrip(
+        u"about"_s, 2, ktechpit::AppStrip::Orientation::Horizontal, about));
     connect(about, &AboutDialog::whatsNewRequested, this, &GlateShell::showWhatsNew);
     connect(about, &AboutDialog::bugReportRequested, this, [this]() { showBugReport(); });
     m_about = about;

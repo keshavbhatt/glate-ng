@@ -91,12 +91,14 @@ QWidget* makeRowList(const QList<AboutInfo::Row>& rows, QWidget* parent)
 
 AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
     : QDialog(parent)
+    , m_links(buildLinks(info))
 {
     setObjectName(u"aboutDialog"_s);
     QBoxLayout* body = setUpDialog(this, tr("About %1").arg(info.appName));
     body->setSpacing(14);
     body->addWidget(buildHeader(info));
-    body->addWidget(buildLinks(info));
+    body->addWidget(m_links);
+    m_body = body;
 
     auto* tabs = new QTabWidget(this);
     tabs->setObjectName(u"aboutTabs"_s);
@@ -127,6 +129,12 @@ AboutDialog::AboutDialog(const AboutInfo& info, QWidget* parent)
     pageHeight = std::min(pageHeight, kMaxPageHeight);
     tabs->setFixedHeight(tabs->tabBar()->sizeHint().height() + pageHeight + 4);
     fitToContent(this, kWidth);
+}
+
+void AboutDialog::addBelowLinks(QWidget* widget)
+{
+    widget->setParent(this);
+    m_body->insertWidget(m_body->indexOf(m_links) + 1, widget);
 }
 
 void AboutDialog::setDiagnostics(const QString& text)

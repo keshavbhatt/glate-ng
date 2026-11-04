@@ -28,6 +28,13 @@ precedence = "override"
 SPDX-FileCopyrightText = "2026 Keshav Bhatt (Ktechpit)"
 SPDX-License-Identifier = "LicenseRef-Ktechpit-Licensing-Module"
 
+# KtechpitApps ("More apps from Ktechpit"), a subtree of github.com/keshavbhatt/ktechpit-apps (ADR-010).
+[[annotations]]
+path = "modules/KtechpitApps/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Keshav Bhatt (Ktechpit)"
+SPDX-License-Identifier = "MIT"
+
 [[annotations]]
 path = ["src/waitingspinnerwidget.cpp", "src/waitingspinnerwidget.h"]
 precedence = "override"

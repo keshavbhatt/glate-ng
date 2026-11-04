@@ -6,6 +6,7 @@
 #include <QString>
 #include <QUrl>
 
+class QBoxLayout;
 class QPlainTextEdit;
 
 namespace glate::shell {
@@ -49,6 +50,8 @@ public:
 
     // Updates the Diagnostics tab (offline state can change while it is open).
     void setDiagnostics(const QString& text);
+    // Adds a widget of the host app under the link row, e.g. "more apps" cards.
+    void addBelowLinks(QWidget* widget);
 
 Q_SIGNALS:
     void whatsNewRequested();
@@ -60,6 +63,8 @@ private:
     QWidget* buildDiagnostics(const AboutInfo& info);
 
     QPlainTextEdit* m_diagnostics = nullptr;
+    QBoxLayout* m_body = nullptr;
+    QWidget* m_links = nullptr;
 };
 
 // A two-column list of name/text rows in a framed box (Credits, Open source).

@@ -56,6 +56,9 @@ add_subdirectory(modules/OfflineTranslation)
 add_subdirectory(modules/AppShell)
 add_subdirectory(modules/GlobalShortcut)
 
+# "More apps from Ktechpit" cards in About: a subtree of ktechpit-apps (ADR-010)
+add_subdirectory(modules/KtechpitApps)
+
 add_subdirectory(src)
 
 if(GLATE_BUILD_TESTS)
