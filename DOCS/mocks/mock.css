@@ -2,7 +2,7 @@
    default accent #4a78ff; every mock reads only these. Light on :root, dark under
    [data-theme=dark] and the system preference. Nothing here ships in the app. */
 :root {
-  --accent: #4A78FF; --accent-hover: #3A66E8; --accent-text: #FFFFFF; --accent-soft: #E6EDFF;
+  --accent: #4785D6; --accent-hover: #3D73BC; --accent-text: #FFFFFF; --accent-soft: #E6EDFF;
   --offline: #1B7F38; --offline-soft: #E3F4E8;
   --bg: #EFEFF1; --bar: #F6F6F7; --panel: #FFFFFF; --pane: #FFFFFF; --elevated: #FFFFFF; --hover: #E7E8EB;
   --input: #FFFFFF; --border: #D9DBE0; --text: #1B1C1F; --muted: #6B7280;
@@ -11,7 +11,7 @@
   --font: "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 [data-theme=dark] {
-  --accent: #4A78FF; --accent-hover: #6A90FF; --accent-text: #FFFFFF; --accent-soft: #1C2747;
+  --accent: #4785D6; --accent-hover: #5298F0; --accent-text: #FFFFFF; --accent-soft: #1C2747;
   --offline: #5CCB84; --offline-soft: #17301F;
   --bg: #121212; --bar: #141414; --panel: #1C1C1C; --pane: #191919; --elevated: #242424; --hover: #2A2A2A;
   --input: #151515; --border: #2C2C2C; --text: #E8E8E8; --muted: #9A9A9A;
@@ -19,7 +19,7 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme=light]) {
-    --accent: #4A78FF; --accent-hover: #6A90FF; --accent-text: #FFFFFF; --accent-soft: #1C2747;
+    --accent: #4785D6; --accent-hover: #5298F0; --accent-text: #FFFFFF; --accent-soft: #1C2747;
     --offline: #5CCB84; --offline-soft: #17301F;
     --bg: #121212; --bar: #141414; --panel: #1C1C1C; --pane: #191919; --elevated: #242424; --hover: #2A2A2A;
     --input: #151515; --border: #2C2C2C; --text: #E8E8E8; --muted: #9A9A9A;

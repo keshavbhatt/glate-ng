@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glate mock: Settings redesign</title><link rel="stylesheet" href="mock.css"><script src="mock.js"></script><script src="main.js"></script>
+<style>
+  body { background: var(--bg); color: var(--text); font-family: var(--font); padding: 24px 16px 120px; }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(470px, 1fr)); gap: 28px; align-items: start; }
+  .opt h2 { font-size: 15px; margin: 0 0 10px; }
+  .dialog { width: auto; max-width: none; max-height: none; position: relative; }
+  .sec { display: flex; flex-direction: column; gap: 2px; }
+  .sec > h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 6px 0 6px 2px; }
+  .card { background: var(--elevated); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 46px; }
+  .row + .row { border-top: 1px solid var(--border); }
+  .row .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+  .row .txt small { color: var(--muted); font-size: 11.5px; line-height: 1.4; }
+  .switch { width: 34px; height: 18px; border-radius: 9px; background: var(--accent); position: relative; flex: none; }
+  .switch::after { content: ""; position: absolute; right: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+  .switch.off { background: var(--border); } .switch.off::after { left: 2px; right: auto; }
+  .seg { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; flex: none; }
+  .seg span { padding: 5px 12px; font-size: 12px; }
+  .seg span + span { border-left: 1px solid var(--border); }
+  .seg span.on { background: var(--accent); color: var(--accent-text); }
+  .combo { min-width: 170px; }
+  .key { height: 30px; display: flex; align-items: center; padding: 0 10px; border-radius: 6px; background: var(--input); border: 1px solid var(--border); font-weight: 600; font-size: 12px; min-width: 130px; }
+  .pro { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); margin-left: 6px; vertical-align: 1px; }
+  .side { display: flex; min-height: 420px; }
+  .side nav { width: 150px; border-right: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; gap: 2px; background: var(--bar); }
+  .side nav span { padding: 7px 10px; border-radius: 6px; font-size: 13px; display: flex; gap: 8px; align-items: center; }
+  .side nav span.on { background: var(--accent); color: var(--accent-text); }
+  .side .page { flex: 1; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+</style></head>
+<body><div class="wrap">
+<h1 style="font-size:18px;margin:0 0 4px">Settings redesign</h1>
+<p class="muted small" style="margin:0 0 20px">The same eight controls as today, grouped by what they are about. Toolbar at the bottom right: dark and light.</p>
+<div class="opts">
+
+<div class="opt"><h2>Option A (recommended): one page, four sections</h2>
+<div class="dialog">
+  <div class="dtitle">Glate | Settings<span class="x">&#x2715;</span></div>
+  <div class="dbody" style="gap:14px">
+
+    <div class="sec"><h3>Translation</h3><div class="card">
+      <div class="row"><div class="txt"><span>Translate offline<span class="pro">PRO</span></span><small>On this computer, with downloaded languages. Your text never leaves your device.</small></div><span class="switch off"></span></div>
+      <div class="row"><div class="txt">Offline languages<small>2 languages downloaded (German, French)</small></div><span class="btn">Manage languages...</span></div>
+      <div class="row"><div class="txt">Reading voice<small>Used when Glate reads text aloud.</small></div><span class="combo"><span class="grow">Female (Default)</span><svg class="ic s"><use href="#i-down"/></svg></span></div>
+    </div></div>
+
+    <div class="sec"><h3>Quick Translate</h3><div class="card">
+      <div class="row"><div class="txt">Translate selected text from any app<small>Select text anywhere, then press the keys.</small></div><span class="switch"></span></div>
+      <div class="row"><div class="txt">Keys</div><span class="key">Ctrl+Shift+Space</span><span class="btn">Change...</span></div>
+    </div></div>
+
+    <div class="sec"><h3>Appearance</h3><div class="card">
+      <div class="row"><div class="txt">Theme</div><span class="seg"><span class="on">System</span><span>Light</span><span>Dark</span></span></div>
+      <div class="row"><div class="txt">Use Glate's own title bar<small>Applies after a restart.</small></div><span class="switch off"></span></div>
+    </div></div>
+
+    <div class="sec"><h3>General</h3><div class="card">
+      <div class="row"><div class="txt">Language<small>Applies after a restart.</small></div><span class="combo"><span class="grow">Follow system</span><svg class="ic s"><use href="#i-down"/></svg></span></div>
+      <div class="row"><div class="txt">Closing the window<small>Keep Glate in the system tray so Quick Translate keeps working.</small></div><span class="seg"><span class="on">Quits Glate</span><span>Keeps it in the tray</span></span></div>
+    </div></div>
+
+  </div>
+  <span class="pin" style="left:4px;top:60px">1</span>
+  <span class="pin" style="left:4px;top:300px">2</span>
+  <span class="pin" style="left:4px;top:440px">3</span>
+  <span class="pin" style="left:4px;top:560px">4</span>
+</div></div>
+
+<div class="opt"><h2>Option B: sidebar with pages</h2>
+<div class="dialog">
+  <div class="dtitle">Glate | Settings<span class="x">&#x2715;</span></div>
+  <div class="side">
+    <nav>
+      <span class="on"><svg class="ic s"><use href="#i-languages"/></svg>Translation</span>
+      <span><svg class="ic s"><use href="#i-type"/></svg>Quick Translate</span>
+      <span><svg class="ic s"><use href="#i-sliders"/></svg>Appearance</span>
+      <span><svg class="ic s"><use href="#i-info"/></svg>General</span>
+    </nav>
+    <div class="page">
+      <div class="card">
+        <div class="row"><div class="txt"><span>Translate offline<span class="pro">PRO</span></span><small>On this computer, with downloaded languages. Your text never leaves your device.</small></div><span class="switch off"></span></div>
+        <div class="row"><div class="txt">Offline languages<small>2 languages downloaded (German, French)</small></div><span class="btn">Manage...</span></div>
+        <div class="row"><div class="txt">Reading voice<small>Used when Glate reads text aloud.</small></div><span class="combo" style="min-width:140px"><span class="grow">Female (Default)</span><svg class="ic s"><use href="#i-down"/></svg></span></div>
+      </div>
+    </div>
+  </div>
+  <span class="pin" style="left:4px;top:60px">5</span>
+</div></div>
+
+</div>
+<div class="notes"><h2>Review notes</h2><ol>
+  <li><b>Translation</b> first, since it is what Glate is for: offline mode (with a PRO tag, the switch asks Free users to upgrade as today), the downloaded languages with Manage languages, and the reading voice, which used to sit in "App Settings".</li>
+  <li><b>Quick Translate</b> gets its own section: the switch, then the keys with Change. The state lines of the approved Quick Translate mock (keys taken, desktop manages it, not allowed, no portal) appear under the Keys row, unchanged.</li>
+  <li><b>Appearance</b>: Theme as three buttons (System, Light, Dark) instead of a list, and the title bar switch. Fusion 2 and the icon blue are fixed, so there is nothing else to choose.</li>
+  <li><b>General</b>: the interface language (moved out of Appearance) and what closing the window does, as two buttons. Where there is no system tray, "Keeps it in the tray" is greyed out with the reason as its tooltip, as today. The old hidden Dark/Light radios and the "Theme" label in the form go.</li>
+  <li><b>Option B</b> puts the same four sections on pages behind a sidebar. With eight controls, one page (A) shows everything at once without clicking, so A is recommended; B only pays off if Settings grows a lot.</li>
+  <li>Every row: what it is on the left (one line, with a short muted explanation when it needs one), the control on the right. Switches for on/off, buttons for small choices, lists for longer ones. Changes apply at once; "Applies after a restart" rows still offer Restart now, as today.</li>
+</ol></div>
+</div></body></html>
