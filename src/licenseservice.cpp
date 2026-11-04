@@ -32,7 +32,8 @@ QString proBenefitsHtml(const QString &title)
     return QStringLiteral(
         "<p style='margin-top:8px;'><b>%1</b></p>"
         "<p style='margin:0; line-height:1.7;'>"
-        "&nbsp;&bull;&nbsp; Unlimited TTS playback<br>"
+        "&nbsp;&bull;&nbsp; Offline translation on this computer<br>"
+        "&nbsp;&bull;&nbsp; Unlimited read aloud<br>"
         "&nbsp;&bull;&nbsp; Export translations as audio (MP3)<br>"
         "&nbsp;&bull;&nbsp; Create public share links<br>"
         "&nbsp;&bull;&nbsp; All future premium features<br>"
